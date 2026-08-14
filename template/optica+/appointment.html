@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Make An Appointment - Optica Optometrist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-info">
+        <div class="top-bar-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <div>
+            <div class="label">Address</div>
+            <div class="value">Jl. Sunset Road, Kuta, Bali - 80361</div>
+          </div>
+        </div>
+        <div class="top-bar-item">
+          <i class="fas fa-phone-alt"></i>
+          <div>
+            <div class="label">Phone Number</div>
+            <div class="value">(+62) 81 589 2581</div>
+          </div>
+        </div>
+        <div class="top-bar-item">
+          <i class="fas fa-envelope"></i>
+          <div>
+            <div class="label">Send Your Mail</div>
+            <div class="value">support@domain.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN NAVIGATION ===== -->
+  <nav class="main-nav">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="https://templatekit.jegtheme.com/optica/wp-content/uploads/sites/124/2021/07/logo-N5XYWG.png" alt="Optica">
+      </a>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="appointment.html" class="active">Appointment</a></li>
+        <li class="nav-item">
+          <a href="#">Pages <i class="fas fa-chevron-down" style="font-size:12px;margin-left:4px;"></i></a>
+          <ul class="nav-dropdown">
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="doctor.html">Our Doctor</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#">Blog <i class="fas fa-chevron-down" style="font-size:12px;margin-left:4px;"></i></a>
+          <ul class="nav-dropdown">
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="#">Single Blog</a></li>
+          </ul>
+        </li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <a href="appointment.html" class="btn btn-primary btn-sm nav-cta">
+        <i class="fas fa-calendar-alt"></i> Make Appointment
+      </a>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <!-- ===== PAGE HERO ===== -->
+  <section class="page-hero">
+    <div class="container">
+      <h1>Make An Appointment</h1>
+      <ul class="breadcrumb">
+        <li><a href="index.html">Home</a></li>
+        <li class="active">Appointment</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== APPOINTMENT SECTION ===== -->
+  <section class="appointment-section">
+    <div class="container">
+      <div class="appointment-grid">
+        <div class="appointment-form animate-on-scroll">
+          <h2>Book Your Appointment</h2>
+          <form id="appointmentForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" placeholder="Your Name" required>
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" placeholder="Your Email" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" placeholder="Your Phone" required>
+              </div>
+              <div class="form-group">
+                <label>Service</label>
+                <select required>
+                  <option value="">Select Service</option>
+                  <option>Eye Care</option>
+                  <option>Retina Repair</option>
+                  <option>Vision Check</option>
+                  <option>Cornea Transplant</option>
+                  <option>Glaucoma & Cornea</option>
+                  <option>Dry Eye Surgery</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Doctor</label>
+                <select required>
+                  <option value="">Select Doctor</option>
+                  <option>Dr. Sarah Johnson</option>
+                  <option>Dr. Michael Chen</option>
+                  <option>Dr. Emily Davis</option>
+                  <option>Dr. James Wilson</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Time</label>
+                <select required>
+                  <option value="">Select Time</option>
+                  <option>08:00 AM</option>
+                  <option>09:00 AM</option>
+                  <option>10:00 AM</option>
+                  <option>11:00 AM</option>
+                  <option>12:00 PM</option>
+                  <option>01:00 PM</option>
+                  <option>02:00 PM</option>
+                  <option>03:00 PM</option>
+                  <option>04:00 PM</option>
+                  <option>05:00 PM</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Your Message</label>
+              <textarea placeholder="Write your message here..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Book Appointment</button>
+          </form>
+        </div>
+        <div class="animate-on-scroll">
+          <div class="opening-hours">
+            <h4><i class="far fa-clock"></i> Opening Hours</h4>
+            <div class="hours-item"><span class="day">Monday - Thursday</span><span class="time">08:00 AM - 20:00 PM</span></div>
+            <div class="hours-item"><span class="day">Friday</span><span class="time">08:00 AM - 17:00 PM</span></div>
+            <div class="hours-item"><span class="day">Saturday</span><span class="time">09:00 AM - 17:00 PM</span></div>
+            <div class="hours-item"><span class="day">Sunday</span><span class="time">09:00 AM - 18:00 PM</span></div>
+          </div>
+          <div style="margin-top:30px; background: var(--secondary); padding: 40px; border-radius: var(--radius-lg); text-align: center;">
+            <i class="fas fa-phone-alt" style="font-size: 36px; color: var(--white); margin-bottom: 15px;"></i>
+            <h4 style="color: var(--white); margin-bottom: 5px;">Call Us Today</h4>
+            <p style="color: rgba(255,255,255,0.8); font-size: 22px; font-family: var(--font-heading); font-weight: 600; color: var(--white);">(+62) 81 589 2581</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NEWSLETTER ===== -->
+  <section class="newsletter">
+    <div class="container">
+      <div class="newsletter-content">
+        <h3>Subscribe Our Newsletter</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</p>
+      </div>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Enter your email">
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="footer-logo">
+            <img src="https://templatekit.jegtheme.com/optica/wp-content/uploads/sites/124/2021/07/logo-footer.png" alt="Optica">
+          </div>
+          <p>Lorem ipsum dolor sit amet, consectet adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore.</p>
+          <div class="footer-social">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <div class="footer-links">
+            <a href="about.html">About Us</a>
+            <a href="services.html">Services</a>
+            <a href="appointment.html">Appointment</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Useful Links</h4>
+          <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms and Conditions</a>
+            <a href="#">Disclaimer</a>
+            <a href="#">Support</a>
+            <a href="faq.html">FAQ</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Make Appointment</h4>
+          <div class="footer-contact-item">
+            <i class="far fa-clock"></i>
+            <div class="text">
+              <strong>Opening Hours</strong>
+              9 AM - 10 PM, Monday - Saturday
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <i class="fas fa-phone-alt"></i>
+            <div class="text">
+              <strong>Call Us Today</strong>
+              (+62) 81 589 2581
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <i class="fas fa-envelope"></i>
+            <div class="text">
+              <strong>Email Us</strong>
+              support@domain.com
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Optometrist & Eye Care Template Kit &copy; 2024. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

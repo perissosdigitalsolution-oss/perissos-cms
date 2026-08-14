@@ -1,0 +1,25 @@
+{
+  "sprint": 6,
+  "date": "2026-08-14",
+  "gate": "T",
+  "summary": "TemplateList UI revamp complete. Digital Agency template fully CMS-driven with 10 blocks, full header/footer/contact form, title highlight fix. Frontend Docker rebuilt. API smoke tests pass. Typecheck passes for all 4 packages. Build succeeds. Governance documentation suite created.",
+  "results": {
+    "typecheck": { "pass": true, "packages": ["@perissos/shared", "@perissos/ui", "backoffice", "frontend"] },
+    "build": { "pass": true, "apps": ["backoffice", "frontend"] },
+    "api_tests": { "pass": true, "tests": ["health_check", "login", "templates_list", "template_import", "template_activate", "template_deactivate", "templates_list_after"] },
+    "typecheck_duration": "86ms",
+    "api_test_duration": "31229ms"
+  },
+  "ac_status": {
+    "AC-1": { "status": "PASS", "description": "TemplateList renders as table with columns: Preview, Name, Description, Version, Category, Status, Actions" },
+    "AC-2": { "status": "PASS", "description": "All styling uses Payload CSS variables" },
+    "AC-3": { "status": "PENDING", "description": "Manifest.json schema validation (Zod)" },
+    "AC-4": { "status": "PENDING", "description": "ZIP packager script" },
+    "AC-5": { "status": "PENDING", "description": "Seed script for default templates" },
+    "AC-6": { "status": "PENDING", "description": "Template Library UI (empty state + category filter)" },
+    "AC-7": { "status": "PASS", "description": "Digital Agency template: 10 blocks created, page seeded, full frontend rendered with header/footer/form, title highlight fixed" },
+    "AC-8": { "status": "PASS", "description": "Sprint governance artifacts created" }
+  },
+  "issues_found": [],
+  "verdict": "CONDITIONAL_PASS"
+}

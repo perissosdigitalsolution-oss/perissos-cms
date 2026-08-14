@@ -1,0 +1,134 @@
+# docker-compose.yml - Local development environment
+# Usage: docker-compose up -d
+
+services:
+  # ─── PostgreSQL (Neon-compatible) ────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: perissos-postgres
+    environment:
+      POSTGRES_DB: perissos_dev
+      POSTGRES_USER: perissos
+      POSTGRES_PASSWORD: perissos_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U perissos -d perissos_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── MinIO (S3-compatible for R2 local) ──────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: perissos-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: perissos
+      MINIO_ROOT_PASSWORD: perissos_minio_password
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ─── Create MinIO Bucket ─────────────────────────────────
+  minio-setup:
+    image: minio/mc:latest
+    container_name: perissos-minio-setup
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 perissos perissos_minio_password;
+      mc mb -p local/perissos-media;
+      mc anonymous set public local/perissos-media;
+      echo 'MinIO bucket created and configured';
+      "
+
+  # ─── Backoffice (Payload CMS) ────────────────────────────
+  backoffice:
+    build:
+      context: .
+      dockerfile: apps/backoffice/Dockerfile
+      target: builder
+    container_name: perissos-backoffice
+    environment:
+      NODE_ENV: development
+      PAYLOAD_SECRET: dev_secret_change_in_production_min_32_chars
+      DATABASE_URL: postgresql://perissos:perissos_dev_password@postgres:5432/perissos_dev
+      R2_ENDPOINT: http://minio:9000
+      R2_BUCKET: perissos-media
+      R2_ACCESS_KEY_ID: perissos
+      R2_SECRET_ACCESS_KEY: perissos_minio_password
+      R2_PUBLIC_URL: http://localhost:9000/perissos-media
+      R2_PREFIX: dev/
+      NEXT_PUBLIC_CMS_URL: http://localhost:3000
+      NEXT_PUBLIC_FRONTEND_URL: http://localhost:3001
+      NEXT_PUBLIC_R2_URL: http://localhost:9000/perissos-media/dev
+      PREVIEW_SECRET: dev_preview_secret_change_in_production
+      CRON_SECRET: dev_cron_secret
+      STRIPE_SECRET_KEY: sk_test_your_stripe_key
+      STRIPE_WEBHOOK_SECRET: whsec_your_webhook_secret
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_your_stripe_key
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./apps/backoffice:/app/apps/backoffice
+      - ./packages:/app/packages
+    command: ["pnpm", "--filter", "backoffice", "run", "dev"]
+
+  # ─── Frontend (Next.js) ──────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_CMS_URL: http://localhost:3000
+    container_name: perissos-frontend
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_CMS_URL: http://backoffice:3000
+      NEXT_PUBLIC_R2_URL: http://localhost:9000/perissos-media/dev
+    ports:
+      - "3001:80"
+    depends_on:
+      - backoffice
+
+  # ─── Database Admin (Optional) ───────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: perissos-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@perissos.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  minio_data:
+  pgadmin_data:
+
+networks:
+  default:
+    name: perissos-network

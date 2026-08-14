@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Restora</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Open+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" href="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/cropped-logo-square-32x32.png" sizes="32x32" />
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<header id="masthead">
+    <div class="header-inner">
+        <nav class="nav-left">
+            <ul>
+                <li><a href="#" class="active">HOME</a></li>
+                <li><a href="#about">ABOUT</a></li>
+                <li><a href="#menu-highlights">MENU</a></li>
+            </ul>
+        </nav>
+        <div class="header-logo">
+            <a href="#">
+                <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/logo-1024x220.png" alt="Restora Logo" />
+            </a>
+        </div>
+        <nav class="nav-right">
+            <ul>
+                <li><a href="#services">SERVICES</a></li>
+                <li><a href="#gallery">GALLERY</a></li>
+                <li class="has-dropdown">
+                    <a href="#">OTHER <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="#reservation">RESERVATION</a></li>
+                        <li><a href="#testimonials">TESTIMONIALS</a></li>
+                        <li><a href="#services">CHEF</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">BLOG</a></li>
+                        <li><a href="#contact">CONTACT US</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+        <button class="close-menu" id="closeMenu" aria-label="Close menu">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <ul class="mobile-nav">
+        <li><a href="#" class="active">HOME</a></li>
+        <li><a href="#about">ABOUT</a></li>
+        <li><a href="#menu-highlights">MENU</a></li>
+        <li><a href="#services">SERVICES</a></li>
+        <li><a href="#gallery">GALLERY</a></li>
+        <li class="mobile-dropdown">
+            <a href="#">OTHER <i class="fas fa-chevron-down"></i></a>
+            <ul class="mobile-submenu">
+                <li><a href="#reservation">RESERVATION</a></li>
+                <li><a href="#testimonials">TESTIMONIALS</a></li>
+                <li><a href="#services">CHEF</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">BLOG</a></li>
+                <li><a href="#contact">CONTACT US</a></li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<div class="mobile-overlay" id="mobileOverlay"></div>
+
+<main>
+
+<!-- ========== SECTION 1: HERO ========== -->
+<section class="hero" id="hero">
+    <div class="container hero-grid">
+        <div class="hero-content">
+            <h1 class="hero-title animate fade-in-up">WHERE EVERY MEAL BECOMES A MEMORY</h1>
+            <p class="hero-text animate fade-in-up" style="animation-delay: 0.1s;">Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis.</p>
+            <div class="hero-buttons animate fade-in-up" style="animation-delay: 0.3s;">
+                <a href="#reservation" class="btn btn-primary">Reserve Your Table</a>
+                <a href="#menu-highlights" class="btn btn-outline">Explore Our Menu</a>
+            </div>
+        </div>
+        <div class="hero-image animate roll-in">
+            <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/instant-noodles-with-grilled-beef-meat-in-black-bo-2026-01-06-09-17-11-utc.png" alt="Delicious noodle dish" />
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 2: FEATURES ========== -->
+<section class="features" id="features">
+    <div class="container features-grid">
+        <div class="feature-card animate fade-in-up">
+            <div class="feature-icon"><i class="fas fa-utensils"></i></div>
+            <h5>FARM-TO-TABLE FRESHNESS</h5>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat.</p>
+        </div>
+        <div class="feature-card animate fade-in-up" style="animation-delay: 0.15s;">
+            <div class="feature-icon"><i class="fas fa-martini-glass-empty"></i></div>
+            <h5>COZY DINING AMBIANCE</h5>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat.</p>
+        </div>
+        <div class="feature-card animate fade-in-up" style="animation-delay: 0.3s;">
+            <div class="feature-icon"><i class="fas fa-bell-concierge"></i></div>
+            <h5>CHEF-DRIVEN SEASONAL MENUS</h5>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 3: ABOUT ========== -->
+<section class="about" id="about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-left">
+                <span class="subtitle animate fade-in-up">ABOUT RESTORA</span>
+                <h2 class="section-heading animate fade-in-up">MORE THAN A RESTAURANT, A CULINARY JOURNEY</h2>
+                <div class="about-card animate fade-in-up">
+                    <h4>OUR VISION</h4>
+                    <p>Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu.</p>
+                    <a href="#" class="btn btn-primary btn-sm">Discover Our Story <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="about-right animate fade-in-right">
+                <div class="accordion" id="aboutAccordion">
+                    <div class="accordion-item active">
+                        <button class="accordion-header">
+                            HERITAGE RECIPE COLLECTION
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-body">
+                            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            LOCALLY-SOURCED INGREDIENTS
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-body">
+                            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            NEIGHBORHOOD GATHERING PLACE
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-body">
+                            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 4: MENU HIGHLIGHTS ========== -->
+<section class="menu-highlights" id="menu-highlights">
+    <div class="container">
+        <span class="subtitle animate fade-in-up">MENU HIGHLIGHTS</span>
+        <h2 class="section-heading animate fade-in-up">DISCOVER OUR SIGNATURE CREATIONS</h2>
+        <div class="menu-grid">
+            <div class="menu-item animate fade-in-left">
+                <div class="menu-item-image">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/plate-1.png" alt="Truffle Mushroom Risotto" />
+                </div>
+                <div class="menu-item-info">
+                    <h6>Truffle Mushroom Risotto</h6>
+                    <h5>$24</h5>
+                    <div class="divider"></div>
+                    <p>Creamy arborio rice with wild mushrooms, truffle oil, and parmesan.</p>
+                </div>
+            </div>
+            <div class="menu-item animate fade-in-right">
+                <div class="menu-item-image">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/plate-4.png" alt="Herb-Crusted Rack of Lamb" />
+                </div>
+                <div class="menu-item-info">
+                    <h6>Herb-Crusted Rack of Lamb</h6>
+                    <h5>$21</h5>
+                    <div class="divider"></div>
+                    <p>Tender lamb with herb crust, served with roasted vegetables.</p>
+                </div>
+            </div>
+            <div class="menu-item animate fade-in-left" style="animation-delay: 0.1s;">
+                <div class="menu-item-image">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/plate-2.png" alt="Pan-Seared Atlantic Salmon" />
+                </div>
+                <div class="menu-item-info">
+                    <h6>Pan-Seared Atlantic Salmon</h6>
+                    <h5>$14</h5>
+                    <div class="divider"></div>
+                    <p>Fresh salmon fillet with lemon butter sauce and seasonal greens.</p>
+                </div>
+            </div>
+            <div class="menu-item animate fade-in-right" style="animation-delay: 0.1s;">
+                <div class="menu-item-image">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/plate-5.png" alt="Classic Eggs Benedict" />
+                </div>
+                <div class="menu-item-info">
+                    <h6>Classic Eggs Benedict</h6>
+                    <h5>$10</h5>
+                    <div class="divider"></div>
+                    <p>Poached eggs on English muffin with hollandaise and bacon.</p>
+                </div>
+            </div>
+            <div class="menu-item animate fade-in-left" style="animation-delay: 0.2s;">
+                <div class="menu-item-image">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/plate-3.png" alt="Artisan Margherita Pizza" />
+                </div>
+                <div class="menu-item-info">
+                    <h6>Artisan Margherita Pizza</h6>
+                    <h5>$18</h5>
+                    <div class="divider"></div>
+                    <p>Hand-tossed dough with San Marzano tomatoes and fresh mozzarella.</p>
+                </div>
+            </div>
+            <div class="menu-item animate fade-in-right" style="animation-delay: 0.2s;">
+                <div class="menu-item-image">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/plate-6.png" alt="Grilled Ribeye Steak" />
+                </div>
+                <div class="menu-item-info">
+                    <h6>Grilled Ribeye Steak</h6>
+                    <h5>$12</h5>
+                    <div class="divider"></div>
+                    <p>Prime cut grilled to perfection with garlic herb butter.</p>
+                </div>
+            </div>
+        </div>
+        <div class="center-btn animate fade-in-up">
+            <a href="#" class="btn btn-primary">View Full Menu <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 5: FULL MENU ========== -->
+<section class="full-menu" id="full-menu">
+    <div class="container">
+        <span class="subtitle animate fade-in-up">OUR MENU</span>
+        <h2 class="section-heading animate fade-in-up">Crafted Flavors, Thoughtfully Served</h2>
+        <div class="menu-categories">
+            <div class="menu-category animate fade-in-up">
+                <h4>Appetizers</h4>
+                <ul class="menu-list">
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Truffle Mushroom Soup <i class="fas fa-thumbs-up recommended"></i></span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$12</span>
+                        </div>
+                        <p class="menu-desc">Creamy wild mushroom soup infused with white truffle oil and finished with parmesan crisp.</p>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Crispy Calamari</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$14</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Burrata &amp; Heirloom Tomatoes</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$16</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Smoked Salmon Crostini</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$15</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="menu-category animate fade-in-up" style="animation-delay: 0.15s;">
+                <h4>Signature Main Courses</h4>
+                <ul class="menu-list">
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Herb-Crusted Ribeye Steak</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$38</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Lemon Butter Grilled Salmon</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$29</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Truffle Mushroom Risotto</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$24</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Slow-Braised Lamb Shank</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$34</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="menu-category animate fade-in-up" style="animation-delay: 0.3s;">
+                <h4>Desserts &amp; Beverages</h4>
+                <ul class="menu-list">
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Classic Tiramisu</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$11</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Molten Chocolate Lava Cake</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$13</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Signature Mocktail Collection</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$9</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu-list-item">
+                            <span class="menu-name">Specialty Artisan Coffee</span>
+                            <span class="menu-dots"></span>
+                            <span class="menu-price">$6</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="center-btn animate fade-in-up">
+            <a href="#" class="btn btn-primary">View Full Menu <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 6: NEW ARRIVAL ========== -->
+<section class="new-arrival" id="new-arrival">
+    <div class="container new-arrival-grid">
+        <div class="new-arrival-image animate slide-in-up">
+            <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/instant-noodles-2026-01-07-07-12-29-utc.png" alt="Truffle Cream Noodles" />
+        </div>
+        <div class="new-arrival-content">
+            <h4 class="animate fade-in-up">New Arrival</h4>
+            <h1 class="animate fade-in-up" style="animation-delay: 0.1s;">Truffle Cream Noodles</h1>
+            <p class="animate fade-in-up" style="animation-delay: 0.2s;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+            <a href="#" class="btn btn-primary animate fade-in-up" style="animation-delay: 0.3s;">Try It Today <i class="fas fa-arrow-right"></i></a>
+            <div class="limited-time animate fade-in-up" style="animation-delay: 0.4s;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Available for a Limited Time</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 7: SPECIAL OFFERS ========== -->
+<section class="special-offers" id="special-offers">
+    <div class="container">
+        <span class="subtitle animate fade-in-up">SPECIAL OFFERS</span>
+        <h2 class="section-heading animate fade-in-up">EXCLUSIVE OFFERS JUST FOR YOU</h2>
+        <div class="offers-grid">
+            <div class="offer-card animate fade-in-up">
+                <div class="offer-accent"></div>
+                <div class="offer-content">
+                    <div class="offer-counter">
+                        <span class="counter-number" data-target="20">0</span>
+                        <span class="counter-suffix">%</span>
+                    </div>
+                    <span class="offer-label">off</span>
+                    <h4>EARLY BIRD DINNER</h4>
+                    <p>Enjoy a special discount when you dine with us before 6 PM on weekdays.</p>
+                </div>
+            </div>
+            <div class="offer-card animate fade-in-up" style="animation-delay: 0.15s;">
+                <div class="offer-accent"></div>
+                <div class="offer-content">
+                    <div class="offer-counter">
+                        <span class="counter-number" data-target="50">0</span>
+                        <span class="counter-suffix">%</span>
+                    </div>
+                    <span class="offer-label">off</span>
+                    <h4>HAPPY HOUR SPECIAL</h4>
+                    <p half-off>Half-price select appetizers and cocktails every weekday from 4 to 6 PM.</p>
+                </div>
+            </div>
+            <div class="offer-card animate fade-in-up" style="animation-delay: 0.3s;">
+                <div class="offer-accent"></div>
+                <div class="offer-content">
+                    <div class="offer-counter">
+                        <span class="counter-number" data-target="15">0</span>
+                        <span class="counter-suffix">%</span>
+                    </div>
+                    <span class="offer-label">save</span>
+                    <h4>LOYALTY MEMBERS SAVE</h4>
+                    <p>Sign up for our loyalty program and receive exclusive member-only discounts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 8: SERVICES ========== -->
+<section class="services" id="services">
+    <div class="container">
+        <span class="subtitle animate fade-in-up">SERVICE OVERVIEW</span>
+        <h2 class="section-heading animate fade-in-up">HOW WE SERVE YOU BETTER</h2>
+        <p class="section-text animate fade-in-up">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+        <div class="services-grid">
+            <div class="service-card animate fade-in">
+                <div class="service-icon"><i class="fas fa-utensils"></i></div>
+                <h5>DINE-IN RESTAURANT SERVICE</h5>
+                <a href="#" class="learn-more">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card animate fade-in" style="animation-delay: 0.1s;">
+                <div class="service-icon"><i class="fas fa-theater-masks"></i></div>
+                <h5>PRIVATE DINING EVENTS</h5>
+                <a href="#" class="learn-more">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card animate fade-in" style="animation-delay: 0.2s;">
+                <div class="service-icon"><i class="fas fa-suitcase-rolling"></i></div>
+                <h5>FULL-SERVICE CATERING</h5>
+                <a href="#" class="learn-more">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card animate fade-in" style="animation-delay: 0.3s;">
+                <div class="service-icon"><i class="fas fa-box-open"></i></div>
+                <h5>TAKEOUT &amp; DELIVERY</h5>
+                <a href="#" class="learn-more">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card animate fade-in" style="animation-delay: 0.4s;">
+                <div class="service-icon"><i class="fas fa-industry"></i></div>
+                <h5>CORPORATE MEAL PROGRAMS</h5>
+                <a href="#" class="learn-more">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card animate fade-in" style="animation-delay: 0.5s;">
+                <div class="service-icon"><i class="fas fa-bell-concierge"></i></div>
+                <h5>CHEF'S TABLE EXPERIENCE</h5>
+                <a href="#" class="learn-more">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 9: GALLERY ========== -->
+<section class="gallery" id="gallery">
+    <div class="container">
+        <span class="subtitle animate fade-in-up">GALLERY</span>
+        <h2 class="section-heading animate fade-in-up">MOMENTS WORTH CAPTURING</h2>
+        <p class="section-text animate fade-in-up">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.</p>
+        <div class="gallery-carousel" id="galleryCarousel">
+            <div class="gallery-track">
+                <div class="gallery-item">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/cook-garnishing-dish-with-greens-2026-01-07-07-07-45-utc.jpg" alt="Plated Dish Artistry" />
+                    <div class="gallery-overlay">
+                        <span>PLATED DISH ARTISTRY</span>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/porch-with-a-dining-area-2026-01-09-09-28-15-utc.jpg" alt="Dining Room & Patio" />
+                    <div class="gallery-overlay">
+                        <span>DINING ROOM &amp; PATIO</span>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/mature-chef-preparing-food-in-the-kitchen-in-a-res-2026-03-16-03-27-30-utc.jpg" alt="Kitchen Action Shots" />
+                    <div class="gallery-overlay">
+                        <span>KITCHEN ACTION SHOTS</span>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/japanese-man-giving-a-speech-2026-01-08-23-49-33-utc.jpg" alt="Guest Celebration" />
+                    <div class="gallery-overlay">
+                        <span>GUEST CELEBRATION</span>
+                    </div>
+                </div>
+            </div>
+            <button class="gallery-btn gallery-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+            <button class="gallery-btn gallery-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 10: TESTIMONIALS ========== -->
+<section class="testimonials" id="testimonials">
+    <div class="container">
+        <div class="testimonials-grid">
+            <div class="testimonials-left animate fade-in-up">
+                <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/logo-3-1024x220.png" alt="Restora" class="testimonial-logo" />
+                <div class="social-icons">
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="testimonials-right">
+                <span class="subtitle animate fade-in-up">TESTIMONIALS</span>
+                <h2 class="section-heading animate fade-in-up">"Restora blends refined cuisine with a welcoming atmosphere beautifully."</h2>
+                <div class="testimonial-carousel" id="testimonialCarousel">
+                    <div class="testimonial-slide active">
+                        <div class="testimonial-cards">
+                            <div class="testimonial-card">
+                                <div class="testimonial-avatar">
+                                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/6.collage-of-happy-multiracial-people-faces-on-gray-2026-01-08-23-13-58-utc-UBNG9AE.jpg" alt="Eleanor Pena" />
+                                </div>
+                                <div class="testimonial-stars">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                                <p>My husband and I recently celebrated our tenth anniversary here. Everything was perfect. Our server remembered our special night.</p>
+                                <h6>Eleanor Pena</h6>
+                                <span>Verified Diner</span>
+                            </div>
+                            <div class="testimonial-card">
+                                <div class="testimonial-avatar">
+                                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/2.collage-of-happy-multiracial-people-faces-on-gray-2025-03-18-18-10-13-utc-UBNG9AE.jpg" alt="Darrell Steward" />
+                                </div>
+                                <div class="testimonial-stars">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                                <p>I go every Sunday for brunch and am never disappointed. The eggs benedict are the best--the hollandaise is silky and perfectly lemony.</p>
+                                <h6>Darrell Steward</h6>
+                                <span>Regular Guest</span>
+                            </div>
+                            <div class="testimonial-card">
+                                <div class="testimonial-avatar">
+                                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/1.collage-of-happy-multiracial-people-faces-on-gray-2025-03-18-18-10-13-utc-UBNG9AE.jpg" alt="Guy Hawkins" />
+                                </div>
+                                <div class="testimonial-stars">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                                <p>Our company's quarterly celebration was flawless. The event coordinator made a customized menu, which the kitchen produced perfectly.</p>
+                                <h6>Guy Hawkins</h6>
+                                <span>Corporate Client</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-slide">
+                        <div class="testimonial-cards">
+                            <div class="testimonial-card">
+                                <div class="testimonial-avatar">
+                                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/5.collage-of-happy-multiracial-people-faces-on-gray-2026-01-08-23-13-58-utc-UBNG9AE.jpg" alt="Floyd Miles" />
+                                </div>
+                                <div class="testimonial-stars">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                                <p>Truffle risotto and ribeye steak. What a find! Dim lighting, candlelit tables, the romantic ambiance. A real hidden gem.</p>
+                                <h6>Floyd Miles</h6>
+                                <span>First-Time Visitor</span>
+                            </div>
+                            <div class="testimonial-card">
+                                <div class="testimonial-avatar">
+                                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/3.collage-of-happy-multiracial-people-faces-on-gray-2025-03-18-18-10-13-utc-UBNG9AE.jpg" alt="Kristin Watson" />
+                                </div>
+                                <div class="testimonial-stars">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                                <p>Our server knew about gluten-free options, the chef came out to discuss modifications and my meal was just as good. It's rare to feel so cared for.</p>
+                                <h6>Kristin Watson</h6>
+                                <span>Verified Diner</span>
+                            </div>
+                            <div class="testimonial-card">
+                                <div class="testimonial-avatar">
+                                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/4.collage-of-happy-multiracial-people-faces-on-gray-2025-03-18-18-10-13-utc-UBNG9AE.jpg" alt="Bessie Cooper" />
+                                </div>
+                                <div class="testimonial-stars">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                                <p>I'm nearby and have tried many lunch places, but come back here. The set menu is great value: good food, big servings, fast service.</p>
+                                <h6>Bessie Cooper</h6>
+                                <span>Weekly Regular</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 11: ORDER / DELIVERY ========== -->
+<section class="order-delivery" id="order">
+    <div class="container order-grid">
+        <div class="order-content">
+            <span class="subtitle animate fade-in-up">READY TO ORDER?</span>
+            <h2 class="section-heading animate fade-in-up">FRESH FLAVORS, DELIVERED STRAIGHT TO YOUR DOOR</h2>
+            <p class="section-text animate fade-in-up">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.</p>
+            <div class="order-card animate fade-in-up">
+                <h4>ORDER YOUR FAVORITES FOR DELIVERY</h4>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                <ul class="check-list">
+                    <li><i class="fas fa-check-circle"></i> Full Menu Available</li>
+                    <li><i class="fas fa-check-circle"></i> Fast &amp; Reliable Delivery</li>
+                </ul>
+                <div class="order-buttons">
+                    <a href="#" class="btn btn-primary">Order Now</a>
+                    <a href="#" class="btn btn-outline">View Menu</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 12: CONTACT & MAP ========== -->
+<section class="contact" id="contact">
+    <div class="container">
+        <span class="subtitle animate fade-in-up">CONTACT &amp; LOCATION</span>
+        <h2 class="section-heading animate fade-in-up">YOUR NEXT GREAT MEAL AWAITS</h2>
+        <div class="map-container animate fade-in">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d158858.47340002653!2d-0.24168120642536509!3d51.52855824164916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8a00baf21de75%3A0x52963a5addd52a99!2sLondon%20Eye!5e0!3m2!1sen!2suk!4v1700000000000!5m2!1sen!2suk" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 13: RESERVATION FORM ========== -->
+<section class="reservation" id="reservation">
+    <div class="container reservation-grid">
+        <div class="reservation-info">
+            <span class="subtitle animate fade-in-up">BOOK FORM</span>
+            <h2 class="section-heading animate fade-in-up">BOOK YOUR TABLE IN SECONDS</h2>
+            <p class="section-text animate fade-in-up">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+            <ul class="check-list animate fade-in-up">
+                <li><i class="fas fa-check-circle"></i> Instant Confirmation</li>
+                <li><i class="fas fa-check-circle"></i> No Booking Fees</li>
+                <li><i class="fas fa-check-circle"></i> Free Cancellation Within 24 Hours</li>
+            </ul>
+        </div>
+        <div class="reservation-form-wrapper animate fade-in-up">
+            <form class="reservation-form" id="reservationForm">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" placeholder="ex: John Doe" required />
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone number</label>
+                    <input type="tel" id="phone" placeholder="(555) 000-0000" required />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date">Reservation Date</label>
+                        <input type="date" id="date" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="time">Preferred Time</label>
+                        <input type="time" id="time" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="guests">Number of Guests</label>
+                        <select id="guests" required>
+                            <option value="">Select</option>
+                            <option>1 Person</option>
+                            <option>2 People</option>
+                            <option>3 People</option>
+                            <option>4 People</option>
+                            <option>5+ People</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="seating">Seating Preference</label>
+                        <select id="seating" required>
+                            <option value="">Select</option>
+                            <option>Indoor</option>
+                            <option>Outdoor</option>
+                            <option>Bar Area</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Confirm Reservation</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 14: NEWSLETTER ========== -->
+<section class="newsletter" id="newsletter">
+    <div class="container">
+        <h2 class="section-heading animate fade-in-up">SUBSCRIBE &amp; GET UNEXPECTED PROMO FROM US</h2>
+        <form class="newsletter-form animate fade-in-up">
+            <input type="email" placeholder="Input Your Email" required />
+            <button type="submit" class="btn btn-primary">Subscribe Now</button>
+        </form>
+    </div>
+</section>
+
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h5>OPENING HOURS</h5>
+                <ul class="footer-list">
+                    <li>Monday - Thursday: 7:00 - 22:00</li>
+                    <li>Friday - Saturday: 7:00 - 23:00</li>
+                    <li>Sunday: 7:00 - 22:00</li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h5>Contact &amp; Location</h5>
+                <ul class="footer-contact">
+                    <li><i class="fas fa-map-marker-alt"></i> New York Street No. 123 NY</li>
+                    <li><i class="fas fa-phone-alt"></i> (555) 123-4567</li>
+                    <li><i class="fas fa-envelope"></i> info@restora.com</li>
+                </ul>
+            </div>
+            <div class="footer-col footer-brand">
+                <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/logo-2-1024x220.png" alt="Restora" class="footer-logo" />
+                <p>A modern farm-to-table restaurant serving seasonal dishes crafted with passion, precision, and premium local ingredients.</p>
+                <div class="social-icons">
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+                <div class="google-rating">
+                    <img src="https://elementorkits-1.nextdin.com/restora/wp-content/uploads/sites/16/2026/03/google-logo.png" alt="Google" />
+                    <div class="rating-info">
+                        <div class="stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span>4.8 / 5</span>
+                    </div>
+                    <a href="#" class="see-reviews">See all our reviews</a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h5>QUICK LINKS</h5>
+                <ul class="footer-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#menu-highlights">Our Menu</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#reservation">Reservations</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h5>LEGAL SUPPORT</h5>
+                <ul class="footer-links">
+                    <li><a href="#">Terms of Use</a></li>
+                    <li><a href="#">Refund Policy</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#reservation">Reservation</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Restora &copy; 2026. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Scroll to Top -->
+<button class="scroll-top" id="scrollTop" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+</button>
+
+<script src="js/main.js"></script>
+</body>
+</html>

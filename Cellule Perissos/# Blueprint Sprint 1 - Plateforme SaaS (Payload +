@@ -1,0 +1,334 @@
+# Blueprint Sprint 1 - Plateforme SaaS (Payload + Next.js)
+
+**Version :** 2.0
+**Date :** [À définir]
+**Auteur :** [Votre Équipe]
+**Statut :** En cours
+
+---
+
+## 🎯 Objectif du Sprint 1 : "Fondations et Preuve de Concept"
+
+L'objectif de ce premier sprint est de **mettre en place l'ossature technique** et de valider le cycle de vie complet d'une instance client, de la création à la mise en ligne.
+
+### Architecture Choisie
+
+| Composant | Technologie | Justification |
+|---|---|---|
+| **CMS (Back Office)** | Payload 3.x (Open-Source, MIT) | Admin panel + API REST/GraphQL, gestion de contenu, hooks, access control |
+| **Framework Frontend** | Next.js (App Router) | Rendu statique (SSG) + ISR via webhooks, SEO optimisé |
+| **Base de Données** | PostgreSQL via Neon | Serverless, branching instantané, scaling automatique, intégration Vercel |
+| **Stockage Médias** | Cloudflare R2 | S3-compatible, sans egress fees, CDN intégré |
+| **Back Office — Hébergement** | Vercel | Déploiement natif Payload, serverless functions, cron jobs |
+| **Frontend — Hébergement** | Cloudflare Pages | Static export, CDN global, performance maximale |
+| **Monorepo** | Turborepo + pnpm | Cache de build, orchestration, code partagé |
+| **CI/CD** | GitHub Actions | Tests, lint, build, déploiement automatisé |
+| **Stratégie d'instances** | Une instance par client | Isolation totale : chaque client a son propre Payload, DB, et frontend |
+
+### Structure du Monorepo
+
+```
+perissos-cms/
+├── apps/
+│   ├── backoffice/          # Next.js + Payload (→ déployé sur Vercel)
+│   │   ├── src/
+│   │   │   ├── collections/ # Pages, BlogArticles, Activities, Users
+│   │   │   ├── globals/     # ClientSettings (1 ligne par instance)
+│   │   │   └── payload.config.ts
+│   │   ├── next.config.js   # withPayload() plugin
+│   │   ├── Dockerfile
+│   │   └── vercel.json
+│   │
+│   └── frontend/            # Next.js static export (→ déployé sur Cloudflare Pages)
+│       ├── src/
+│       │   ├── app/         # App Router pages
+│       │   └── components/  # UI components
+│       ├── next.config.js   # output: 'export'
+│       └── wrangler.toml    # Cloudflare config
+│
+├── packages/
+│   ├── shared/              # Types TypeScript, utils, hooks partagés
+│   │   ├── src/
+│   │   │   ├── types/       # Types Payload partagés
+│   │   │   ├── utils/       # Fonctions utilitaires
+│   │   │   └── index.ts
+│   │   └── package.json
+│   │
+│   └── ui/                  # Composants React partagés (design system)
+│       ├── src/
+│       │   ├── components/  # Button, Card, Input, etc.
+│       │   ├── styles/      # Tokens TailwindCSS, luxury-glass
+│       │   └── index.ts
+│       └── package.json
+│
+├── turbo.json               # Configuration Turborepo
+├── pnpm-workspace.yaml
+├── package.json             # Root: scripts orchestrés via Turborepo
+└── .github/
+    └── workflows/
+        ├── ci.yml           # Lint → Typecheck → Test → Build
+        └── deploy.yml       # Deploy backoffice (Vercel) + frontend (Cloudflare)
+```
+
+### Architecture de Déploiement par Client
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                     INSTANCE CLIENT : <client-name>              │
+│                                                                  │
+│  ┌────────────────────────────┐  ┌────────────────────────────┐  │
+│  │       VERCEL               │  │     CLOUDFLARE PAGES       │  │
+│  │       (Back Office)        │  │     (Frontend Public)      │  │
+│  │                            │  │                            │  │
+│  │  payload.perissos.dev      │  │  <client>.perissos.dev     │  │
+│  │  /admin                    │  │  / (pages statiques)       │  │
+│  │  /api/*                    │  │                            │  │
+│  │                            │  │  output: 'export'          │  │
+│  │  @payloadcms/db-postgres   │  │  SSG + ISR via webhooks    │  │
+│  │  @payloadcms/storage-s3    │  │                            │  │
+│  │  clientUploads: true       │  │  Rebuild on content change │  │
+│  └─────────────┬──────────────┘  └─────────────┬──────────────┘  │
+│                │                               │                 │
+│                ▼                               │                 │
+│  ┌──────────────────────┐                     │                 │
+│  │  NEON PostgreSQL      │                     │                 │
+│  │  perissos_<client>    │                     │                 │
+│  │  (DB dédiée)          │                     │                 │
+│  └──────────────────────┘                     │                 │
+│                                                │                 │
+│  ┌──────────────────────────────────────────────────────────┐    │
+│  │              CLOUDFLARE R2                               │    │
+│  │  Bucket: perissos-media                                  │    │
+│  │  Prefix: /<client>/                                      │    │
+│  │  Public URL: media.perissos.dev/<client>/<file>          │    │
+│  │  ← Sert à la fois le Back Office (upload)               │    │
+│  │    et le Frontend (affichage des images)                 │    │
+│  └──────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Variables d'Environnement par Instance
+
+| Variable | Service | Description |
+|---|---|---|
+| `PAYLOAD_SECRET` | Vercel | Secret Payload pour JWT/encryption |
+| `DATABASE_URL` | Vercel | URL Neon PostgreSQL (`postgresql://...`) |
+| `R2_ENDPOINT` | Vercel | `https://<accountId>.r2.cloudflarestorage.com` |
+| `R2_BUCKET` | Vercel | `perissos-media` |
+| `R2_ACCESS_KEY_ID` | Vercel | Clé d'accès R2 |
+| `R2_SECRET_ACCESS_KEY` | Vercel | Secret R2 |
+| `R2_PUBLIC_URL` | Vercel + Cloudflare | `https://media.perissos.dev` |
+| `NEXT_PUBLIC_CMS_URL` | Cloudflare | URL du Back Office Payload |
+| `NEXT_PUBLIC_R2_URL` | Cloudflare | URL publique R2 pour les images |
+| `CRON_SECRET` | Vercel | Secret pour le cron de réchauffement |
+
+---
+
+## 📅 Déroulement du Sprint
+
+### 🔹 Phase 1 : Planification et Architecture (Jours 1-2)
+
+#### DevOps
+- [ ] Valider l'architecture Vercel (Back Office) + Cloudflare Pages (Frontend) + R2 + Neon.
+- [ ] Configurer le monorepo Turborepo avec pnpm workspaces.
+- [ ] Définir la structure `apps/backoffice`, `apps/frontend`, `packages/shared`, `packages/ui`.
+- [ ] Configurer la stratégie de CI/CD (GitHub Actions) : lint → typecheck → test → build.
+- [ ] Sélectionner Neon comme fournisseur PostgreSQL serverless.
+- [ ] Créer le bucket R2 `perissos-media` avec accès public (sous-domaine R2.dev ou domaine custom).
+- [ ] Définir les conventions de commits (Conventional Commits).
+
+#### Sécurité
+- [ ] Réaliser une analyse des risques initiale (modélisation des menaces STRIDE).
+- [ ] Définir les politiques de gestion des secrets (GitHub Secrets, Vercel Env Vars, Cloudflare Env Vars).
+- [ ] Établir les règles CORS entre Vercel (API) et Cloudflare (Frontend).
+- [ ] Planifier le chiffrement des données au repos (Neon) et en transit (HTTPS).
+
+#### Architecture Backend (Payload)
+- [ ] Définir les schémas des collections : `Pages`, `BlogArticles`, `Activities`, `Users`.
+- [ ] Définir le Global `ClientSettings` (nom du client, domaine, logo, couleurs — 1 ligne par instance).
+- [ ] Concevoir l'authentification JWT (admin + éditeur) et le RBAC.
+- [ ] Valider la config R2 : `clientUploads: true`, `region: 'auto'`, `forcePathStyle: true`.
+- [ ] Valider la config DB : `@payloadcms/db-postgres` (TCP, pas WebSocket).
+
+#### Architecture Frontend (Next.js)
+- [ ] Définir les pages : Accueil, Article de blog, Activité, 404.
+- [ ] Choisir SSG (static export) avec ISR via webhooks Payload.
+- [ ] Définir la stratégie d'fetch : Build time depuis l'API Payload.
+- [ ] Prévoir la révalidation automatique via webhooks Payload → Cloudflare rebuild.
+
+---
+
+### 🔹 Phase 2 : Développement du Core (Jours 3-5)
+
+#### Monorepo Setup
+- [ ] Initialiser Turborepo + pnpm workspaces.
+- [ ] Créer le package `packages/shared` (types, utils).
+- [ ] Créer le package `packages/ui` (composants React partagés).
+- [ ] Configurer `turbo.json` avec les pipelines de build/test/lint.
+
+#### Développement Backend (Payload — `apps/backoffice`)
+- [ ] Initialiser Payload 3.x avec le template `blank` ou `website`.
+- [ ] Configurer `payload.config.ts` :
+  - [ ] `@payloadcms/db-postgres` avec `DATABASE_URL`.
+  - [ ] `@payloadcms/storage-s3` avec config R2 (region: 'auto', forcePathStyle: true, clientUploads: true).
+  - [ ] `withPayload()` dans `next.config.js`.
+- [ ] Créer les collections :
+  - [ ] `Pages` (title, slug, content [richText], publishedAt)
+  - [ ] `BlogArticles` (title, slug, content [richText], excerpt, featuredImage, publishedAt, author)
+  - [ ] `Activities` (title, slug, description, image, date, category)
+  - [ ] `Users` (email, password, role [admin/editor], name)
+- [ ] Créer le Global `ClientSettings` (clientName, domain, logo, primaryColor, etc.)
+- [ ] Implémenter l'authentification JWT + RBAC (admin, editor).
+- [ ] Configurer `clientUploads: true` pour bypasser la limite 4.5MB Vercel.
+- [ ] Configurer le cron de réchauffement (Vercel Cron Jobs — ping `/admin` toutes les 5 min).
+- [ ] Déployer sur Vercel et vérifier l'admin panel fonctionne.
+
+#### Développement Frontend (Next.js — `apps/frontend`)
+- [ ] Initialiser Next.js avec App Router.
+- [ ] Configurer `next.config.js` pour static export :
+  - [ ] `output: 'export'`
+  - [ ] `images: { unoptimized: true }`
+- [ ] Intégrer le fetch de l'API Payload depuis le build time.
+- [ ] Créer les pages :
+  - [ ] Page d'accueil (données depuis l'API Payload)
+  - [ ] Page d'article de blog (générée dynamiquement via `generateStaticParams`)
+  - [ ] Page d'activité
+  - [ ] Page 404 personnalisée
+- [ ] Implémenter le design system depuis `packages/ui`.
+- [ ] Déployer sur Cloudflare Pages et vérifier le rendu statique.
+
+#### DevOps (Automatisation)
+- [ ] Mettre en place le pipeline CI GitHub Actions (lint → typecheck → test → build).
+- [ ] Créer le script `pnpm new-client <name>` :
+  - [ ] Cloner le template du monorepo.
+  - [ ] Créer une base de données Neon dédiée (API Neon ou CLI).
+  - [ ] Créer un projet Vercel avec les variables d'environnement.
+  - [ ] Créer un projet Cloudflare Pages avec les variables d'environnement.
+  - [ ] Configurer le préfixe R2 pour le client.
+  - [ ] Envoyer un email de bienvenue avec les identifiants.
+
+---
+
+### 🔹 Phase 3 : Tests et Validation (Jours 6-7)
+
+#### Tests Backend
+- [ ] Écrire des tests unitaires pour les hooks Payload (Vitest).
+- [ ] Écrire des tests d'intégration pour les collections (API CRUD).
+- [ ] Tester l'authentification JWT (token generation, refresh, invalidation).
+- [ ] Tester le RBAC (admin vs editor vs unauthorized).
+- [ ] Valider le flux de création d'instance client (script `new-client`).
+
+#### Tests Frontend
+- [ ] Écrire des tests end-to-end (Playwright) : homepage → blog → activity.
+- [ ] Tester la navigation, le responsive design, les animations.
+- [ ] Valider la régeneration des pages via webhook Payload.
+- [ ] Vérifier les Core Web Vitals (LCP < 2.5s, FID < 100ms, CLS < 0.1).
+
+#### Sécurité
+- [ ] Tester la force des mots de passe et la protection brute force.
+- [ ] Vérifier CORS entre Vercel et Cloudflare.
+- [ ] Vérifier que les secrets ne sont pas exposés dans le code ou les logs.
+- [ ] Tester les headers de sécurité (HSTS, CSP, X-Frame-Options).
+- [ ] Auditer les dépendances (Snyk, npm audit).
+- [ ] Vérifier la validation des entrées sur toutes les routes API.
+
+#### QA / Validation
+- [ ] Revue de code statique (ESLint + TypeScript strict).
+- [ ] Vérifier la couverture de code (≥ 80% sur les collections Payload).
+- [ ] Tester manuellement le flux complet : admin → créer contenu → frontend affiche.
+- [ ] Vérifier les performances (temps de chargement, requêtes DB, Taille du bundle).
+
+---
+
+### 🔹 Phase 4 : Déploiement et Vérification (Jours 8-10)
+
+#### Déploiement Back Office (Vercel)
+- [ ] Déployer l'instance de démonstration sur Vercel.
+- [ ] Vérifier l'admin panel `/admin` fonctionne sans cold start (cron actif).
+- [ ] Vérifier les uploads médias via R2 (clientUploads: true).
+- [ ] Vérifier l'authentification JWT en production.
+- [ ] Configurer le domaine custom (ex: `admin.perissos.dev`).
+
+#### Déploiement Frontend (Cloudflare Pages)
+- [ ] Déployer le frontend statique sur Cloudflare Pages.
+- [ ] Vérifier que toutes les pages sont générées statiquement.
+- [ ] Tester la révalidation via webhook : modifier du contenu dans Payload → vérifier que le frontend se reconstruit.
+- [ ] Configurer le domaine custom (ex: `perissos.dev` ou `<client>.perissos.dev`).
+
+#### Sécurité
+- [ ] Activer HTTPS + HSTS sur les deux plateformes.
+- [ ] Configurer CSP (Content Security Policy) pour les deux plateformes.
+- [ ] Activer la journalisation des accès et des actions sensibles.
+- [ ] Vérifier que les CORS sont restrictifs (uniquement les domaines autorisés).
+
+#### Monitoring
+- [ ] Configurer Sentry pour le monitoring d'erreurs (Back Office + Frontend).
+- [ ] Configurer les logs Vercel pour le Back Office.
+- [ ] Configurer les analytics Cloudflare pour le Frontend.
+- [ ] Mettre en place des alertes sur les erreurs critiques.
+
+#### Validation Finale
+- [ ] Tester manuellement l'ensemble du flux utilisateur (admin → contenu → frontend).
+- [ ] Vérifier la performance : temps de chargement < 2s, Lighthouse ≥ 90.
+- [ ] Documenter les procédures d'administration et de maintenance.
+- [ ] Documenter les variables d'environnement et la procédure de nouveau client.
+- [ ] Faciliter la rétrospective Sprint 1.
+
+---
+
+## 🔄 La Boucle Continue (Itérations Futures)
+
+Pour les sprints suivants, ce processus se répète en boucle :
+
+```mermaid
+graph TD
+    A[Planification] --> B[Développement]
+    B --> C[Tests & Audit]
+    C --> D[Déploiement & Vérification]
+    D --> E[Feedback & Rétrospectives]
+    E --> A
+```
+
+### → Sprint 2 : "Automatisation & Expérience Client"
+
+Le Sprint 2 transformera la base du Sprint 1 en une plateforme SaaS véritablement opérationnelle :
+
+- **Automatisation du provisionnement** — Script TypeScript `pnpm new-client` (Neon, Vercel, Cloudflare, R2)
+- **Prévisualisation en direct** — Live Preview avec tokens JWT sécurisés
+- **Facturation Stripe** — Plans (Gratuit, Pro, Entreprise) avec essai 14 jours
+- **Sécurité renforcée** — Sauvegardes Neon PITR, Sentry, Logtail, rate limiting Upstash Redis
+- **Préparation au lancement** — Landing page, onboarding interactif, documentation client
+
+📄 **Document de référence :** `# Blueprint Sprint 2 - Automatisation & Expérience Client.md`
+
+---
+
+## 📋 Livrables Clés du Sprint 1
+
+| Livrable | Responsable | Statut |
+|---|---|---|
+| Monorepo Turborepo fonctionnel | DevOps Automator | ⬜ |
+| Payload Collections (Pages, Blog, Activities, Users) | Backend Architect | ⬜ |
+| Global ClientSettings | Backend Architect | ⬜ |
+| Auth JWT + RBAC | Backend Architect | ⬜ |
+| Config R2 (clientUploads: true) | Backend Architect | ⬜ |
+| Frontend Next.js (SSG) | Frontend Developer | ⬜ |
+| Design System (packages/ui) | UI Designer | ⬜ |
+| Pipeline CI GitHub Actions | DevOps Automator | ⬜ |
+| Script `pnpm new-client <name>` | DevOps Automator | ⬜ |
+| Instance de démonstration déployée | DevOps Automator | ⬜ |
+| Tests unitaires + E2E | Developer Senior | ⬜ |
+| Audit de sécurité | Security Engineer | ⬜ |
+| Documentation admin | Project Shepherd | ⬜ |
+
+---
+
+## ⚠️ Risques et Mitigations
+
+| Risque | Impact | Mitigation |
+|---|---|---|
+| Cold start Vercel (5-10s sur `/admin`) | Élevé | Cron job toutes les 5 min pour réchauffer |
+| Épuisement connexions DB en serverless | Élevé | `@payloadcms/db-postgres` (TCP) + pooling |
+| Upload > 4.5MB bloqué par Vercel | Moyen | `clientUploads: true` → upload direct vers R2 |
+| CORS entre Vercel et Cloudflare | Moyen | Configuration CORS stricte dès la Phase 1 |
+| Réconciliation webhook Cloudflare lente | Faible | Monitorer le temps de rebuild, optimiser si nécessaire |

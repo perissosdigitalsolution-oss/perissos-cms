@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - Optica Optometrist & Eye Care</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* --- Page Hero --- */
+    .page-hero {
+      position: relative;
+      padding: 140px 0 80px;
+      background: linear-gradient(135deg, var(--primary) 0%, #1a2654 100%);
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      background: url('https://templatekit.jegtheme.com/optica/wp-content/uploads/sites/124/2021/07/female-oculist-examining-kid-eyes-with-trial-frame-and-lenses.jpg') center/cover;
+      opacity: 0.1;
+    }
+    .page-hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    .page-hero h1 {
+      color: var(--white);
+      font-size: 42px;
+      margin-bottom: 15px;
+    }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.7);
+      font-size: 15px;
+    }
+    .breadcrumb a {
+      color: rgba(255,255,255,0.7);
+      transition: var(--transition);
+    }
+    .breadcrumb a:hover {
+      color: var(--secondary);
+    }
+    .breadcrumb i {
+      font-size: 10px;
+    }
+
+    /* --- Contact Section --- */
+    .contact-section {
+      padding: 80px 0;
+      background: var(--white);
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 50px;
+      align-items: flex-start;
+    }
+
+    /* --- Contact Form --- */
+    .contact-form h3 {
+      margin-bottom: 25px;
+      font-size: 24px;
+      color: var(--text-dark);
+    }
+    .contact-form .form-group {
+      margin-bottom: 20px;
+    }
+    .contact-form label {
+      display: block;
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-family: var(--font-heading);
+    }
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--text-dark);
+      background: var(--white);
+      transition: var(--transition);
+      outline: none;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(5, 193, 142, 0.1);
+    }
+    .contact-form input::placeholder,
+    .contact-form textarea::placeholder {
+      color: #B0B5C8;
+    }
+    .contact-form textarea {
+      resize: vertical;
+      min-height: 140px;
+    }
+    .contact-form .btn-primary {
+      margin-top: 5px;
+    }
+
+    /* --- Contact Info --- */
+    .contact-info {
+      background: var(--light-gray);
+      padding: 40px;
+      border-radius: var(--radius-lg);
+    }
+    .contact-info h3 {
+      margin-bottom: 30px;
+      font-size: 22px;
+      color: var(--text-dark);
+    }
+    .contact-info-item {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 28px;
+      align-items: flex-start;
+    }
+    .contact-info-item:last-child {
+      margin-bottom: 0;
+    }
+    .contact-info-item .icon {
+      width: 52px;
+      height: 52px;
+      min-width: 52px;
+      background: var(--secondary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-size: 20px;
+    }
+    .contact-info-item .details h4 {
+      font-size: 16px;
+      margin-bottom: 5px;
+      color: var(--text-dark);
+    }
+    .contact-info-item .details p {
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .contact-info-item .details p.day {
+      margin-bottom: 2px;
+    }
+
+    /* --- Map Section --- */
+    .map-section {
+      padding: 0 0 80px;
+    }
+    .map-section .container {
+      max-width: 100%;
+      padding: 0;
+    }
+    .map-wrapper {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .map-wrapper iframe {
+      display: block;
+      width: 100%;
+      height: 450px;
+      border: none;
+    }
+    .map-placeholder {
+      width: 100%;
+      height: 450px;
+      background: linear-gradient(135deg, #e8edf5 0%, #d4dbe8 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      color: var(--text-dark);
+    }
+    .map-placeholder i {
+      font-size: 48px;
+      color: var(--primary);
+    }
+    .map-placeholder p {
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 992px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+      .page-hero h1 {
+        font-size: 36px;
+      }
+    }
+    @media (max-width: 768px) {
+      .page-hero {
+        padding: 120px 0 60px;
+      }
+      .page-hero h1 {
+        font-size: 30px;
+      }
+      .contact-info {
+        padding: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-info">
+        <div class="top-bar-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <div>
+            <div class="label">Address</div>
+            <div class="value">Jl. Sunset Road, Kuta, Bali - 80361</div>
+          </div>
+        </div>
+        <div class="top-bar-item">
+          <i class="fas fa-phone-alt"></i>
+          <div>
+            <div class="label">Phone Number</div>
+            <div class="value">(+62) 81 589 2581</div>
+          </div>
+        </div>
+        <div class="top-bar-item">
+          <i class="fas fa-envelope"></i>
+          <div>
+            <div class="label">Send Your Mail</div>
+            <div class="value">support@domain.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN NAVIGATION ===== -->
+  <nav class="main-nav">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="https://templatekit.jegtheme.com/optica/wp-content/uploads/sites/124/2021/07/logo-N5XYWG.png" alt="Optica">
+      </a>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="appointment.html">Appointment</a></li>
+        <li class="nav-item">
+          <a href="#">Pages <i class="fas fa-chevron-down" style="font-size:12px;margin-left:4px;"></i></a>
+          <ul class="nav-dropdown">
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="doctor.html">Our Doctor</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#">Blog <i class="fas fa-chevron-down" style="font-size:12px;margin-left:4px;"></i></a>
+          <ul class="nav-dropdown">
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="#">Single Blog</a></li>
+          </ul>
+        </li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+      </ul>
+      <a href="appointment.html" class="btn btn-primary btn-sm nav-cta">
+        <i class="fas fa-calendar-alt"></i> Make Appointment
+      </a>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <!-- ===== PAGE HERO ===== -->
+  <section class="page-hero">
+    <div class="container">
+      <div class="page-hero-content">
+        <h1>Contact Us</h1>
+        <div class="breadcrumb">
+          <a href="index.html"><i class="fas fa-home"></i> Home</a>
+          <i class="fas fa-chevron-right"></i>
+          <span>Contact Us</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT SECTION ===== -->
+  <section class="contact-section">
+    <div class="container">
+      <div class="contact-grid">
+
+        <!-- LEFT: Contact Form -->
+        <div class="contact-form animate-on-scroll">
+          <h3>Get In Touch</h3>
+          <form id="contactForm">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" placeholder="Enter your email address" required>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" placeholder="Enter your phone number" required>
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <input type="text" placeholder="How can we help you?" required>
+            </div>
+            <div class="form-group">
+              <label>Message</label>
+              <textarea placeholder="Write your message here..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send Message</button>
+          </form>
+        </div>
+
+        <!-- RIGHT: Contact Information -->
+        <div class="contact-info animate-on-scroll">
+          <h3>Contact Information</h3>
+          <div class="contact-info-item">
+            <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="details">
+              <h4>Our Address</h4>
+              <p>Jl. Sunset Road, Kuta, Bali - 80361</p>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="icon"><i class="fas fa-phone-alt"></i></div>
+            <div class="details">
+              <h4>Phone Number</h4>
+              <p>(+62) 81 589 2581</p>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="icon"><i class="fas fa-envelope"></i></div>
+            <div class="details">
+              <h4>Email Address</h4>
+              <p>support@domain.com</p>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="icon"><i class="far fa-clock"></i></div>
+            <div class="details">
+              <h4>Opening Hours</h4>
+              <p class="day">Mon - Thu : 8AM - 8PM</p>
+              <p class="day">Fri : 8AM - 5PM</p>
+              <p class="day">Sat : 9AM - 5PM</p>
+              <p>Sun : 9AM - 6PM</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MAP SECTION ===== -->
+  <section class="map-section">
+    <div class="map-wrapper">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126417.93182419267!2d115.16476465!3d-8.7253759!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd240d73b888999%3A0x6b639b24e2e48c91!2sKuta%2C%20Badung%20Regency%2C%20Bali!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== NEWSLETTER ===== -->
+  <section class="newsletter">
+    <div class="container">
+      <div class="newsletter-content">
+        <h3>Subscribe Our Newsletter</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</p>
+      </div>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Enter your email">
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="footer-logo">
+            <img src="https://templatekit.jegtheme.com/optica/wp-content/uploads/sites/124/2021/07/logo-footer.png" alt="Optica">
+          </div>
+          <p>Lorem ipsum dolor sit amet, consectet adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore.</p>
+          <div class="footer-social">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <div class="footer-links">
+            <a href="about.html">About Us</a>
+            <a href="services.html">Services</a>
+            <a href="appointment.html">Appointment</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Useful Links</h4>
+          <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms and Conditions</a>
+            <a href="#">Disclaimer</a>
+            <a href="#">Support</a>
+            <a href="faq.html">FAQ</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Make Appointment</h4>
+          <div class="footer-contact-item">
+            <i class="far fa-clock"></i>
+            <div class="text">
+              <strong>Opening Hours</strong>
+              9 AM - 10 PM, Monday - Saturday
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <i class="fas fa-phone-alt"></i>
+            <div class="text">
+              <strong>Call Us Today</strong>
+              (+62) 81 589 2581
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <i class="fas fa-envelope"></i>
+            <div class="text">
+              <strong>Email Us</strong>
+              support@domain.com
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Optometrist & Eye Care Template Kit &copy; 2024. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

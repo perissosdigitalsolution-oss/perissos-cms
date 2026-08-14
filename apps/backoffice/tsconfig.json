@@ -1,0 +1,41 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@payload-config": [
+        "./src/payload.config.ts"
+      ],
+      "@perissos/shared": [
+        "../../packages/shared/src"
+      ],
+      "@perissos/shared/*": [
+        "../../packages/shared/src/*"
+      ],
+      "@perissos/ui": [
+        "../../packages/ui/src"
+      ],
+      "@perissos/ui/*": [
+        "../../packages/ui/src/*"
+      ]
+    },
+    "jsx": "preserve"
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
