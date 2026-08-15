@@ -1,6 +1,8 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
+import { EditToolbar } from '@/components/EditToolbar'
+import { SectionEditor } from '@/components/SectionEditor'
 
 interface Section {
   blockType: string
@@ -587,14 +589,23 @@ function renderSection(section: Section, index: number) {
 export default function LandingPage() {
   const [sections, setSections] = useState<Section[]>([])
   const [loading, setLoading] = useState(true)
+  const [pageId, setPageId] = useState<string | null>(null)
+  const [pageSlug, setPageSlug] = useState('home')
+  const [isEditing, setIsEditing] = useState(false)
+  const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
 
   useEffect(() => {
-    const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
-    fetch(`${cmsUrl}/api/pages?where%5Bslug%5D%5Bequals%5D=home&depth=1`)
+    const fetchCmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
+    fetch(`${fetchCmsUrl}/api/pages?where%5Bslug%5D%5Bequals%5D=home&depth=1`)
       .then((res) => res.json())
       .then((data: any) => {
-        if (data.docs?.[0]?.sections) {
-          setSections(data.docs[0].sections)
+        if (data.docs?.[0]) {
+          setSections(data.docs[0].sections || [])
+          setPageId(data.docs[0].id)
+          setPageSlug(data.docs[0].slug || 'home')
         }
         setLoading(false)
       })
@@ -602,6 +613,41 @@ export default function LandingPage() {
         setLoading(false)
       })
   }, [])
+
+  // Check auth status for edit mode
+  useEffect(() => {
+    fetch(`${cmsUrl}/api/users/me`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setIsEditing(true)
+        }
+      })
+      .catch(() => {})
+  }, [cmsUrl])
+
+  const handleSectionSave = useCallback((sectionIndex: number, updatedSection: any) => {
+    const newSections = [...sections]
+    newSections[sectionIndex] = updatedSection
+    setSections(newSections)
+  }, [sections])
+
+  const handleSaveAll = useCallback(async () => {
+    if (!pageId) return
+    setIsSaving(true)
+    try {
+      await fetch(`${cmsUrl}/api/pages/${pageId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ sections }),
+      })
+    } catch (err) {
+      console.error('Save failed:', err)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [pageId, sections, cmsUrl])
 
   useEffect(() => {
     if (loading || sections.length === 0) return
@@ -663,9 +709,80 @@ export default function LandingPage() {
 
   return (
     <main className="digital-agency-template">
+      {/* Edit Mode Toolbar */}
+      {isEditing && (
+        <EditToolbar
+          pageId={pageId}
+          pageSlug={pageSlug}
+          onSave={handleSaveAll}
+          isSaving={isSaving}
+        />
+      )}
+
+      {/* Edit Mode Spacer */}
+      {isEditing && <div style={{ height: '50px' }} />}
+
       <Header />
       {sections.length > 0 ? (
-        sections.map((section, i) => renderSection(section, i))
+        sections.map((section, i) => (
+          <div
+            key={i}
+            data-section-editor
+            style={{
+              position: 'relative',
+              cursor: isEditing ? 'pointer' : 'default',
+            }}
+            onClick={(e) => {
+              if (!isEditing) return
+              // Don't trigger if clicking on links or buttons
+              const target = e.target as HTMLElement
+              if (target.tagName === 'A' || target.tagName === 'BUTTON' || target.closest('a') || target.closest('button')) {
+                return
+              }
+              e.preventDefault()
+              e.stopPropagation()
+              setSelectedSectionIndex(i)
+            }}
+            onMouseEnter={(e) => {
+              if (!isEditing) return
+              const el = e.currentTarget
+              const overlay = document.createElement('div')
+              overlay.className = 'section-edit-overlay'
+              overlay.style.position = 'absolute'
+              overlay.style.inset = '0'
+              overlay.style.background = 'rgba(255, 102, 0, 0.05)'
+              overlay.style.border = '2px dashed rgba(255, 102, 0, 0.4)'
+              overlay.style.borderRadius = '8px'
+              overlay.style.pointerEvents = 'none'
+              overlay.style.zIndex = '10'
+              overlay.style.display = 'flex'
+              overlay.style.alignItems = 'flex-start'
+              overlay.style.justifyContent = 'center'
+              overlay.style.paddingTop = '8px'
+
+              const label = document.createElement('span')
+              label.style.background = '#FF6600'
+              label.style.color = 'white'
+              label.style.padding = '4px 12px'
+              label.style.borderRadius = '4px'
+              label.style.fontSize = '11px'
+              label.style.fontWeight = '600'
+              label.style.fontFamily = 'DM Sans, sans-serif'
+              label.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)'
+              label.textContent = 'Click to Edit — ' + section.blockType
+
+              overlay.appendChild(label)
+              el.style.position = 'relative'
+              el.appendChild(overlay)
+            }}
+            onMouseLeave={(e) => {
+              const overlay = e.currentTarget.querySelector('.section-edit-overlay')
+              if (overlay) overlay.remove()
+            }}
+          >
+            {renderSection(section, i)}
+          </div>
+        ))
       ) : (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
@@ -675,6 +792,19 @@ export default function LandingPage() {
         </div>
       )}
       <Footer />
+
+      {/* Section Editor Panel */}
+      <SectionEditor
+        section={selectedSectionIndex !== null ? sections[selectedSectionIndex] : null}
+        sectionIndex={selectedSectionIndex ?? 0}
+        isOpen={selectedSectionIndex !== null}
+        onClose={() => setSelectedSectionIndex(null)}
+        onSave={(updatedSection) => {
+          if (selectedSectionIndex !== null) {
+            handleSectionSave(selectedSectionIndex, updatedSection)
+          }
+        }}
+      />
     </main>
   )
 }

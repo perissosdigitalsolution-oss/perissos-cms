@@ -89,6 +89,7 @@ services:
         condition: service_healthy
     volumes:
       - ./apps/backoffice:/app/apps/backoffice
+      - backoffice_next:/app/apps/backoffice/.next
       - ./packages:/app/packages
     command: ["pnpm", "--filter", "backoffice", "run", "dev"]
 
@@ -128,6 +129,7 @@ volumes:
   postgres_data:
   minio_data:
   pgadmin_data:
+  backoffice_next:
 
 networks:
   default:

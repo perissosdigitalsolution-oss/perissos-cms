@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
+import { ZodArray, ZodString, ZodBoolean, ZodNumber, ZodEnum, ZodDefault } from 'zod'
 import {
   getSectionRegistry,
   getSectionDefaultProps,
@@ -254,11 +255,11 @@ function BlockSettings({ block, registryEntry, onChange }: {
     <div className="space-y-3">
       {Object.entries(shape).slice(0, 8).map(([fieldName, fieldSchema]) => {
         const isOptional = fieldSchema.isOptional?.() ?? false
-        const isArray = fieldSchema instanceof require('zod').ZodArray
+        const isArray = fieldSchema instanceof ZodArray
 
         if (isArray) return null
 
-        if (fieldSchema instanceof require('zod').ZodString) {
+        if (fieldSchema instanceof ZodString) {
           return (
             <div key={fieldName} className="grid grid-cols-[140px_1fr] gap-3 items-center">
               <label className="text-sm text-white/70" style={{ fontFamily: 'DM Sans, sans-serif' }}>
@@ -269,7 +270,7 @@ function BlockSettings({ block, registryEntry, onChange }: {
                 type="text"
                 value={block[fieldName] || ''}
                 onChange={e => onChange({ [fieldName]: e.target.value })}
-                placeholder={fieldSchema._def.defaultValue?.() || ''}
+                placeholder={((fieldSchema._def as any).defaultValue ? ((fieldSchema._def as any).defaultValue() || (fieldSchema._def as any).defaultValue) : '')}
                 className="px-3 py-2 bg-[#181817] border border-[#3A3A38] rounded-lg text-white placeholder-[#7A7A74] focus:outline-none focus:border-[#FF6600] transition-colors text-sm"
                 style={{ fontFamily: 'DM Sans, sans-serif' }}
               />
@@ -277,7 +278,7 @@ function BlockSettings({ block, registryEntry, onChange }: {
           )
         }
 
-        if (fieldSchema instanceof require('zod').ZodBoolean) {
+        if (fieldSchema instanceof ZodBoolean) {
           return (
             <div key={fieldName} className="flex items-center justify-between">
               <label className="text-sm text-white/70" style={{ fontFamily: 'DM Sans, sans-serif' }}>

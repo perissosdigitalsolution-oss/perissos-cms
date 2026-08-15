@@ -6,6 +6,8 @@
 **Classification:** Internal — Agent Onboarding Reference  
 **Maintained by:** Agentic Orchestration Layer
 
+> **New Agent?** Start with `AGENTS.md` in the project root for a quick overview of governance, roles, and the DTAP lifecycle.
+
 ---
 
 ## 1. Vision Statement
@@ -168,22 +170,26 @@
 
 | Deliverable | Status | Owner |
 |-------------|--------|-------|
-| Block-Based Page Builder (Payload Blocks field) | ���� Spec created | backend-lead |
-| Section Registry (packages/shared) | ����� Spec created | frontend-lead |
-| Visual Drag-Drop Editor (admin custom component) | ����� Spec created | frontend-lead + ui-lead |
-| Live Preview (iframe in admin sidebar) | ����� Spec created | frontend-lead |
-| Section Props Schema → Auto Form Fields | ����� Spec created | backend-lead |
-| Section Components Migration (packages/ui) | ����� Spec created | frontend-lead |
-| Sprint Governance Artifacts | ����� Spec created | project-shepherd |
+| Block-Based Page Builder (Payload Blocks field) | ✅ Complete | backend-lead |
+| Section Registry (packages/shared) | ✅ Complete | frontend-lead |
+| Visual Drag-Drop Editor (admin custom component) | ✅ Complete | frontend-lead + ui-lead |
+| Live Preview (iframe in admin sidebar) | ⏳ Pending | frontend-lead |
+| Section Props Schema → Auto Form Fields | ✅ Complete | backend-lead |
+| Section Components Migration (packages/ui) | ✅ Complete | frontend-lead |
+| Sprint Governance Artifacts | ✅ Complete | project-shepherd |
+| Inline Frontend Editing Mode | ✅ Complete | frontend-lead |
+| SectionEditor Bug Fix | ✅ Complete | frontend-lead |
 
 **Tasks:**
-1. Design section registry schema (Zod) + TypeScript types
-2. Migrate 10 section components to `packages/ui/src/sections/`
-3. Add `blocks` field to Pages collection
-4. Build PageBuilderEditor admin component (drag-drop palette + canvas)
-5. Build LivePreview iframe component with auth
-6. Auto-generate Payload field config from section schemas
-7. E2E tests for editor + preview flow
+1. ✅ Design section registry schema (Zod) + TypeScript types
+2. ✅ Migrate 10 section components to `packages/ui/src/sections/`
+3. ✅ Add `blocks` field to Pages collection
+4. ✅ Build PageBuilderEditor admin component (drag-drop palette + canvas)
+5. ⏳ Build LivePreview iframe component with auth
+6. ✅ Auto-generate Payload field config from section schemas
+7. ⏳ E2E tests for editor + preview flow
+8. ✅ Build inline frontend editing mode (EditToolbar + SectionEditor)
+9. ✅ Fix SectionEditor data loading bug
 
 ---
 
