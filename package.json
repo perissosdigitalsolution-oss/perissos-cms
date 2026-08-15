@@ -9,8 +9,9 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
-    "test:ci": "pnpm typecheck && pnpm build && pnpm test:api",
+    "test:ci": "pnpm typecheck && pnpm build && pnpm test:api && pnpm test:frontend",
     "test:api": "node scripts/test-api.mjs",
+    "test:frontend": "node scripts/test-frontend.mjs",
     "seed:pages": "node scripts/seed-pages.mjs",
     "dev:backoffice": "turbo dev --filter=backoffice",
     "dev:frontend": "turbo dev --filter=frontend",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "adm-zip": "^0.6.0",
+    "puppeteer": "^25.7.0",
     "tsx": "^4.19.2",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"

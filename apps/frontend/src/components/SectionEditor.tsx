@@ -114,40 +114,34 @@ function getBlockFields(blockType: string): BlockField[] {
   }
 }
 
-function cloneSection(section: any): any {
-  if (!section) return {}
-  const clone: any = {}
-  for (const key of Object.keys(section)) {
-    if (Array.isArray(section[key])) {
-      clone[key] = JSON.parse(JSON.stringify(section[key]))
-    } else if (typeof section[key] === 'object' && section[key] !== null) {
-      clone[key] = { ...section[key] }
-    } else {
-      clone[key] = section[key]
-    }
-  }
-  return clone
-}
-
 export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }: SectionEditorProps) {
-  const prevSectionRef = useRef<any>(null)
-  const [formData, setFormData] = useState<any>(() => section ? cloneSection(section) : {})
+  const [edits, setEdits] = useState<Record<string, any>>({})
   const panelRef = useRef<HTMLDivElement>(null)
 
-  if (section && section !== prevSectionRef.current) {
-    prevSectionRef.current = section
-    const cloned = cloneSection(section)
-    setFormData(cloned)
-  }
+  // Reset edits when section changes
+  useEffect(() => {
+    setEdits({})
+  }, [section?.id, sectionIndex])
+
+  // Get value: use edit if present, otherwise read directly from section prop
+  const getValue = useCallback((fieldName: string) => {
+    if (fieldName in edits) return edits[fieldName]
+    return section?.[fieldName] ?? ''
+  }, [edits, section])
 
   const handleChange = useCallback((fieldName: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [fieldName]: value }))
+    setEdits(prev => ({ ...prev, [fieldName]: value }))
   }, [])
 
   const handleSave = useCallback(() => {
-    onSave(formData)
+    // Merge edits with original section to create updated section
+    const updated = { ...section }
+    for (const [key, value] of Object.entries(edits)) {
+      updated[key] = value
+    }
+    onSave(updated)
     onClose()
-  }, [formData, onSave, onClose])
+  }, [section, edits, onSave, onClose])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -245,7 +239,7 @@ export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }
             {field.type === 'text' && (
               <input
                 type="text"
-                value={formData[field.name] ?? ''}
+                value={getValue(field.name)}
                 onChange={e => handleChange(field.name, e.target.value)}
                 style={{
                   width: '100%',
@@ -263,7 +257,7 @@ export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }
             )}
             {field.type === 'textarea' && (
               <textarea
-                value={formData[field.name] ?? ''}
+                value={getValue(field.name)}
                 onChange={e => handleChange(field.name, e.target.value)}
                 rows={3}
                 style={{
