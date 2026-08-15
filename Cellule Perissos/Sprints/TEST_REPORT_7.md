@@ -13,6 +13,7 @@
 | TypeScript | ✅ PASS | All 4 workspaces typecheck clean |
 | Build | ✅ PASS | Backoffice + Frontend build successfully |
 | API Tests | ✅ PASS | 7/7 smoke tests pass |
+| Frontend Integration (NEW) | ✅ PASS | 7/7 Puppeteer tests pass |
 | SectionEditor Bug Fix | ✅ PASS | Fields populate correctly on panel open |
 | Docker Rebuild | ✅ PASS | Frontend container rebuilt with fixes |
 
@@ -40,32 +41,46 @@ pnpm build
 ```
 ✓ Health check passed
 ✓ Login successful
-✓ Templates list: 3 templates
-✓ Template imported: Smoke Test (id: 14)
-✓ Template 14 activated
-✓ Template 14 deactivated
-✓ Templates list: 4 templates
+✓ Templates list: 11 templates
+✓ Template imported: Smoke Test (id: 22)
+✓ Template 22 activated
+✓ Template 22 deactivated
+✓ Templates list: 12 templates
 ```
 
-### 4. SectionEditor Bug Fix Verification
-**Issue:** SectionEditor panel opened but fields were empty despite section data being present.
+### 4. Frontend Integration Tests (Puppeteer)
+```
+✓ Frontend loads without console errors
+✓ CMS-driven sections rendered correctly
+✓ Backoffice login works
+✓ Edit toolbar appears when authenticated
+✓ SectionEditor panel opens on click
+✓ SectionEditor fields correctly populated from section data
+✓ SectionEditor textarea correctly populated
+```
+
+### 5. SectionEditor Bug Fix Verification
+**Issue:** SectionEditor panel opened but fields were empty despite section data being present in the API response and rendered on the page.
 
 **Root Cause:** 
-- `useEffect`-based initialization created a flash of empty fields on mount
-- Field definitions referenced non-existent Payload block fields (e.g., `subtitle` for hero)
+- Previous approaches used `useState` + `useEffect` to synchronize form data with the `section` prop
+- React state synchronization failed due to reference equality checks and render timing
+- `formData` state was not updating when `section` prop changed (same object reference)
 
-**Fix Applied:**
-1. Changed `useState(() => cloneSection(section))` for direct initialization
-2. Fixed field definitions to match actual Payload block schemas
-3. Preserved `id` field in cloned data for proper Payload updates
-4. Added `data-section-editor` attribute for click-outside detection
+**Fix Applied (bulletproof approach):**
+1. **Eliminated `formData` state entirely** — no more state synchronization
+2. **`getValue(fieldName)` reads directly from `section` prop** — always current
+3. **Only `edits` state tracks user modifications** — minimal state surface
+4. **`handleSave` merges edits with original section** — clean separation
+5. **Reset `edits` on section change** via `useEffect` with `[section?.id, sectionIndex]`
 
 **Verification:** 
-- API returns correct section data with all required fields
-- SectionEditor receives and displays data correctly
-- Save flow preserves section IDs for Payload updates
+- API returns correct section data with all required fields (`title`, `description`, `badgeText`, etc.)
+- SectionEditor receives and displays data correctly on first click
+- Save flow merges edits and preserves all section data
+- Puppeteer test verifies end-to-end flow automatically
 
-### 5. Docker Rebuild
+### 6. Docker Rebuild
 - Frontend container rebuilt with updated source code
 - Container restarted and serving updated static files
 - Frontend accessible at http://localhost:3001
@@ -91,7 +106,7 @@ pnpm build
 ## Recommendations
 
 1. **Live Preview (AC-6):** Implement iframe-based live preview in admin sidebar
-2. **E2E Testing:** Add Playwright tests for drag-drop and save flows
+2. **E2E Testing:** Expand Puppeteer tests for drag-drop and save flows
 3. **Performance:** Monitor SectionEditor render performance with large section arrays
 
 ---
