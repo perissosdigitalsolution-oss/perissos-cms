@@ -147,6 +147,27 @@ Testing section 3 (about)...
 - Container restarted and serving updated static files
 - Frontend accessible at http://localhost:3001
 
+### 11. Hero Image API Save Fix
+**Issue:** Hero section's `mainImage` field was not saving to Payload CMS when edited in SectionEditor.
+
+**Root Cause:** 
+- Payload block definition used `upload` type (requires media ID)
+- Frontend sends image URLs, not media IDs
+- Database had both `main_image` (text) and `main_image_id` (FK) causing conflicts
+
+**Fix Applied:**
+1. Changed Hero block `mainImage` field to `text` type (accepts URL directly)
+2. Added missing `main_image` column to `pages_blocks_hero` table
+3. Removed conflicting `main_image_id` FK column
+4. Fixed `profile_image` column in `pages_blocks_team_members` table
+5. All image fields now use `text` type for URLs across all 10 block types
+
+**Verification:**
+- Direct API test: `PATCH /api/pages/:id` with `mainImage` URL succeeds
+- URL persists: `https://cdn.prod.website-files.com/.../Banner%20Image.png`
+- GET returns saved URL correctly
+- Frontend renders image when URL present
+
 ---
 
 ## Acceptance Criteria Status
