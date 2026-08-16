@@ -15,6 +15,7 @@ export const HeroBlock: Block = {
     { name: 'secondaryButtonText', type: 'text', defaultValue: 'View Our Work' },
     { name: 'secondaryButtonIcon', type: 'text', defaultValue: 'fas fa-play' },
     { name: 'secondaryButtonUrl', type: 'text', defaultValue: '#portfolio' },
+    { name: 'mainImage', type: 'text', admin: { description: 'Main image URL (replaces laptop icon)' } },
     {
       name: 'stats',
       type: 'array',
@@ -22,6 +23,8 @@ export const HeroBlock: Block = {
       fields: [
         { name: 'value', type: 'text', required: true },
         { name: 'label', type: 'text', required: true },
+        { name: 'icon', type: 'text', admin: { description: 'Font Awesome icon (optional)' } },
+        { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
       ],
     },
     {
@@ -30,6 +33,7 @@ export const HeroBlock: Block = {
       maxRows: 4,
       fields: [
         { name: 'icon', type: 'text', admin: { description: 'Font Awesome icon' } },
+        { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
         { name: 'label', type: 'text', required: true },
         { name: 'value', type: 'text', required: true },
       ],

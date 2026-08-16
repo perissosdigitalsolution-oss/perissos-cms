@@ -19,12 +19,14 @@ export const PricingBlock: Block = {
         { name: 'description', type: 'text' },
         { name: 'price', type: 'text', required: true },
         { name: 'period', type: 'text' },
+        { name: 'image', type: 'text', admin: { description: 'Plan image URL (optional)' } },
         {
           name: 'features',
           type: 'array',
           maxRows: 20,
           fields: [
             { name: 'icon', type: 'text', defaultValue: 'fas fa-check' },
+            { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
             { name: 'text', type: 'text', required: true },
           ],
         },

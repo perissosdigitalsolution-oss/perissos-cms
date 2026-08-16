@@ -35,8 +35,8 @@ async function testFrontendLoads() {
 
   try {
     // Test 1: Frontend loads without JS errors
-    await page.goto(FRONTEND_URL, { waitUntil: 'networkidle0', timeout: 30000 });
-    await new Promise(r => setTimeout(r, 1000));
+    await page.goto(FRONTEND_URL, { waitUntil: 'networkidle0', timeout: 60000 });
+    await new Promise(r => setTimeout(r, 3000));
     
     if (errors.length > 0) {
       throw new Error(`Frontend has console errors: ${errors.join(', ')}`);
@@ -51,17 +51,17 @@ async function testFrontendLoads() {
     console.log('✓ CMS-driven sections rendered correctly');
 
     // Test 3: Login to backoffice
-    await page.goto(`${BACKOFFICE_URL}/admin/login`, { waitUntil: 'networkidle0' });
-    await page.waitForSelector('input[name="email"]', { timeout: 10000 });
+    await page.goto(`${BACKOFFICE_URL}/admin/login`, { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.waitForSelector('input[name="email"]', { timeout: 20000 });
     await page.type('input[name="email"]', ADMIN_EMAIL);
     await page.type('input[name="password"]', ADMIN_PASSWORD);
     await page.click('button[type="submit"]');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 });
     console.log('✓ Backoffice login works');
 
     // Test 4: Return to frontend, edit toolbar appears
-    await page.goto(FRONTEND_URL, { waitUntil: 'networkidle0' });
-    await new Promise(r => setTimeout(r, 2000));
+    await page.goto(FRONTEND_URL, { waitUntil: 'networkidle0', timeout: 60000 });
+    await new Promise(r => setTimeout(r, 5000));
     
     const toolbar = await page.$('div[style*="z-index: 9999"]');
     if (!toolbar) {

@@ -22,6 +22,7 @@ export const PortfolioBlock: Block = {
       maxRows: 12,
       fields: [
         { name: 'icon', type: 'text', admin: { description: 'Font Awesome icon' } },
+        { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
         { name: 'category', type: 'text' },
         { name: 'title', type: 'text', required: true },
         { name: 'linkText', type: 'text', defaultValue: 'View Project' },

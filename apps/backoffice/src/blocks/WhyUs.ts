@@ -16,6 +16,7 @@ export const WhyUsBlock: Block = {
       maxRows: 6,
       fields: [
         { name: 'icon', type: 'text', admin: { description: 'Font Awesome icon' } },
+        { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
         { name: 'label', type: 'text', required: true },
         { name: 'description', type: 'textarea' },
       ],
@@ -26,6 +27,7 @@ export const WhyUsBlock: Block = {
       maxRows: 6,
       fields: [
         { name: 'icon', type: 'text' },
+        { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
         { name: 'number', type: 'text', required: true },
         { name: 'label', type: 'text', required: true },
       ],

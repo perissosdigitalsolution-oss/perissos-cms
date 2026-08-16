@@ -18,7 +18,8 @@ export const TeamBlock: Block = {
         { name: 'name', type: 'text', required: true },
         { name: 'role', type: 'text', required: true },
         { name: 'avatarIcon', type: 'text', defaultValue: 'fas fa-user', admin: { description: 'Font Awesome icon for placeholder avatar' } },
-        { name: 'profileImage', type: 'upload', relationTo: 'media', admin: { description: 'Optional profile image (overrides avatar icon)' } },
+        { name: 'avatarImage', type: 'text', admin: { description: 'Avatar image URL (optional, replaces icon)' } },
+        { name: 'profileImage', type: 'text', admin: { description: 'Optional profile image URL (overrides avatar icon)' } },
         {
           name: 'social',
           type: 'array',

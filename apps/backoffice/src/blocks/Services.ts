@@ -16,6 +16,7 @@ export const ServicesBlock: Block = {
       maxRows: 12,
       fields: [
         { name: 'icon', type: 'text', admin: { description: 'Font Awesome icon e.g. fas fa-code' } },
+        { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
         { name: 'title', type: 'text', required: true },
         { name: 'description', type: 'textarea' },
         { name: 'linkText', type: 'text', defaultValue: 'Learn More' },

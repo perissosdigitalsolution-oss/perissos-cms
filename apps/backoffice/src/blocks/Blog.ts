@@ -16,6 +16,7 @@ export const BlogBlock: Block = {
       maxRows: 9,
       fields: [
         { name: 'icon', type: 'text', admin: { description: 'Font Awesome icon' } },
+        { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
         { name: 'imageIcon', type: 'text', admin: { description: 'Icon shown in blog image placeholder' } },
         { name: 'date', type: 'text', required: true, admin: { description: 'e.g. Jan 15, 2025' } },
         { name: 'tag', type: 'text', required: true, admin: { description: 'e.g. AI Technology' } },

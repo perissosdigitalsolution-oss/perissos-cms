@@ -9,5 +9,6 @@ export const CTABlock: Block = {
     { name: 'buttonText', type: 'text', defaultValue: 'Start a Project' },
     { name: 'buttonIcon', type: 'text', defaultValue: 'fas fa-arrow-right' },
     { name: 'buttonUrl', type: 'text', defaultValue: '#contact' },
+    { name: 'image', type: 'text', admin: { description: 'Background image URL (optional)' } },
   ],
 }

@@ -11,12 +11,14 @@ export const AboutBlock: Block = {
     { name: 'description', type: 'textarea' },
     { name: 'experienceNumber', type: 'text' },
     { name: 'experienceLabel', type: 'text' },
+    { name: 'mainImage', type: 'text', admin: { description: 'Main image URL (replaces building icon)' } },
     {
       name: 'features',
       type: 'array',
       maxRows: 8,
       fields: [
         { name: 'icon', type: 'text', defaultValue: 'fas fa-check' },
+        { name: 'image', type: 'text', admin: { description: 'Image URL (optional, replaces icon)' } },
         { name: 'text', type: 'text', required: true },
       ],
     },
