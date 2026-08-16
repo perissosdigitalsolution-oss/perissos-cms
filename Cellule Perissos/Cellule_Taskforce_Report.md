@@ -180,6 +180,8 @@
 | Inline Frontend Editing Mode | ✅ Complete | frontend-lead |
 | SectionEditor Bug Fix | ✅ Complete | frontend-lead |
 | Frontend Integration Tests (Puppeteer) | ✅ Complete | frontend-lead |
+| SectionEditor Array/Image Support | ✅ Complete | frontend-lead |
+| Edit Toolbar Header Fix | ✅ Complete | frontend-lead |
 
 **Tasks:**
 1. ✅ Design section registry schema (Zod) + TypeScript types
@@ -192,6 +194,8 @@
 8. ✅ Build inline frontend editing mode (EditToolbar + SectionEditor)
 9. ✅ Fix SectionEditor data loading bug — bulletproof prop-reading approach
 10. ✅ Add Puppeteer frontend integration tests to `test:ci` pipeline
+11. ✅ SectionEditor array field support — 53+ repeatable items across 10 block types
+12. ✅ EditToolbar auto-height spacer — no longer covers site header
 
 **Sprint 7 Gates:**
 | Gate | Status | Evidence |

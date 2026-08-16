@@ -13,9 +13,11 @@
 | TypeScript | ✅ PASS | All 4 workspaces typecheck clean |
 | Build | ✅ PASS | Backoffice + Frontend build successfully |
 | API Tests | ✅ PASS | 7/7 smoke tests pass |
-| Frontend Integration (NEW) | ✅ PASS | 7/7 Puppeteer tests pass |
-| SectionEditor Bug Fix | ✅ PASS | Fields populate correctly on panel open |
-| Docker Rebuild | ✅ PASS | Frontend container rebuilt with fixes |
+| Frontend Integration (Puppeteer) | ✅ PASS | 7/7 tests pass |
+| SectionEditor Array/Image Support | ✅ PASS | All 10 block types with arrays |
+| Edit Toolbar Fix | ✅ PASS | No longer covers header |
+| Section Switching | ✅ PASS | Adapts correctly per section |
+| Docker Rebuild | ✅ PASS | Frontend container rebuilt |
 
 ---
 
@@ -41,11 +43,11 @@ pnpm build
 ```
 ✓ Health check passed
 ✓ Login successful
-✓ Templates list: 11 templates
-✓ Template imported: Smoke Test (id: 22)
-✓ Template 22 activated
-✓ Template 22 deactivated
-✓ Templates list: 12 templates
+✓ Templates list: 16 templates
+✓ Template imported: Smoke Test (id: 27)
+✓ Template 27 activated
+✓ Template 27 deactivated
+✓ Templates list: 17 templates
 ```
 
 ### 4. Frontend Integration Tests (Puppeteer)
@@ -59,28 +61,52 @@ pnpm build
 ✓ SectionEditor textarea correctly populated
 ```
 
-### 5. SectionEditor Bug Fix Verification
-**Issue:** SectionEditor panel opened but fields were empty despite section data being present in the API response and rendered on the page.
+### 5. SectionEditor Array/Image Support
+**New Feature:** SectionEditor now supports complex field types for all 10 block types.
 
-**Root Cause:** 
-- Previous approaches used `useState` + `useEffect` to synchronize form data with the `section` prop
-- React state synchronization failed due to reference equality checks and render timing
-- `formData` state was not updating when `section` prop changed (same object reference)
+**Field Types Supported:**
+- `text` — Single line text inputs
+- `textarea` — Multi-line text areas
+- `image` — Image URL with preview (ready for use)
+- `array` — Repeatable item groups with nested fields
 
-**Fix Applied (bulletproof approach):**
-1. **Eliminated `formData` state entirely** — no more state synchronization
-2. **`getValue(fieldName)` reads directly from `section` prop** — always current
-3. **Only `edits` state tracks user modifications** — minimal state surface
-4. **`handleSave` merges edits with original section** — clean separation
-5. **Reset `edits` on section change** via `useEffect` with `[section?.id, sectionIndex]`
+**Block Type Coverage:**
 
-**Verification:** 
-- API returns correct section data with all required fields (`title`, `description`, `badgeText`, etc.)
-- SectionEditor receives and displays data correctly on first click
-- Save flow merges edits and preserves all section data
-- Puppeteer test verifies end-to-end flow automatically
+| Block Type | Array Fields | Items Managed |
+|------------|--------------|---------------|
+| Hero | `stats` (3), `floatingCards` (2) | 5 items |
+| Services | `items` (6) | 6 service cards |
+| About | `features` (4) | 4 features |
+| Why Us | `items` (3), `stats` (4) | 7 items |
+| Team | `members` (4) + nested `social` | 4 members |
+| Portfolio | `filters` (5), `projects` (6) | 11 items |
+| Blog | `posts` (3) | 3 posts |
+| Pricing | `plans` (3) + nested `features` | 3 plans |
+| CTA | (simple fields only) | — |
+| Contact | `contactItems` (3), `socials` (4), `formFields` | 7+ items |
 
-### 6. Docker Rebuild
+**Total: 53+ repeatable items now editable inline**
+
+### 6. Edit Toolbar Fix
+**Issue:** Fixed-position toolbar covered the site header/navigation.
+
+**Fix:** Toolbar now auto-measures its height (`useRef` + `offsetHeight`) and renders a spacer div that pushes page content down dynamically. Works for both collapsed and expanded states.
+
+### 7. Section Switching Verification
+```
+Testing section 1 (hero)...
+  Fields found: 38
+  ✓ Title field populated
+Testing section 2 (services)...
+  Fields found: 56
+  ✓ Title field populated
+Testing section 3 (about)...
+  Fields found: 28
+  ✓ Title field populated
+✅ Section switching test PASSED
+```
+
+### 8. Docker Rebuild
 - Frontend container rebuilt with updated source code
 - Container restarted and serving updated static files
 - Frontend accessible at http://localhost:3001
@@ -108,6 +134,7 @@ pnpm build
 1. **Live Preview (AC-6):** Implement iframe-based live preview in admin sidebar
 2. **E2E Testing:** Expand Puppeteer tests for drag-drop and save flows
 3. **Performance:** Monitor SectionEditor render performance with large section arrays
+4. **Image Upload:** Add direct image upload to MinIO/R2 from SectionEditor
 
 ---
 
