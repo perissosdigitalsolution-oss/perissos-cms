@@ -8,6 +8,8 @@ interface EditToolbarProps {
   onSave: () => void
   isSaving: boolean
   onHeightChange?: (height: number) => void
+  theme?: any
+  onThemeChange?: (theme: any) => void
 }
 
 // Default theme values matching digital-agency.css CSS variables
@@ -27,15 +29,27 @@ const DEFAULT_THEME = {
   spacing: '16px',
 }
 
-export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange }: EditToolbarProps) {
+export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange, theme: initialTheme, onThemeChange }: EditToolbarProps) {
   const [user, setUser] = useState<any>(null)
   const [isExpanded, setIsExpanded] = useState(false)
   const [showThemePanel, setShowThemePanel] = useState(false)
   const [toolbarHeight, setToolbarHeight] = useState(50)
-  const [theme, setTheme] = useState(DEFAULT_THEME)
+  const [theme, setTheme] = useState<any>(initialTheme || DEFAULT_THEME)
   const toolbarRef = useRef<HTMLDivElement>(null)
 
   const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
+
+  // Sync theme with parent
+  useEffect(() => {
+    if (initialTheme) {
+      setTheme(initialTheme)
+    }
+  }, [initialTheme])
+
+  // Notify parent of theme changes
+  useEffect(() => {
+    onThemeChange?.(theme)
+  }, [theme, onThemeChange])
 
   useEffect(() => {
     fetch(`${cmsUrl}/api/users/me`, {
@@ -94,7 +108,7 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
   }, [cmsUrl])
 
   const handleThemeChange = useCallback((key: string, value: string) => {
-    setTheme(prev => ({ ...prev, [key]: value }))
+    setTheme((prev: any) => ({ ...prev, [key]: value }))
   }, [])
 
   const handleResetTheme = useCallback(() => {
@@ -419,7 +433,7 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
                   <input
                     type="text"
                     value={theme.borderRadius}
-                    onChange={e => setTheme(prev => ({ ...prev, borderRadius: e.target.value }))}
+                    onChange={e => setTheme((prev: any) => ({ ...prev, borderRadius: e.target.value }))}
                     style={{
                       padding: '8px 10px',
                       background: '#2d2d2d',
@@ -437,7 +451,7 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
                   <input
                     type="text"
                     value={theme.spacing}
-                    onChange={e => setTheme(prev => ({ ...prev, spacing: e.target.value }))}
+                    onChange={e => setTheme((prev: any) => ({ ...prev, spacing: e.target.value }))}
                     style={{
                       padding: '8px 10px',
                       background: '#2d2d2d',

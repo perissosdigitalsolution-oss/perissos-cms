@@ -602,6 +602,7 @@ export default function LandingPage() {
   const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [toolbarHeight, setToolbarHeight] = useState(60)
+  const [theme, setTheme] = useState<any>(null)
 
   const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
 
@@ -614,6 +615,9 @@ export default function LandingPage() {
           setSections(data.docs[0].sections || [])
           setPageId(data.docs[0].id)
           setPageSlug(data.docs[0].slug || 'home')
+          if (data.docs[0].theme) {
+            setTheme(data.docs[0].theme)
+          }
         }
         setLoading(false)
       })
@@ -640,6 +644,10 @@ export default function LandingPage() {
     setSections(newSections)
   }, [sections])
 
+  const handleThemeChange = useCallback((newTheme: any) => {
+    setTheme(newTheme)
+  }, [])
+
   const handleSaveAll = useCallback(async () => {
     if (!pageId) return
     setIsSaving(true)
@@ -648,14 +656,14 @@ export default function LandingPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ sections }),
+        body: JSON.stringify({ sections, theme }),
       })
     } catch (err) {
       console.error('Save failed:', err)
     } finally {
       setIsSaving(false)
     }
-  }, [pageId, sections, cmsUrl])
+  }, [pageId, sections, theme, cmsUrl])
 
   useEffect(() => {
     if (loading || sections.length === 0) return
@@ -725,6 +733,8 @@ export default function LandingPage() {
           onSave={handleSaveAll}
           isSaving={isSaving}
           onHeightChange={setToolbarHeight}
+          theme={theme}
+          onThemeChange={handleThemeChange}
         />
       )}
 

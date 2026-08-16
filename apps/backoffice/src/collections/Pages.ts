@@ -56,6 +56,13 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'theme',
+      type: 'json',
+      admin: {
+        description: 'Global theme customization (colors, fonts, spacing)',
+      },
+    },
+    {
       name: 'publishedAt',
       type: 'date',
       admin: {
