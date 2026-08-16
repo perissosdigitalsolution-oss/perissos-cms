@@ -82,8 +82,8 @@ async function testThemePanel() {
     await new Promise(r => setTimeout(r, 500))
 
     // Check if CSS variable was applied
-    const primaryColor = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--theme-primary'))
-    console.log(`📐 CSS variable --theme-primary: "${primaryColor.trim()}"`)
+    const primaryColor = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--primary'))
+    console.log(`📐 CSS variable --primary: "${primaryColor.trim()}"`)
 
     // Test font preset
     console.log('\n🔤 Testing font preset (Modern)...')
@@ -93,10 +93,10 @@ async function testThemePanel() {
       if (modernBtn) modernBtn.click()
     })
     await new Promise(r => setTimeout(r, 500))
-    const headingFont = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--theme-font-heading'))
-    const bodyFont = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--theme-font-body'))
-    console.log(`📐 CSS variable --theme-font-heading: "${headingFont.trim()}"`)
-    console.log(`📐 CSS variable --theme-font-body: "${bodyFont.trim()}"`)
+    const headingFont = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--font-heading'))
+    const bodyFont = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--font-body'))
+    console.log(`📐 CSS variable --font-heading: "${headingFont.trim()}"`)
+    console.log(`📐 CSS variable --font-body: "${bodyFont.trim()}"`)
 
     // Test reset
     console.log('\n🔄 Testing reset...')
@@ -106,8 +106,8 @@ async function testThemePanel() {
       if (resetBtn) resetBtn.click()
     })
     await new Promise(r => setTimeout(r, 500))
-    const resetPrimary = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--theme-primary'))
-    console.log(`📐 After reset --theme-primary: "${resetPrimary.trim()}"`)
+    const resetPrimary = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--primary'))
+    console.log(`📐 After reset --primary: "${resetPrimary.trim()}"`)
 
     console.log('\n✅ Theme panel test complete!')
     console.log('⏳ Browser will stay open for 30 seconds for manual testing...')

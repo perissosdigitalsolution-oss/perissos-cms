@@ -10,23 +10,19 @@ interface EditToolbarProps {
   onHeightChange?: (height: number) => void
 }
 
-// Default theme values matching the current design
+// Default theme values matching digital-agency.css CSS variables
 const DEFAULT_THEME = {
-  colors: {
-    primary: '#FF6600',
-    primaryHover: '#E55A00',
-    secondary: '#1a1a1a',
-    accent: '#FF6600',
-    background: '#ffffff',
-    surface: '#fafafa',
-    text: '#1a1a1a',
-    textSecondary: '#666666',
-    border: '#e5e5e5',
-  },
-  fonts: {
-    heading: 'Plus Jakarta Sans, sans-serif',
-    body: 'DM Sans, sans-serif',
-  },
+  primary: '#FF6600',
+  primaryHover: '#E55B00',
+  dark: '#181817',
+  dark2: '#1E1E1D',
+  dark3: '#2A2A28',
+  light: '#F6F4F1',
+  white: '#FFFFFF',
+  gray: '#7A7A74',
+  border: '#3A3A38',
+  fontBody: 'DM Sans, sans-serif',
+  fontHeading: 'Plus Jakarta Sans, sans-serif',
   borderRadius: '8px',
   spacing: '16px',
 }
@@ -63,16 +59,22 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
     }
   }, [isExpanded, user, showThemePanel, onHeightChange])
 
-  // Apply theme to document
+  // Apply theme to document (matches digital-agency.css CSS variables)
   useEffect(() => {
     const root = document.documentElement
-    Object.entries(theme.colors).forEach(([key, value]) => {
-      root.style.setProperty(`--theme-${key}`, value)
-    })
-    root.style.setProperty('--theme-font-heading', theme.fonts.heading)
-    root.style.setProperty('--theme-font-body', theme.fonts.body)
-    root.style.setProperty('--theme-border-radius', theme.borderRadius)
-    root.style.setProperty('--theme-spacing', theme.spacing)
+    root.style.setProperty('--primary', theme.primary)
+    root.style.setProperty('--primary-hover', theme.primaryHover)
+    root.style.setProperty('--dark', theme.dark)
+    root.style.setProperty('--dark-2', theme.dark2)
+    root.style.setProperty('--dark-3', theme.dark3)
+    root.style.setProperty('--light', theme.light)
+    root.style.setProperty('--white', theme.white)
+    root.style.setProperty('--gray', theme.gray)
+    root.style.setProperty('--border', theme.border)
+    root.style.setProperty('--font-body', theme.fontBody)
+    root.style.setProperty('--font-heading', theme.fontHeading)
+    root.style.setProperty('--border-radius', theme.borderRadius)
+    root.style.setProperty('--spacing', theme.spacing)
   }, [theme])
 
   const handleOpenAdmin = useCallback(() => {
@@ -91,18 +93,8 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
     } catch {}
   }, [cmsUrl])
 
-  const handleThemeColorChange = useCallback((colorKey: string, value: string) => {
-    setTheme(prev => ({
-      ...prev,
-      colors: { ...prev.colors, [colorKey]: value }
-    }))
-  }, [])
-
-  const handleThemeFontChange = useCallback((fontKey: string, value: string) => {
-    setTheme(prev => ({
-      ...prev,
-      fonts: { ...prev.fonts, [fontKey]: value }
-    }))
+  const handleThemeChange = useCallback((key: string, value: string) => {
+    setTheme(prev => ({ ...prev, [key]: value }))
   }, [])
 
   const handleResetTheme = useCallback(() => {
@@ -114,18 +106,18 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
   const colorOptions = [
     { key: 'primary', label: 'Primary (Brand)', help: 'Main brand color - buttons, links, accents' },
     { key: 'primaryHover', label: 'Primary Hover', help: 'Darker shade for hover states' },
-    { key: 'secondary', label: 'Secondary (Dark)', help: 'Dark backgrounds, headers, footers' },
-    { key: 'accent', label: 'Accent', help: 'Secondary accent color' },
-    { key: 'background', label: 'Background', help: 'Page background color' },
-    { key: 'surface', label: 'Surface', help: 'Card/panel backgrounds' },
-    { key: 'text', label: 'Text Primary', help: 'Main text color' },
-    { key: 'textSecondary', label: 'Text Secondary', help: 'Muted text color' },
-    { key: 'border', label: 'Border', help: 'Input borders, dividers' },
+    { key: 'dark', label: 'Dark Background', help: 'Main dark background color' },
+    { key: 'dark2', label: 'Dark Variant 2', help: 'Secondary dark background' },
+    { key: 'dark3', label: 'Dark Variant 3', help: 'Tertiary dark background' },
+    { key: 'light', label: 'Light Background', help: 'Light section backgrounds' },
+    { key: 'white', label: 'White', help: 'Pure white color' },
+    { key: 'gray', label: 'Gray Text', help: 'Muted text color' },
+    { key: 'border', label: 'Border', help: 'Border/divider color' },
   ]
 
   const fontOptions = [
-    { key: 'heading', label: 'Heading Font', help: 'Used for titles, headings' },
-    { key: 'body', label: 'Body Font', help: 'Used for paragraphs, UI text' },
+    { key: 'fontHeading', label: 'Heading Font', help: 'Used for titles, headings' },
+    { key: 'fontBody', label: 'Body Font', help: 'Used for paragraphs, UI text' },
   ]
 
   const fontPresets = [
@@ -312,8 +304,8 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input
                         type="color"
-                        value={theme.colors[opt.key as keyof typeof theme.colors]}
-                        onChange={e => handleThemeColorChange(opt.key, e.target.value)}
+                        value={theme[opt.key as keyof typeof theme]}
+                        onChange={e => handleThemeChange(opt.key, e.target.value)}
                         style={{
                           width: '36px',
                           height: '36px',
@@ -325,8 +317,8 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
                       />
                       <input
                         type="text"
-                        value={theme.colors[opt.key as keyof typeof theme.colors]}
-                        onChange={e => handleThemeColorChange(opt.key, e.target.value)}
+                        value={theme[opt.key as keyof typeof theme]}
+                        onChange={e => handleThemeChange(opt.key, e.target.value)}
                         style={{
                           flex: 1,
                           padding: '6px 10px',
@@ -363,8 +355,8 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
                       key={preset.name}
                       type="button"
                       onClick={() => {
-                        handleThemeFontChange('heading', preset.heading)
-                        handleThemeFontChange('body', preset.body)
+                        handleThemeChange('fontHeading', preset.heading)
+                        handleThemeChange('fontBody', preset.body)
                       }}
                       style={{
                         padding: '6px 12px',
@@ -394,8 +386,8 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
                     </label>
                     <input
                       type="text"
-                      value={theme.fonts[opt.key as keyof typeof theme.fonts]}
-                      onChange={e => handleThemeFontChange(opt.key, e.target.value)}
+                      value={theme[opt.key as keyof typeof theme]}
+                      onChange={e => handleThemeChange(opt.key, e.target.value)}
                       placeholder="e.g. Inter, sans-serif"
                       style={{
                         padding: '8px 10px',
