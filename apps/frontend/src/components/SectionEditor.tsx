@@ -49,6 +49,7 @@ function getBlockFields(blockType: string): BlockField[] {
         { name: 'primaryButtonUrl', label: 'Primary Button URL', type: 'text' },
         { name: 'secondaryButtonText', label: 'Secondary Button Text', type: 'text' },
         { name: 'secondaryButtonUrl', label: 'Secondary Button URL', type: 'text' },
+        { name: 'mainImage', label: 'Main Image (replaces laptop icon)', type: 'image', help: 'Image URL for hero illustration' },
         { 
           name: 'stats', 
           label: 'Stats', 
@@ -57,6 +58,8 @@ function getBlockFields(blockType: string): BlockField[] {
           itemFields: [
             { name: 'value', label: 'Value', type: 'text', help: 'e.g. 250+' },
             { name: 'label', label: 'Label', type: 'text', help: 'e.g. Projects Completed' },
+            { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class (optional)' },
+            { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
           ]
         },
         { 
@@ -66,6 +69,7 @@ function getBlockFields(blockType: string): BlockField[] {
           help: 'Floating cards on hero image',
           itemFields: [
             { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
+            { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
             { name: 'label', label: 'Label', type: 'text' },
             { name: 'value', label: 'Value', type: 'text' },
           ]
@@ -84,6 +88,7 @@ function getBlockFields(blockType: string): BlockField[] {
           help: 'Individual service cards',
           itemFields: [
             { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
+            { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
             { name: 'title', label: 'Title', type: 'text' },
             { name: 'description', label: 'Description', type: 'textarea' },
             { name: 'linkText', label: 'Link Text', type: 'text' },
@@ -102,6 +107,7 @@ function getBlockFields(blockType: string): BlockField[] {
         { name: 'experienceLabel', label: 'Experience Label', type: 'text', help: 'e.g. Years Experience' },
         { name: 'buttonText', label: 'Button Text', type: 'text' },
         { name: 'buttonUrl', label: 'Button URL', type: 'text' },
+        { name: 'mainImage', label: 'Main Image (replaces building icon)', type: 'image', help: 'Image URL for about illustration' },
         { 
           name: 'features', 
           label: 'Features', 
@@ -109,6 +115,7 @@ function getBlockFields(blockType: string): BlockField[] {
           help: 'Feature list items',
           itemFields: [
             { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
+            { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
             { name: 'text', label: 'Text', type: 'text' },
           ]
         },
@@ -125,6 +132,7 @@ function getBlockFields(blockType: string): BlockField[] {
           help: 'Reason cards',
           itemFields: [
             { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
+            { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
             { name: 'label', label: 'Label', type: 'text' },
             { name: 'description', label: 'Description', type: 'textarea' },
           ]
@@ -136,6 +144,7 @@ function getBlockFields(blockType: string): BlockField[] {
           help: 'Statistics',
           itemFields: [
             { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
+            { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
             { name: 'number', label: 'Number', type: 'text' },
             { name: 'label', label: 'Label', type: 'text' },
           ]
@@ -156,6 +165,7 @@ function getBlockFields(blockType: string): BlockField[] {
             { name: 'name', label: 'Name', type: 'text' },
             { name: 'role', label: 'Role', type: 'text' },
             { name: 'avatarIcon', label: 'Avatar Icon', type: 'text', help: 'Font Awesome class' },
+            { name: 'avatarImage', label: 'Avatar Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
             { name: 'social', label: 'Social Links', type: 'array', help: 'Social links', itemFields: [
               { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
               { name: 'url', label: 'URL', type: 'text' },
@@ -185,6 +195,7 @@ function getBlockFields(blockType: string): BlockField[] {
           help: 'Portfolio projects',
           itemFields: [
             { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
+            { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
             { name: 'category', label: 'Category', type: 'text' },
             { name: 'title', label: 'Title', type: 'text' },
             { name: 'linkText', label: 'Link Text', type: 'text' },
@@ -206,6 +217,7 @@ function getBlockFields(blockType: string): BlockField[] {
           help: 'Blog post cards',
           itemFields: [
             { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
+            { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
             { name: 'date', label: 'Date', type: 'text' },
             { name: 'tag', label: 'Tag', type: 'text' },
             { name: 'title', label: 'Title', type: 'text' },
@@ -235,8 +247,10 @@ function getBlockFields(blockType: string): BlockField[] {
             { name: 'buttonText', label: 'Button Text', type: 'text' },
             { name: 'buttonUrl', label: 'Button URL', type: 'text' },
             { name: 'buttonStyle', label: 'Button Style', type: 'text', help: 'primary/outline' },
+            { name: 'image', label: 'Plan Image', type: 'image', help: 'Image URL for plan illustration' },
             { name: 'features', label: 'Features', type: 'array', help: 'Plan features', itemFields: [
               { name: 'icon', label: 'Icon', type: 'text', help: 'Font Awesome class' },
+              { name: 'image', label: 'Image', type: 'image', help: 'Image URL (optional, replaces icon)' },
               { name: 'text', label: 'Text', type: 'text' },
             ]},
           ]
@@ -249,6 +263,7 @@ function getBlockFields(blockType: string): BlockField[] {
         { name: 'buttonText', label: 'Button Text', type: 'text' },
         { name: 'buttonUrl', label: 'Button URL', type: 'text' },
         { name: 'buttonIcon', label: 'Button Icon', type: 'text', help: 'Font Awesome class' },
+        { name: 'image', label: 'Background Image', type: 'image', help: 'Image URL for CTA background' },
       ]
     case 'contact':
       return [
