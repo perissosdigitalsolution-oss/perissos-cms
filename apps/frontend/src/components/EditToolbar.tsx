@@ -7,6 +7,7 @@ interface EditToolbarProps {
   pageSlug: string
   onSave: () => void
   isSaving: boolean
+  onHeightChange?: (height: number) => void
 }
 
 // Default theme values matching the current design
@@ -30,7 +31,7 @@ const DEFAULT_THEME = {
   spacing: '16px',
 }
 
-export function EditToolbar({ pageId, pageSlug, onSave, isSaving }: EditToolbarProps) {
+export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange }: EditToolbarProps) {
   const [user, setUser] = useState<any>(null)
   const [isExpanded, setIsExpanded] = useState(false)
   const [showThemePanel, setShowThemePanel] = useState(false)
@@ -56,9 +57,11 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving }: EditToolbarP
   // Measure toolbar height
   useEffect(() => {
     if (toolbarRef.current) {
-      setToolbarHeight(toolbarRef.current.offsetHeight)
+      const height = toolbarRef.current.offsetHeight
+      setToolbarHeight(height)
+      onHeightChange?.(height)
     }
-  }, [isExpanded, user, showThemePanel])
+  }, [isExpanded, user, showThemePanel, onHeightChange])
 
   // Apply theme to document
   useEffect(() => {

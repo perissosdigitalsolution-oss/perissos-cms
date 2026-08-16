@@ -16,9 +16,16 @@ interface Page {
   sections: Section[]
 }
 
-function Header() {
+function Header({ editMode, toolbarHeight }: { editMode?: boolean; toolbarHeight?: number }) {
+  const headerTop = editMode && toolbarHeight ? toolbarHeight : 0
   return (
-    <header className="header" id="header">
+    <header
+      className="header"
+      id="header"
+      style={{
+        top: headerTop,
+      }}
+    >
       <div className="container">
         <a href="/" className="logo">
           <div className="logo-icon"><i className="fas fa-rocket"></i></div>
@@ -594,6 +601,7 @@ export default function LandingPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [toolbarHeight, setToolbarHeight] = useState(60)
 
   const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
 
@@ -716,10 +724,11 @@ export default function LandingPage() {
           pageSlug={pageSlug}
           onSave={handleSaveAll}
           isSaving={isSaving}
+          onHeightChange={setToolbarHeight}
         />
       )}
 
-      <Header />
+      <Header editMode={isEditing} toolbarHeight={toolbarHeight} />
       {sections.length > 0 ? (
         sections.map((section, i) => (
           <div
