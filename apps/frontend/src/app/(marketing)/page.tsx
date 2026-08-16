@@ -179,20 +179,32 @@ function renderSection(section: Section, index: number) {
                 </div>
               )}
             </div>
-            {props.floatingCards && props.floatingCards.length > 0 && (
+            {props.mainImage || (props.floatingCards && props.floatingCards.length > 0) && (
               <div className="hero-image">
-                <div className="hero-img-main">
-                  <i className="fas fa-laptop-code hero-img-placeholder"></i>
-                </div>
-                {props.floatingCards.map((card: any, i: number) => (
-                  <div key={i} className={`floating-card floating-card-${i + 1}`}>
-                    <div className={`floating-icon`}><i className={card.icon}></i></div>
-                    <div className="floating-text">
-                      <h4>{card.label}</h4>
-                      <p>{card.value}</p>
-                    </div>
+                {props.mainImage ? (
+                  <div className="hero-img-main">
+                    <img src={props.mainImage} alt={props.title} />
                   </div>
-                ))}
+                ) : (
+                  <div className="hero-img-main">
+                    <i className="fas fa-laptop-code hero-img-placeholder"></i>
+                  </div>
+                )}
+                {props.floatingCards && props.floatingCards.length > 0 && (
+                  <>
+                    {props.floatingCards.map((card: any, i: number) => (
+                      <div key={i} className={`floating-card floating-card-${i + 1}`}>
+                        <div className={`floating-icon`}>
+                          {card.image ? <img src={card.image} alt={card.label} /> : <i className={card.icon}></i>}
+                        </div>
+                        <div className="floating-text">
+                          <h4>{card.label}</h4>
+                          <p>{card.value}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -238,9 +250,15 @@ function renderSection(section: Section, index: number) {
         <section className="section about" id="about" key={index}>
           <div className="container">
             <div className="about-image">
-              <div className="about-img-main">
-                <i className="fas fa-building"></i>
-              </div>
+              {props.mainImage ? (
+                <div className="about-img-main">
+                  <img src={props.mainImage} alt={props.title} />
+                </div>
+              ) : (
+                <div className="about-img-main">
+                  <i className="fas fa-building"></i>
+                </div>
+              )}
               {props.experienceNumber && (
                 <div className="experience-badge">
                   <div className="number">{props.experienceNumber}</div>
@@ -255,7 +273,6 @@ function renderSection(section: Section, index: number) {
                 </div>
               )}
               <h2 className="section-title">
-                {props.title}
                 {highlightTitle(props.title, props.titleHighlight)}
               </h2>
               {props.description && <p className="about-desc">{props.description}</p>}
@@ -291,7 +308,6 @@ function renderSection(section: Section, index: number) {
                 </div>
               )}
               <h2 className="section-title">
-                {props.title}
                 {highlightTitle(props.title, props.titleHighlight)}
               </h2>
               {props.items && props.items.length > 0 && (
@@ -334,7 +350,6 @@ function renderSection(section: Section, index: number) {
                 </div>
               )}
               <h2 className="section-title">
-                {props.title}
                 {highlightTitle(props.title, props.titleHighlight)}
               </h2>
               {props.description && <p className="section-desc">{props.description}</p>}
@@ -343,7 +358,11 @@ function renderSection(section: Section, index: number) {
               {props.members?.map((member: any, i: number) => (
                 <div key={i} className="team-card">
                   <div className="team-img">
-                    <i className={member.avatarIcon || 'fas fa-user'}></i>
+                    {member.avatarImage ? (
+                      <img src={member.avatarImage} alt={member.name} />
+                    ) : (
+                      <i className={member.avatarIcon || 'fas fa-user'}></i>
+                    )}
                     {member.social && member.social.length > 0 && (
                       <div className="team-socials">
                         {member.social.map((s: any, j: number) => (
@@ -374,7 +393,6 @@ function renderSection(section: Section, index: number) {
                 </div>
               )}
               <h2 className="section-title">
-                {props.title}
                 {highlightTitle(props.title, props.titleHighlight)}
               </h2>
               {props.description && <p className="section-desc">{props.description}</p>}
@@ -418,7 +436,6 @@ function renderSection(section: Section, index: number) {
                 </div>
               )}
               <h2 className="section-title">
-                {props.title}
                 {highlightTitle(props.title, props.titleHighlight)}
               </h2>
               {props.description && <p className="section-desc">{props.description}</p>}
@@ -456,7 +473,6 @@ function renderSection(section: Section, index: number) {
                 </div>
               )}
               <h2 className="section-title">
-                {props.title}
                 {highlightTitle(props.title, props.titleHighlight)}
               </h2>
               {props.description && <p className="section-desc">{props.description}</p>}
@@ -515,7 +531,6 @@ function renderSection(section: Section, index: number) {
           <div className="container">
               <div className="contact-info">
                 <h2 className="section-title">
-                  {props.title}
                   {highlightTitle(props.title, props.titleHighlight)}
                 </h2>
                 {props.description && <p className="section-desc" style={{ textAlign: 'left' }}>{props.description}</p>}
