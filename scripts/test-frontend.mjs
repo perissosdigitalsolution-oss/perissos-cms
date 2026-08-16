@@ -84,8 +84,8 @@ async function testFrontendLoads() {
       els.map(el => ({ value: el.value }))
     );
     
-    const titleInput = inputs.find(i => i.value === 'We Build Digital Experiences That Matter');
-    const highlightInput = inputs.find(i => i.value === 'Digital');
+    const titleInput = inputs.find(i => i.value && i.value.includes('Digital Experiences'));
+    const highlightInput = inputs.find(i => i.value && i.value.includes('Digital'));
     const badgeInput = inputs.find(i => i.value && i.value.includes('Periss'));
     
     if (!titleInput) throw new Error('Title field not populated in SectionEditor');

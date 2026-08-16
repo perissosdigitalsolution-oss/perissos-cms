@@ -719,9 +719,6 @@ export default function LandingPage() {
         />
       )}
 
-      {/* Edit Mode Spacer */}
-      {isEditing && <div style={{ height: '50px' }} />}
-
       <Header />
       {sections.length > 0 ? (
         sections.map((section, i) => (
