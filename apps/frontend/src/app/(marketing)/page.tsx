@@ -665,6 +665,18 @@ export default function LandingPage() {
     }
   }, [pageId, sections, theme, cmsUrl])
 
+  // Apply theme to CSS variables for ALL users (not just logged in)
+  useEffect(() => {
+    if (theme) {
+      const root = document.documentElement
+      Object.entries(theme).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+          root.style.setProperty(`--${key}`, value)
+        }
+      })
+    }
+  }, [theme])
+
   useEffect(() => {
     if (loading || sections.length === 0) return
 
