@@ -15,6 +15,8 @@
 | API Tests | ✅ PASS | 7/7 smoke tests pass |
 | Frontend Integration (Puppeteer) | ✅ PASS | 7/7 tests pass |
 | SectionEditor Array/Image Support | ✅ PASS | All 10 block types with arrays |
+| Image Replacement Fields | ✅ PASS | 10 block types with image fields |
+| Global Theme Panel | ✅ PASS | Colors + Fonts + Presets |
 | Edit Toolbar Fix | ✅ PASS | No longer covers header |
 | Section Switching | ✅ PASS | Adapts correctly per section |
 | Docker Rebuild | ✅ PASS | Frontend container rebuilt |
@@ -43,11 +45,11 @@ pnpm build
 ```
 ✓ Health check passed
 ✓ Login successful
-✓ Templates list: 16 templates
-✓ Template imported: Smoke Test (id: 27)
-✓ Template 27 activated
-✓ Template 27 deactivated
-✓ Templates list: 17 templates
+✓ Templates list: 18 templates
+✓ Template imported: Smoke Test (id: 29)
+✓ Template 29 activated
+✓ Template 29 deactivated
+✓ Templates list: 19 templates
 ```
 
 ### 4. Frontend Integration Tests (Puppeteer)
@@ -87,12 +89,46 @@ pnpm build
 
 **Total: 53+ repeatable items now editable inline**
 
-### 6. Edit Toolbar Fix
+### 6. Image Replacement for FontAwesome Icons
+**New Feature:** Every icon field now has an optional companion image field.
+
+| Section | Main Image | Item Images |
+|---------|------------|-------------|
+| Hero | `mainImage` (replaces laptop) | `stats[].image`, `floatingCards[].image` |
+| Services | — | `items[].image` (6 items) |
+| About | `mainImage` (replaces building) | `features[].image` |
+| Why Us | — | `items[].image`, `stats[].image` |
+| Team | — | `members[].avatarImage` (4 members) |
+| Portfolio | — | `projects[].image` (6 projects) |
+| Blog | — | `posts[].image` (3 posts) |
+| Pricing | — | `plans[].image`, `plans[].features[].image` |
+| CTA | `image` (background) | — |
+| Contact | — | — |
+
+**All image fields appear alongside existing icon fields for gradual migration.**
+
+### 7. Global Theme Customization Panel
+**New Feature:** Full theme editor accessible from EditToolbar.
+
+**Colors (9 CSS variables):**
+- Primary, Primary Hover, Secondary, Accent, Background, Surface, Text Primary, Text Secondary, Border
+- Each with color picker + hex input + live CSS variable update
+
+**Fonts (2 variables + 5 presets):**
+- Heading Font, Body Font — free text input for any CSS font stack
+- Presets: Default (Plus Jakarta/DM Sans), Modern (Inter), Classic (Merriweather/Source Sans), Tech (Space Grotesk/JetBrains), Elegant (Playfair/Lora)
+
+**Advanced:**
+- Border Radius, Base Spacing
+
+**Technical:** Real-time CSS custom property updates via `document.documentElement.style.setProperty()`. Changes apply instantly site-wide. Reset to defaults button.
+
+### 8. Edit Toolbar Fix
 **Issue:** Fixed-position toolbar covered the site header/navigation.
 
-**Fix:** Toolbar now auto-measures its height (`useRef` + `offsetHeight`) and renders a spacer div that pushes page content down dynamically. Works for both collapsed and expanded states.
+**Fix:** Toolbar now auto-measures its height (`useRef` + `offsetHeight`) and renders a spacer div that pushes page content down dynamically. Works for collapsed, expanded tips, and theme panel states.
 
-### 7. Section Switching Verification
+### 9. Section Switching Verification
 ```
 Testing section 1 (hero)...
   Fields found: 38
@@ -106,7 +142,7 @@ Testing section 3 (about)...
 ✅ Section switching test PASSED
 ```
 
-### 8. Docker Rebuild
+### 10. Docker Rebuild
 - Frontend container rebuilt with updated source code
 - Container restarted and serving updated static files
 - Frontend accessible at http://localhost:3001
@@ -135,6 +171,8 @@ Testing section 3 (about)...
 2. **E2E Testing:** Expand Puppeteer tests for drag-drop and save flows
 3. **Performance:** Monitor SectionEditor render performance with large section arrays
 4. **Image Upload:** Add direct image upload to MinIO/R2 from SectionEditor
+5. **Theme Persistence:** Save theme to Payload (ClientSettings) for persistence across sessions
+6. **Font Loading:** Auto-inject Google Fonts `<link>` when custom fonts selected
 
 ---
 

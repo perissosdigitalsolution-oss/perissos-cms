@@ -182,6 +182,8 @@
 | Frontend Integration Tests (Puppeteer) | ✅ Complete | frontend-lead |
 | SectionEditor Array/Image Support | ✅ Complete | frontend-lead |
 | Edit Toolbar Header Fix | ✅ Complete | frontend-lead |
+| Image Replacement for Icons | ✅ Complete | frontend-lead |
+| Global Theme Panel (Colors/Fonts) | ✅ Complete | frontend-lead |
 
 **Tasks:**
 1. ✅ Design section registry schema (Zod) + TypeScript types
@@ -196,6 +198,8 @@
 10. ✅ Add Puppeteer frontend integration tests to `test:ci` pipeline
 11. ✅ SectionEditor array field support — 53+ repeatable items across 10 block types
 12. ✅ EditToolbar auto-height spacer — no longer covers site header
+13. ✅ Image replacement fields — 10 block types with optional image alongside icons
+14. ✅ Global theme customization — 9 colors, 2 fonts, 5 presets, advanced settings
 
 **Sprint 7 Gates:**
 | Gate | Status | Evidence |
