@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import DOMPurify from 'dompurify'
 import { getTemplateConfig } from '@/lib/template-registry'
+import 'grapesjs/dist/css/grapes.min.css'
 
 interface GrapejsEditorProps {
   pageId: string | null
@@ -94,12 +95,6 @@ export function GrapejsEditor({
             { name: 'Mobile', width: '375px', widthMedia: '480px' },
           ],
         },
-        panels: {
-          defaults: [],
-        },
-        blockManager: {
-          blocks: [],
-        },
       });
 
       if (cancelled) {
@@ -120,78 +115,173 @@ export function GrapejsEditor({
         }
       }
 
-      if (initialProjectData) {
-        editor.loadProjectData(initialProjectData)
-      } else if (initialRenderedHtml) {
-        const wrapper = editor.DomComponents?.getWrapper?.()
-        if (wrapper) {
-          const bodyMatch = initialRenderedHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
-          const htmlNoBody = bodyMatch ? bodyMatch[1] : initialRenderedHtml
-          const cleanHtml = DOMPurify.sanitize(htmlNoBody, { ADD_TAGS: ['section', 'div', 'h1', 'h2', 'h3', 'p', 'a', 'i', 'span', 'img', 'button', 'br', 'ul', 'li', 'strong', 'em'], ADD_ATTR: ['class', 'style', 'href', 'src', 'alt'] })
-          wrapper.set('content', cleanHtml)
-        }
-      }
-
-      if (theme) {
-        injectThemeStyles(editor, theme, cssVariableMapping)
-      }
-
-      const forceIframeSize = () => {
-        if (editorRef.current && !cancelled) {
-          const container = containerRef.current
-          if (container) {
-            const iframes = container.querySelectorAll('iframe')
-            iframes.forEach(iframe => {
-              iframe.style.width = '100%'
-              iframe.style.height = '100%'
-              iframe.style.display = 'block'
-              const wrapper = iframe.closest('.gjs-frame-wrapper, .frame-wrapper')
-              if (wrapper) {
-                const htmlWrapper = wrapper as HTMLElement
-                htmlWrapper.style.width = '100%'
-                htmlWrapper.style.height = '100%'
-                htmlWrapper.style.display = 'block'
-              }
-            })
-          }
-        }
-      }
-
-      const injectCanvasStyles = () => {
+      const injectAllStyles = () => {
         const canvasDoc = editor.Canvas.getDocument?.()
         if (!canvasDoc) return
         const head = canvasDoc.head || canvasDoc.getElementsByTagName('head')[0]
         if (!head) return
-        if (extractedStyles) {
-          const styleEl = canvasDoc.createElement('style')
-          styleEl.textContent = extractedStyles
-          head.appendChild(styleEl)
+
+        // 1. Inject restaurant.css, digital-agency.css as base stylesheets
+        const baseSheets = [
+          { id: 'gjs-restaurant-css', href: '/styles/restaurant.css' },
+          { id: 'gjs-digital-css', href: '/styles/digital-agency.css' },
+        ]
+        for (const sheet of baseSheets) {
+          if (!canvasDoc.getElementById(sheet.id)) {
+            const linkEl = canvasDoc.createElement('link')
+            linkEl.id = sheet.id
+            linkEl.rel = 'stylesheet'
+            linkEl.href = sheet.href
+            head.appendChild(linkEl)
+          }
         }
+
+        // 2. Inject Google Fonts
+        const fontsUrl = 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Marcellus&family=Open+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Roboto+Slab:wght@400;500;600;700&display=swap'
+        if (!canvasDoc.getElementById('gjs-google-fonts')) {
+          const linkEl = canvasDoc.createElement('link')
+          linkEl.id = 'gjs-google-fonts'
+          linkEl.rel = 'stylesheet'
+          linkEl.href = fontsUrl
+          head.appendChild(linkEl)
+        }
+
+        // 3. Inject Font Awesome
+        if (!canvasDoc.getElementById('gjs-fontawesome')) {
+          const linkEl = canvasDoc.createElement('link')
+          linkEl.id = 'gjs-fontawesome'
+          linkEl.rel = 'stylesheet'
+          linkEl.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+          head.appendChild(linkEl)
+        }
+
+        // 4. Inject template CSS + overrides as a single <style> (LAST — overrides all)
+        const overrideCss = `
+          /* DO NOT set height:100% on canvas elements — GrapeJS auto-resizes them */
+          .gjs-cv-canvas { background: #fff !important; }
+          .gjs-cv-canvas-bg { background: #fff !important; }
+          .gjs-editor-cont { background: #fff !important; }
+          /* Override GrapeJS wrapper defaults */
+          [data-gjs-type="wrapper"] { min-height: auto !important; padding-top: 0 !important; }
+          body { overflow-x: hidden !important; font-family: 'Open Sans', sans-serif !important; background: #fff !important; margin: 0 !important; padding: 0 !important; }
+          img { max-width: 100%; height: auto; display: block; }
+          a { text-decoration: none; }
+          header#masthead { position: relative !important; background-color: #000 !important; color: #fff !important; z-index: 100 !important; }
+          header, .header-inner { background-color: #000 !important; color: #fff !important; }
+          .nav-left a, .nav-right a, .header-logo, .hamburger, .center-btn, .submenu a,
+          .nav-left a.active, .nav-left a:hover, .nav-right a:hover { color: #fff !important; }
+          .nav-left a.active, .nav-left a:hover, .nav-right a:hover { color: #c8a97e !important; }
+          .hero, section.hero, .section-heading, .hero-content, .hero-title, .hero-text { color: #fff !important; }
+          .hero h1, .hero h2, .hero h3, .hero p, .section-heading h2, .section-heading p { color: #fff !important; }
+          .hero-title span, .hero-text span, .restaurant-highlight, .section-heading h2 span { color: #c8a97e !important; }
+          .about, .testimonials, .gallery, .features-grid, .offer-card, .rating-info { color: #333 !important; }
+          .reservation, .menu, .menu-highlights, .contact, .specials { background-color: #fff !important; color: #333 !important; }
+          .reservation-form-wrapper { background-color: #f5f5f5 !important; border: 1px solid #e0e0e0 !important; }
+          .footer, .footer-main { background-color: #1a1a1a !important; color: #fff !important; }
+          .footer a, .footer h4, .footer p, .footer li { color: #ccc !important; }
+          .footer h4 { color: #fff !important; }
+          .section-heading h2 { color: #1a1a1a !important; }
+          .section-heading h2 span { color: #c8a97e !important; }
+          .mobile-menu { display: none !important; }
+          section.hero, .hero { padding-top: 40px !important; min-height: auto !important; }
+        `
+        const existing = canvasDoc.getElementById('gjs-template-merged')
+        if (existing) existing.remove()
+        const styleEl = canvasDoc.createElement('style')
+        styleEl.id = 'gjs-template-merged'
+        styleEl.textContent = (extractedStyles || '') + '\n' + overrideCss
+        head.appendChild(styleEl)
+
+        // 5. Inject theme CSS variables
         if (theme) {
           injectThemeStyles(editor, theme, cssVariableMapping)
         }
+
+        // 6. Force iframe sizing
+        const frameEl = editor.Canvas.getFrameEl?.()
+        if (frameEl) {
+          frameEl.style.width = '100%'
+          frameEl.style.height = '100%'
+        }
       }
+
+      const refreshCanvas = () => {
+        if (!editorRef.current || cancelled) return
+        try {
+          // Try editor.refresh() first
+          if (typeof editorRef.current.refresh === 'function') {
+            editorRef.current.refresh()
+          }
+          // Also try Canvas.refresh()
+          if (typeof editorRef.current.Canvas?.refresh === 'function') {
+            editorRef.current.Canvas.refresh()
+          }
+          // Manual fallback: measure iframe content and resize
+          const frameEl = editorRef.current.Canvas?.getFrameEl?.()
+          if (frameEl) {
+            try {
+              const iframeDoc = frameEl.contentDocument || frameEl.contentWindow?.document
+              if (iframeDoc) {
+                const scrollH = iframeDoc.documentElement.scrollHeight
+                if (scrollH > 0) {
+                  frameEl.style.height = scrollH + 'px'
+                  // Also set the wrapper elements
+                  const wrapper = frameEl.closest('.gjs-frame-wrapper')
+                  if (wrapper) wrapper.style.height = scrollH + 'px'
+                  const frames = frameEl.closest('.gjs-cv-canvas__frames, .gjs-frames')
+                  if (frames) frames.style.height = scrollH + 'px'
+                  const canvas = frameEl.closest('.gjs-cv-canvas')
+                  if (canvas) canvas.style.height = scrollH + 'px'
+                }
+              }
+            } catch (e) {
+              // cross-origin — ignore
+            }
+          }
+        } catch (e) {
+          // swallow
+        }
+      }
+
+      // Listen for canvas frame ready — inject styles before content renders
+      editor.on('canvas:frame:load', () => {
+        if (!cancelled) {
+          setTimeout(injectAllStyles, 50)
+          setTimeout(refreshCanvas, 200)
+          setTimeout(refreshCanvas, 800)
+        }
+      })
 
       editor.on('load', () => {
         if (!cancelled) {
           setIsReady(true)
-          setTimeout(() => {
-            forceIframeSize()
-            injectCanvasStyles()
-          }, 200)
-          const forceResize = () => {
-            if (editorRef.current && !cancelled) {
-              editorRef.current.Canvas.refresh()
-              editorRef.current.resize()
-              forceIframeSize()
-              injectCanvasStyles()
-            }
-          }
-          setTimeout(forceResize, 100)
-          setTimeout(forceResize, 500)
-          setTimeout(forceResize, 1000)
+          injectAllStyles()
+          // Let GrapeJS auto-resize the canvas after content settles
+          setTimeout(refreshCanvas, 200)
+          setTimeout(refreshCanvas, 600)
+          setTimeout(refreshCanvas, 1200)
         }
       })
+
+      // Now load the content
+      if (initialProjectData) {
+        editor.loadProjectData(initialProjectData)
+        setTimeout(() => { injectAllStyles(); refreshCanvas() }, 300)
+        setTimeout(refreshCanvas, 1000)
+      } else if (initialRenderedHtml) {
+        const bodyMatch = initialRenderedHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+        const htmlNoBody = bodyMatch ? bodyMatch[1] : initialRenderedHtml
+        const cleanHtml = DOMPurify.sanitize(htmlNoBody, {
+          ADD_TAGS: ['section', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'i', 'span', 'img', 'button', 'br', 'ul', 'li', 'strong', 'em', 'nav', 'header', 'footer', 'form', 'input', 'textarea', 'select', 'option', 'figure', 'figcaption', 'video', 'source'],
+          ADD_ATTR: ['class', 'style', 'href', 'src', 'alt', 'id', 'data-*', 'placeholder', 'type', 'value', 'role', 'aria-*'],
+        })
+        editor.setComponents(cleanHtml)
+        // Inject styles and trigger canvas resize after content renders in iframe
+        setTimeout(() => { injectAllStyles(); refreshCanvas() }, 200)
+        setTimeout(refreshCanvas, 600)
+        setTimeout(refreshCanvas, 1500)
+        setTimeout(refreshCanvas, 3000)
+      }
     }
 
     initEditor();
@@ -342,7 +432,7 @@ export function GrapejsEditor({
       </div>
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <div ref={containerRef} style={{ flex: 1, overflow: 'hidden' }} />
+        <div ref={containerRef} style={{ flex: 1, position: 'relative' }} />
 
         {showChat && (
           <div style={{
