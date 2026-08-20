@@ -163,7 +163,7 @@ export function GrapejsEditor({
           .gjs-editor-cont { background: #fff !important; }
           /* Override GrapeJS wrapper defaults */
           [data-gjs-type="wrapper"] { min-height: auto !important; padding-top: 0 !important; }
-          body { overflow-x: hidden !important; font-family: 'Open Sans', sans-serif !important; background: #fff !important; margin: 0 !important; padding: 0 !important; }
+          body { height: 100vh !important; overflow-y: auto !important; overflow-x: hidden !important; font-family: 'Open Sans', sans-serif !important; background: #fff !important; margin: 0 !important; padding: 0 !important; }
           img { max-width: 100%; height: auto; display: block; }
           a { text-decoration: none; }
           header#masthead { position: relative !important; background-color: #000 !important; color: #fff !important; z-index: 100 !important; }
@@ -196,47 +196,16 @@ export function GrapejsEditor({
         if (theme) {
           injectThemeStyles(editor, theme, cssVariableMapping)
         }
-
-        // 6. Force iframe sizing
-        const frameEl = editor.Canvas.getFrameEl?.()
-        if (frameEl) {
-          frameEl.style.width = '100%'
-          frameEl.style.height = '100%'
-        }
       }
 
       const refreshCanvas = () => {
         if (!editorRef.current || cancelled) return
         try {
-          // Try editor.refresh() first
           if (typeof editorRef.current.refresh === 'function') {
             editorRef.current.refresh()
           }
-          // Also try Canvas.refresh()
           if (typeof editorRef.current.Canvas?.refresh === 'function') {
             editorRef.current.Canvas.refresh()
-          }
-          // Manual fallback: measure iframe content and resize
-          const frameEl = editorRef.current.Canvas?.getFrameEl?.()
-          if (frameEl) {
-            try {
-              const iframeDoc = frameEl.contentDocument || frameEl.contentWindow?.document
-              if (iframeDoc) {
-                const scrollH = iframeDoc.documentElement.scrollHeight
-                if (scrollH > 0) {
-                  frameEl.style.height = scrollH + 'px'
-                  // Also set the wrapper elements
-                  const wrapper = frameEl.closest('.gjs-frame-wrapper')
-                  if (wrapper) wrapper.style.height = scrollH + 'px'
-                  const frames = frameEl.closest('.gjs-cv-canvas__frames, .gjs-frames')
-                  if (frames) frames.style.height = scrollH + 'px'
-                  const canvas = frameEl.closest('.gjs-cv-canvas')
-                  if (canvas) canvas.style.height = scrollH + 'px'
-                }
-              }
-            } catch (e) {
-              // cross-origin — ignore
-            }
           }
         } catch (e) {
           // swallow
@@ -432,7 +401,7 @@ export function GrapejsEditor({
       </div>
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <div ref={containerRef} style={{ flex: 1, position: 'relative' }} />
+        <div ref={containerRef} style={{ flex: 1, height: '100%', position: 'relative' }} />
 
         {showChat && (
           <div style={{
