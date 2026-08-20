@@ -35,6 +35,7 @@ export function GrapejsEditor({
   const editorRef = useRef<any>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
+  const originalStylesRef = useRef<string>('')
   const [isReady, setIsReady] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showChat, setShowChat] = useState(false)
@@ -114,6 +115,7 @@ export function GrapejsEditor({
           extractedStyles += match[1] + '\n'
         }
       }
+      originalStylesRef.current = extractedStyles
 
       const injectAllStyles = () => {
         const canvasDoc = editor.Canvas.getDocument?.()
@@ -279,7 +281,12 @@ export function GrapejsEditor({
       const projectData = editor.getProjectData()
       const html = editor.getHtml()
       const css = editor.getCss()
-      const renderedHtml = `<style>${css}</style>${html}`
+
+      // Merge: original template CSS (base) + GrapeJS CSS (modifications on top)
+      const mergedCss = originalStylesRef.current
+        ? originalStylesRef.current + '\n' + css
+        : css
+      const renderedHtml = `<style>${mergedCss}</style>${html}`
 
       await onSave?.(projectData, renderedHtml)
     } finally {
