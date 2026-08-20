@@ -118,3 +118,40 @@ export interface PayloadError {
   code?: string;
   data?: unknown;
 }
+
+// Restaurant-specific types
+export interface MenuItem {
+  name: string;
+  description?: string;
+  price: string;
+  image?: string;
+  dietaryTags?: string[];
+  isRecommended?: boolean;
+}
+
+export interface MenuCategory {
+  name: string;
+  items: MenuItem[];
+}
+
+export interface Testimonial {
+  name: string;
+  role: string;
+  avatar?: string;
+  rating: number;
+  text: string;
+}
+
+export interface Special {
+  title: string;
+  description: string;
+  discountPercent: number;
+  counterTarget: number;
+  label?: string;
+}
+
+export interface GalleryImage {
+  url: string;
+  caption?: string;
+  alt?: string;
+}

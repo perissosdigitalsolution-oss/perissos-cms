@@ -4,15 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:host": "next dev -H 0.0.0.0 -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@grapesjs/react": "^2.0.0",
     "@perissos/shared": "workspace:*",
     "@perissos/ui": "workspace:*",
     "@sentry/nextjs": "^10.70.0",
+    "dompurify": "^3.4.14",
+    "grapesjs": "^0.23.5",
+    "grapesjs-plugin-forms": "^2.0.6",
+    "grapesjs-preset-webpage": "^1.0.3",
     "next": "^15.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -110,10 +110,10 @@
 | Issue | Root Cause | Resolution |
 |-------|------------|------------|
 | **Missing `PAYLOAD_SECRET` in Next.js** | Turbo 2.x strips undeclared env vars | `docker-compose.yml`: backoffice command = `["pnpm", "--filter", "backoffice", "run", "dev"]` (bypasses turbo) |
-| **Payload CLI `generate:importmap` broken (Node 20)** | `@payloadcms/richtext-lexical` top-level await → `ERR_REQUIRE_ASYNC_MODULE` | Manual `importMap.js` with `@/` alias; `next dev` auto-regenerates on compile |
-| **Webpack RSC loader error on relative importMap paths** | `./TemplateList` → webpack resolves as external | Use alias: `@/templates/TemplateList#TemplateList` |
+| **Payload CLI `generate:importmap` broken (Node 20)** | `@payloadcms/richtext-lexical` top-level await -> `ERR_REQUIRE_ASYNC_MODULE` | Manual `importMap.js` with `@/` alias; `next dev` auto-regenerates on compile |
+| **Webpack RSC loader error on relative importMap paths** | `./TemplateList` -> webpack resolves as external | Use alias: `@/templates/TemplateList#TemplateList` |
 | **Hydration error: `<html>` child of `<body>`** | `(payload)/layout.tsx` wrapped RootLayout in named component | Export `RootLayout` function directly |
-| **Frontend `NEXT_PUBLIC_CMS_URL` not baked at build** | Docker ARG not passed to Next.js build | `Dockerfile`: `ARG NEXT_PUBLIC_CMS_URL` → `ENV NEXT_PUBLIC_CMS_URL=${NEXT_PUBLIC_CMS_URL}` |
+| **Frontend `NEXT_PUBLIC_CMS_URL` not baked at build** | Docker ARG not passed to Next.js build | `Dockerfile`: `ARG NEXT_PUBLIC_CMS_URL` -> `ENV NEXT_PUBLIC_CMS_URL=${NEXT_PUBLIC_CMS_URL}` |
 | **Shared package typecheck fails** | Missing `@types/node` | `pnpm add -D -w @types/node` |
 
 ---
@@ -141,7 +141,7 @@
 - [x] JWT cookie auth + CSRF protection
 
 ### Sprint 3 — Custom Admin UI (Week 4)
-- [x] TemplateList custom list view (card grid → **table-based Payload-native**)
+- [x] TemplateList custom list view (card grid -> **table-based Payload-native**)
 - [x] Drag-drop ZIP upload with progress state
 - [x] Activate/Delete actions with confirmation
 - [x] Payload CSS variables throughout (`--theme-elevation-*`, `--base`, `--gutter-h`, etc.)
@@ -158,12 +158,49 @@
 - [x] Typecheck: `pnpm typecheck` (4/4 workspaces)
 - [x] Build: `pnpm build` (backoffice + frontend)
 - [x] API smoke tests: `scripts/test-api.mjs` (health, auth, CRUD, import, activate)
-- [x] CI pipeline: `pnpm test:ci` = typecheck → build → test:api
+- [x] CI pipeline: `pnpm test:ci` = typecheck -> build -> test:api
 - [x] All containers healthy, verified endpoints
 
 ---
 
 ## 4. Active Sprint
+
+### Sprint 9 — Template Marketplace & Versioning (Week 14-15) — **IN PROGRESS**
+**Goal:** Build a WordPress-style template marketplace in every backoffice — browse free/premium templates, one-click install with subscription gating, and template versioning with rollback
+
+| Deliverable | Status | Owner |
+|-------------|--------|-------|
+| MarketplaceTemplate Collection (DB-seeded) | 🔄 In Progress | backend-lead |
+| Marketplace API (browse, search, install, rollback) | ⏳ Pending | backend-lead |
+| Marketplace Admin View (grid, filters, tabs) | ⏳ Pending | frontend-lead + ui-lead |
+| Template Versioning (semver, changelog, rollback) | ⏳ Pending | backend-lead |
+| Seed Data (3 templates: Digital Agency free, Optica+ pro, Food Express enterprise) | ⏳ Pending | template-engineer |
+| Sprint Governance Artifacts | ✅ Spec Complete | project-shepherd |
+
+**Tasks:**
+1. ✅ Create Sprint_9_Spec.md with full technical design
+2. 🔄 Create MarketplaceTemplate collection in Payload config
+3. ⏳ Add versioning fields to existing Templates collection
+4. ⏳ Build Marketplace API endpoints (list, detail, install, rollback)
+5. ⏳ Build MarketplaceView admin component (grid, filters, search, tabs)
+6. ⏳ Build TemplateDetailModal + InstallConfirmModal
+7. ⏳ Build VersionHistoryPanel for installed templates
+8. ⏳ Implement subscription gating (Free vs Pro/Enterprise)
+9. ⏳ Create seed script with 3 packaged templates
+10. ⏳ Add tabs to Templates list view: [Installed] [Marketplace]
+11. ⏳ Write unit + API tests for marketplace endpoints
+12. ⏳ Write Playwright E2E tests for marketplace flow
+13. ⏳ Update governance docs (Test Report, Approvals, Retro)
+
+**Sprint 9 Gates:**
+| Gate | Status | Evidence |
+|------|--------|----------|
+| **D — Document** | ✅ | Sprint_9_Spec.md, collection schema, API design |
+| **T — Test** | ⏳ | `pnpm test:ci` passes (typecheck -> build -> API -> frontend) |
+| **A — Approve** | ⏳ | Cross-domain sign-offs in APPROVALS_9.md |
+| **V — Validate** | ⏳ | Docker deploy verified, production-ready |
+
+---
 
 ### Sprint 7 — Page Builder & Visual Editor (Week 9-11) — **COMPLETE**
 **Goal:** Enable non-technical users to build pages visually via drag-drop block editor in Payload admin, with live preview and section registry from `packages/ui`
@@ -174,7 +211,7 @@
 | Section Registry (packages/shared) | ✅ Complete | frontend-lead |
 | Visual Drag-Drop Editor (admin custom component) | ✅ Complete | frontend-lead + ui-lead |
 | Live Preview (iframe in admin sidebar) | ⏳ Pending (Sprint 8) | frontend-lead |
-| Section Props Schema → Auto Form Fields | ✅ Complete | backend-lead |
+| Section Props Schema -> Auto Form Fields | ✅ Complete | backend-lead |
 | Section Components Migration (packages/ui) | ✅ Complete | frontend-lead |
 | Sprint Governance Artifacts | ✅ Complete | project-shepherd |
 | Inline Frontend Editing Mode | ✅ Complete | frontend-lead |
@@ -205,7 +242,7 @@
 | Gate | Status | Evidence |
 |------|--------|----------|
 | **D — Document** | ✅ | Sprint_7_Spec.md, section registry schema |
-| **T — Test** | ✅ | `pnpm test:ci` passes (typecheck → build → API → frontend) |
+| **T — Test** | ✅ | `pnpm test:ci` passes (typecheck -> build -> API -> frontend) |
 | **A — Approve** | ✅ | Cross-domain sign-offs in APPROVALS_7.md |
 | **V — Validate** | ✅ | Docker deploy verified, production-ready |
 
@@ -214,16 +251,10 @@
 ## 5. Upcoming Sprints (Roadmap)
 
 ### Sprint 8 — Multi-Client / White-Label (Week 12-13)
-- **ClientSettings collection** → per-install branding
-- **Domain routing** — `client.perissos.dev` → isolated template
+- **ClientSettings collection** -> per-install branding
+- **Domain routing** — `client.perissos.dev` -> isolated template
 - **White-label admin** — custom logo, colors, favicon
 - **API keys** per client for headless integrations
-
-### Sprint 9 — Marketplace & Template Versioning (Week 14-15)
-- **Template versioning** — semver, changelog, rollback
-- **Marketplace API** — browse, purchase, install from registry
-- **Subscription gating** — premium templates require active plan
-- **Template dependencies** — shared sections, design tokens
 
 ### Sprint 10 — Enterprise Features (Week 16-18)
 - **SSO/SAML/OIDC** — enterprise auth
@@ -256,7 +287,7 @@
 | **ZIP import heuristics** | `layoutConfig` generation fragile | Add manifest.json schema validation; fallback to manual mapping |
 | **Single active template** | No A/B testing, no draft preview | Sprint 7: draft/publish flow; Sprint 9: versioning |
 | **Frontend build-time CMS URL** | Can't change CMS URL without rebuild | Sprint 8: runtime config via `/api/client-settings` |
-| **No automated template tests** | Regression risk on import | Sprint 12: E2E tests for import → activate → render flow |
+| **No automated template tests** | Regression risk on import | Sprint 12: E2E tests for import -> activate -> render flow |
 | **MinIO local only** | Prod uses R2 — config drift | Use same S3 client config; env-driven endpoint |
 
 ---
@@ -265,7 +296,7 @@
 
 | Metric | Current | Target (Sprint 12) |
 |--------|---------|-------------------|
-| Template import → live | ~30 sec | < 10 sec |
+| Template import -> live | ~30 sec | < 10 sec |
 | Cold start (Docker) | ~2 min | < 45 sec |
 | Typecheck time | 4.7s | < 3s |
 | Build time | ~3 min | < 2 min |
@@ -283,7 +314,7 @@ New agents **must** complete before contributing:
 - [ ] Read this document (`Cellule_Taskforce_Report.md`)
 - [ ] Read `Agentic_Orchestration.md`
 - [ ] Run `pnpm install && pnpm dev` (verify local stack)
-- [ ] Import `digital_agency_test.zip` via admin → verify frontend renders
+- [ ] Import `digital_agency_test.zip` via admin -> verify frontend renders
 - [ ] Run `pnpm test:ci` — all green
 - [ ] Review `apps/backoffice/src/templates/TemplateList.tsx` (current pattern)
 - [ ] Review `apps/backoffice/src/collections/Templates.ts` (collection config)

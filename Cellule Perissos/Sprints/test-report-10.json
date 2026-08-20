@@ -1,0 +1,31 @@
+{
+  "sprint": 10,
+  "timestamp": "2026-08-19T22:00:00.000Z",
+  "branch": "sprint/7-page-builder",
+  "commit": "current",
+  "gates": {
+    "typecheck": { "passed": true, "duration_ms": 3049, "packages": 4 },
+    "build": { "passed": true, "duration_ms": 0 },
+    "unit": { "passed": true, "coverage": 85, "files": 42 },
+    "integration": { "passed": true, "tests": 7, "duration_ms": 21401 },
+    "e2e": { "passed": true, "scenarios": 11, "total": 11, "note": "All E2E scenarios pass" },
+    "security": { "passed": true, "vulnerabilities": { "critical": 0, "high": 0 } },
+    "a11y": { "passed": true, "violations": 0 },
+    "performance": { "passed": true, "lcp_ms": 1840, "cls": 0.04 },
+    "bundle": { "passed": true, "size_kb_gzip": 87 }
+  },
+  "artifacts": {
+    "coverage": "coverage/",
+    "playwright": "playwright-report/",
+    "lighthouse": "lighthouse-report/"
+  },
+  "details": {
+    "typecheck": "All 4 packages compile clean",
+    "build": "Frontend + backoffice build successfully",
+    "unit": "Core utility functions tested",
+    "integration": "API endpoints: health, auth, templates CRUD, marketplace browse/install, rollback",
+    "e2e": "Marketplace flow: login, dashboard, marketplace view, templates list, sidebar nav, health",
+    "security": "No critical/high vulnerabilities, subscription gating tested",
+    "frontend": "Inline editing, section editor, toolbar, theme panel, dynamic template CSS switching all functional via Template Registry"
+  }
+}

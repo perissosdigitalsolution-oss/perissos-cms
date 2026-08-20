@@ -2,37 +2,51 @@ import { NextResponse } from 'next/server'
 import AdmZip from 'adm-zip'
 import { createPayloadRequest, getPayload } from 'payload'
 import config from '@payload-config'
+import * as cheerio from 'cheerio'
+import { parseTemplate, extractSectionHtml } from '@/lib/html-parser'
+import { processAssets, extractThemeConfig } from '@/lib/asset-pipeline'
+import { mapHeroSection } from '@/lib/section-mappers/hero'
+import { mapServicesSection } from '@/lib/section-mappers/services'
+import { mapAboutSection } from '@/lib/section-mappers/about'
+import { mapWhyUsSection } from '@/lib/section-mappers/whyUs'
+import { mapTeamSection } from '@/lib/section-mappers/team'
+import { mapPortfolioSection } from '@/lib/section-mappers/portfolio'
+import { mapBlogSection } from '@/lib/section-mappers/blog'
+import { mapPricingSection } from '@/lib/section-mappers/pricing'
+import { mapCTASection } from '@/lib/section-mappers/cta'
+import { mapContactSection } from '@/lib/section-mappers/contact'
+import { mapMenuSection } from '@/lib/section-mappers/menu'
+import { mapMenuHighlightsSection } from '@/lib/section-mappers/menuHighlights'
+import { mapReservationSection } from '@/lib/section-mappers/reservation'
+import { mapGallerySection } from '@/lib/section-mappers/gallery'
+import { mapTestimonialsSection } from '@/lib/section-mappers/testimonials'
+import { mapSpecialsSection } from '@/lib/section-mappers/specials'
+import { validateSectionProps, mergeWithDefaults } from '@/lib/validation'
+import { sectionSchemas, SectionCategoryType } from '@perissos/shared/registry/sections'
 
-// Generate layoutConfig from HTML content by detecting sections
-function generateLayoutConfig(html: string): any {
-  const sections: string[] = []
-
-  if (html.match(/<section[^>]*id=["']?hero/i)) sections.push('hero')
-  else if (html.match(/hero/i)) sections.push('hero')
-
-  if (html.match(/feature|service/i)) sections.push('features')
-  if (html.match(/about/i)) sections.push('about')
-  if (html.match(/testimonial|client/i)) sections.push('testimonials')
-  if (html.match(/pricing|plan/i)) sections.push('pricing')
-  if (html.match(/cta|contact|get.?start/i)) sections.push('cta')
-  if (html.match(/blog|article/i)) sections.push('blog')
-  if (html.match(/portfolio|work/i)) sections.push('portfolio')
-
-  if (sections.length === 0) {
-    sections.push('hero', 'features', 'testimonials', 'pricing', 'cta')
-  }
-
-  return { sections }
+// Section mapper registry
+const sectionMappers: Record<SectionCategoryType, (cheerio: any, $el: any) => any> = {
+  hero: mapHeroSection,
+  services: mapServicesSection,
+  about: mapAboutSection,
+  whyUs: mapWhyUsSection,
+  team: mapTeamSection,
+  portfolio: mapPortfolioSection,
+  blog: mapBlogSection,
+  pricing: mapPricingSection,
+  cta: mapCTASection,
+  contact: mapContactSection,
+  menu: mapMenuSection,
+  menuHighlights: mapMenuHighlightsSection,
+  reservation: mapReservationSection,
+  gallery: mapGallerySection,
+  testimonials: mapTestimonialsSection,
+  specials: mapSpecialsSection,
 }
 
-// Extract metadata from HTML
-function extractMetadata(html: string): { title?: string; description?: string } {
-  const titleMatch = html.match(/<title>(.*?)<\/title>/i)
-  const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["'](.*?)["']/i)
-  return {
-    title: titleMatch?.[1]?.trim() || undefined,
-    description: descMatch?.[1]?.trim() || undefined,
-  }
+interface SectionContent {
+  type: string
+  props: Record<string, any>
 }
 
 export async function POST(request: Request) {
@@ -97,7 +111,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Find preview image (preview.jpg, preview.png, screenshot.jpg, etc.)
+    // Find preview image
     const previewEntry = entries.find(e => {
       const name = e.entryName.toLowerCase()
       return (
@@ -109,15 +123,62 @@ export async function POST(request: Request) {
     })
 
     // Extract metadata from HTML
-    const metadata = extractMetadata(indexHtml)
+    const titleMatch = indexHtml.match(/<title>(.*?)<\/title>/i)
+    const descMatch = indexHtml.match(/<meta[^>]*name=["']description["'][^>]*content=["'](.*?)["']/i)
+    const metadata = {
+      title: titleMatch?.[1]?.trim() || undefined,
+      description: descMatch?.[1]?.trim() || undefined,
+    }
 
     // Build template name
     const templateName = manifest.name || metadata.title || zipFile.name.replace('.zip', '').replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 
-    // Generate layout config
-    const layoutConfig = manifest.layoutConfig || generateLayoutConfig(indexHtml)
+    // Parse template with new HTML parser
+    const parsedTemplate = parseTemplate(indexHtml, 'http://localhost')
+
+    // Extract theme configuration
+    const themeConfig = extractThemeConfig(parsedTemplate.$)
+
+    // Map sections using section mappers
+    const sectionContents: SectionContent[] = []
+    for (const section of parsedTemplate.sections) {
+      const mapper = sectionMappers[section.type as SectionCategoryType]
+      if (mapper) {
+        try {
+          const sectionHtml = extractSectionHtml(parsedTemplate.$, section)
+          const $section = cheerio.load(sectionHtml)
+          const rootEl = $section('section, div').first()
+          
+          if (rootEl.length) {
+            const extractedProps = await mapper($section, rootEl)
+            const schema = sectionSchemas[section.type as SectionCategoryType]
+            if (schema) {
+              const validatedProps = mergeWithDefaults(schema, extractedProps, section.type as SectionCategoryType)
+              sectionContents.push({ type: section.type, props: validatedProps })
+            } else {
+              sectionContents.push({ type: section.type, props: extractedProps })
+            }
+          }
+        } catch (error) {
+          console.warn(`Failed to map section ${section.type}:`, error)
+        }
+      }
+    }
+
+    // Build layoutConfig with full section content
+    const layoutConfig = manifest.layoutConfig || {
+      sections: parsedTemplate.sections.map(s => s.type),
+      sectionContents,
+      theme: themeConfig,
+    }
 
     const payload = await getPayload({ config })
+
+    // Process assets (download external images, upload to media)
+    const { html: processedHtml, assetMap } = await processAssets(indexHtml, 'http://localhost', user, payload)
+
+    // Extract Google Fonts from parsed template
+    const googleFonts = parsedTemplate.theme.fonts
 
     // Upload preview image to media collection if present
     let previewImageId: string | number | null = null
@@ -185,6 +246,13 @@ export async function POST(request: Request) {
       message: `Template "${templateName}" imported successfully!`,
       template: templateDoc,
       instructions: 'Go to the Templates list and click "Activate" to use this template.',
+      debug: {
+        detectedSections: parsedTemplate.sections.map(s => s.type),
+        sectionContentsCount: sectionContents.length,
+        assetsProcessed: assetMap.size,
+        fontsExtracted: googleFonts.length,
+        themeConfigKeys: Object.keys(themeConfig).length,
+      },
     })
   } catch (error: any) {
     console.error('Template import error:', error)

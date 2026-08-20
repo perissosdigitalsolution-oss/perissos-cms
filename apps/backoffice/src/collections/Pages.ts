@@ -10,6 +10,12 @@ import {
   PricingBlock,
   CTABlock,
   ContactBlock,
+  MenuBlock,
+  MenuHighlightsBlock,
+  ReservationBlock,
+  GalleryBlock,
+  TestimonialsBlock,
+  SpecialsBlock,
 } from '../blocks'
 
 export const Pages: CollectionConfig = {
@@ -53,13 +59,35 @@ export const Pages: CollectionConfig = {
         PricingBlock,
         CTABlock,
         ContactBlock,
+        MenuBlock,
+        MenuHighlightsBlock,
+        ReservationBlock,
+        GalleryBlock,
+        TestimonialsBlock,
+        SpecialsBlock,
       ],
+    },
+    {
+      name: 'renderedHtml',
+      type: 'textarea',
+      admin: {
+        description: 'Full rendered HTML from template ZIP (inlined CSS). If present, frontend renders this directly.',
+        rows: 10,
+      },
+      maxLength: 200000,
     },
     {
       name: 'theme',
       type: 'json',
       admin: {
         description: 'Global theme customization (colors, fonts, spacing)',
+      },
+    },
+    {
+      name: 'projectData',
+      type: 'json',
+      admin: {
+        description: 'GrapeJS visual editor project data (JSON). Used by the Page Builder for drag-and-drop editing.',
       },
     },
     {

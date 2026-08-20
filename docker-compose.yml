@@ -1,8 +1,11 @@
-# docker-compose.yml - Local development environment
-# Usage: docker-compose up -d
+# docker-compose.yml - Perissos CMS
+# Usage:
+#   Development (fast, HMR):  docker compose --profile dev up -d
+#   Production (built image): docker compose --profile prod up -d --build
+#   Default (infra only):     docker compose up -d postgres minio
 
 services:
-  # ─── PostgreSQL (Neon-compatible) ────────────────────────
+  # ─── PostgreSQL ───────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: perissos-postgres
@@ -21,7 +24,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ─── MinIO (S3-compatible for R2 local) ──────────────────
+  # ─── MinIO (S3-compatible) ────────────────────────────────
   minio:
     image: minio/minio:latest
     container_name: perissos-minio
@@ -30,8 +33,8 @@ services:
       MINIO_ROOT_USER: perissos
       MINIO_ROOT_PASSWORD: perissos_minio_password
     ports:
-      - "9000:9000"   # S3 API
-      - "9001:9001"   # Console
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
     healthcheck:
@@ -40,10 +43,11 @@ services:
       timeout: 20s
       retries: 3
 
-  # ─── Create MinIO Bucket ─────────────────────────────────
+  # ─── MinIO Bucket Setup ──────────────────────────────────
   minio-setup:
     image: minio/mc:latest
     container_name: perissos-minio-setup
+    profiles: ["dev"]
     depends_on:
       - minio
     entrypoint: >
@@ -55,15 +59,15 @@ services:
       echo 'MinIO bucket created and configured';
       "
 
-  # ─── Backoffice (Payload CMS) ────────────────────────────
-  backoffice:
-    build:
-      context: .
-      dockerfile: apps/backoffice/Dockerfile
-      target: builder
-    container_name: perissos-backoffice
+  # ─── Backoffice DEV (fast iteration, HMR) ────────────────
+  backoffice-dev:
+    image: node:20-alpine
+    container_name: perissos-backoffice-dev
+    profiles: ["dev"]
+    working_dir: /app
     environment:
       NODE_ENV: development
+      HOSTNAME: "0.0.0.0"
       PAYLOAD_SECRET: dev_secret_change_in_production_min_32_chars
       DATABASE_URL: postgresql://perissos:perissos_dev_password@postgres:5432/perissos_dev
       R2_ENDPOINT: http://minio:9000
@@ -88,12 +92,67 @@ services:
       minio:
         condition: service_healthy
     volumes:
-      - ./apps/backoffice:/app/apps/backoffice
+      - .:/app
+      - backoffice_node:/app/node_modules
       - backoffice_next:/app/apps/backoffice/.next
-      - ./packages:/app/packages
-    command: ["pnpm", "--filter", "backoffice", "run", "dev"]
+    command: sh -c "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && pnpm --filter backoffice dev:host"
 
-  # ─── Frontend (Next.js) ──────────────────────────────────
+  # ─── Backoffice PROD (built image) ───────────────────────
+  backoffice:
+    build:
+      context: .
+      dockerfile: apps/backoffice/Dockerfile
+      target: runner
+    container_name: perissos-backoffice
+    profiles: ["prod"]
+    environment:
+      NODE_ENV: production
+      PAYLOAD_SECRET: dev_secret_change_in_production_min_32_chars
+      DATABASE_URL: postgresql://perissos:perissos_dev_password@postgres:5432/perissos_dev
+      R2_ENDPOINT: http://minio:9000
+      R2_BUCKET: perissos-media
+      R2_ACCESS_KEY_ID: perissos
+      R2_SECRET_ACCESS_KEY: perissos_minio_password
+      R2_PUBLIC_URL: http://localhost:9000/perissos-media
+      R2_PREFIX: dev/
+      NEXT_PUBLIC_CMS_URL: http://localhost:3000
+      NEXT_PUBLIC_FRONTEND_URL: http://localhost:3001
+      NEXT_PUBLIC_R2_URL: http://localhost:9000/perissos-media/dev
+      PREVIEW_SECRET: dev_preview_secret_change_in_production
+      CRON_SECRET: dev_cron_secret
+      STRIPE_SECRET_KEY: sk_test_your_stripe_key
+      STRIPE_WEBHOOK_SECRET: whsec_your_webhook_secret
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_your_stripe_key
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  # ─── Frontend DEV (fast iteration, HMR) ──────────────────
+  frontend-dev:
+    image: node:20-alpine
+    container_name: perissos-frontend-dev
+    profiles: ["dev"]
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_CMS_URL: http://localhost:3000
+      NEXT_PUBLIC_R2_URL: http://localhost:9000/perissos-media/dev
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backoffice-dev
+    volumes:
+      - .:/app
+      - frontend_node:/app/node_modules
+      - frontend_next:/app/apps/frontend/.next
+    command: sh -c "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && pnpm --filter frontend dev:host"
+
+  # ─── Frontend PROD (built image) ─────────────────────────
   frontend:
     build:
       context: .
@@ -102,9 +161,10 @@ services:
       args:
         NEXT_PUBLIC_CMS_URL: http://localhost:3000
     container_name: perissos-frontend
+    profiles: ["prod"]
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_CMS_URL: http://backoffice:3000
+      NEXT_PUBLIC_CMS_URL: http://localhost:3000
       NEXT_PUBLIC_R2_URL: http://localhost:9000/perissos-media/dev
     ports:
       - "3001:80"
@@ -115,6 +175,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: perissos-pgadmin
+    profiles: ["dev"]
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@perissos.dev
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -129,7 +190,10 @@ volumes:
   postgres_data:
   minio_data:
   pgadmin_data:
+  backoffice_node:
   backoffice_next:
+  frontend_node:
+  frontend_next:
 
 networks:
   default:

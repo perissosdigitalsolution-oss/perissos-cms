@@ -11,6 +11,12 @@ export const SectionCategory = [
   'pricing',
   'cta',
   'contact',
+  'menu',
+  'menuHighlights',
+  'reservation',
+  'gallery',
+  'testimonials',
+  'specials',
 ] as const;
 
 export type SectionCategoryType = (typeof SectionCategory)[number];
@@ -287,6 +293,155 @@ const ContactSchema = z.object({
   submitButtonIcon: z.string().optional().default('fas fa-paper-plane'),
 });
 
+const MenuSchema = z.object({
+  badgeIcon: z.string().optional().default('fas fa-utensils'),
+  badgeText: z.string().optional().default('Our Menu'),
+  title: z.string().min(1).default('Crafted Flavors, Thoughtfully Served'),
+  titleHighlight: z.string().optional().default('Flavors'),
+  description: z.string().optional().default('Explore our carefully curated menu featuring the finest ingredients and seasonal creations.'),
+  categories: z.array(z.object({
+    name: z.string().default('Appetizers'),
+    items: z.array(z.object({
+      name: z.string().default('Truffle Mushroom Soup'),
+      description: z.string().optional().default('Creamy wild mushroom soup infused with white truffle oil.'),
+      price: z.string().default('$12'),
+      image: z.string().optional().default(''),
+      dietaryTags: z.array(z.string()).optional().default([]),
+      isRecommended: z.boolean().optional().default(false),
+    })).optional().default([
+      { name: 'Truffle Mushroom Soup', description: 'Creamy wild mushroom soup infused with white truffle oil.', price: '$12', isRecommended: true },
+      { name: 'Crispy Calamari', description: 'Lightly fried with marinara sauce.', price: '$14' },
+      { name: 'Burrata & Heirloom Tomatoes', description: 'Fresh burrata with seasonal tomatoes.', price: '$16' },
+    ]),
+  })).optional().default([
+    { name: 'Appetizers', items: [
+      { name: 'Truffle Mushroom Soup', description: 'Creamy wild mushroom soup infused with white truffle oil.', price: '$12', isRecommended: true },
+      { name: 'Crispy Calamari', description: 'Lightly fried with marinara sauce.', price: '$14' },
+      { name: 'Burrata & Heirloom Tomatoes', description: 'Fresh burrata with seasonal tomatoes.', price: '$16' },
+    ]},
+    { name: 'Main Courses', items: [
+      { name: 'Herb-Crusted Ribeye Steak', description: 'Prime cut with garlic herb butter.', price: '$38' },
+      { name: 'Lemon Butter Grilled Salmon', description: 'Fresh Atlantic salmon fillet.', price: '$29' },
+      { name: 'Truffle Mushroom Risotto', description: 'Creamy arborio rice with wild mushrooms.', price: '$24' },
+    ]},
+    { name: 'Desserts & Beverages', items: [
+      { name: 'Classic Tiramisu', description: 'Traditional Italian dessert.', price: '$11' },
+      { name: 'Molten Chocolate Lava Cake', description: 'Warm chocolate center with vanilla ice cream.', price: '$13' },
+      { name: 'Specialty Artisan Coffee', description: 'Single-origin pour over.', price: '$6' },
+    ]},
+  ]),
+  buttonText: z.string().optional().default('View Full Menu'),
+  buttonIcon: z.string().optional().default('fas fa-arrow-right'),
+  buttonUrl: z.string().optional().default('#menu'),
+});
+
+const MenuHighlightsSchema = z.object({
+  badgeIcon: z.string().optional().default('fas fa-star'),
+  badgeText: z.string().optional().default('Menu Highlights'),
+  title: z.string().min(1).default('Discover Our Signature Creations'),
+  titleHighlight: z.string().optional().default('Signature'),
+  description: z.string().optional().default('Our chef\'s most celebrated dishes, crafted with passion and the finest seasonal ingredients.'),
+  items: z.array(z.object({
+    name: z.string().default('Truffle Mushroom Risotto'),
+    description: z.string().optional().default('Creamy arborio rice with wild mushrooms, truffle oil, and parmesan.'),
+    price: z.string().default('$24'),
+    image: z.string().optional().default(''),
+  })).optional().default([
+    { name: 'Truffle Mushroom Risotto', description: 'Creamy arborio rice with wild mushrooms, truffle oil, and parmesan.', price: '$24' },
+    { name: 'Herb-Crusted Rack of Lamb', description: 'Tender lamb with herb crust, served with roasted vegetables.', price: '$34' },
+    { name: 'Pan-Seared Atlantic Salmon', description: 'Fresh salmon fillet with lemon butter sauce and seasonal greens.', price: '$29' },
+    { name: 'Classic Eggs Benedict', description: 'Poached eggs on English muffin with hollandaise and bacon.', price: '$16' },
+    { name: 'Artisan Margherita Pizza', description: 'Hand-tossed dough with San Marzano tomatoes and fresh mozzarella.', price: '$18' },
+    { name: 'Grilled Ribeye Steak', description: 'Prime cut grilled to perfection with garlic herb butter.', price: '$38' },
+  ]),
+  buttonText: z.string().optional().default('View Full Menu'),
+  buttonIcon: z.string().optional().default('fas fa-arrow-right'),
+  buttonUrl: z.string().optional().default('#menu'),
+});
+
+const ReservationSchema = z.object({
+  badgeIcon: z.string().optional().default('fas fa-calendar-check'),
+  badgeText: z.string().optional().default('Reservations'),
+  title: z.string().min(1).default('Book Your Table in Seconds'),
+  titleHighlight: z.string().optional().default('Table'),
+  description: z.string().optional().default('Reserve your dining experience with us. Instant confirmation, no booking fees.'),
+  benefits: z.array(z.object({
+    icon: z.string().default('fas fa-check-circle'),
+    text: z.string().default('Instant Confirmation'),
+  })).optional().default([
+    { icon: 'fas fa-check-circle', text: 'Instant Confirmation' },
+    { icon: 'fas fa-check-circle', text: 'No Booking Fees' },
+    { icon: 'fas fa-check-circle', text: 'Free Cancellation Within 24 Hours' },
+  ]),
+  submitButtonText: z.string().optional().default('Confirm Reservation'),
+  submitButtonIcon: z.string().optional().default('fas fa-check'),
+});
+
+const GallerySchema = z.object({
+  badgeIcon: z.string().optional().default('fas fa-camera'),
+  badgeText: z.string().optional().default('Gallery'),
+  title: z.string().min(1).default('Moments Worth Capturing'),
+  titleHighlight: z.string().optional().default('Moments'),
+  description: z.string().optional().default('A glimpse into our kitchen, dining room, and the experiences we create every day.'),
+  images: z.array(z.object({
+    url: z.string().default(''),
+    caption: z.string().optional().default(''),
+    alt: z.string().optional().default(''),
+  })).optional().default([
+    { url: '', caption: 'Plated Dish Artistry', alt: 'Chef plating a dish' },
+    { url: '', caption: 'Dining Room & Patio', alt: 'Elegant dining area' },
+    { url: '', caption: 'Kitchen Action Shots', alt: 'Chef in the kitchen' },
+    { url: '', caption: 'Guest Celebration', alt: 'Guests enjoying their meal' },
+  ]),
+});
+
+const TestimonialsSchema = z.object({
+  badgeIcon: z.string().optional().default('fas fa-quote-left'),
+  badgeText: z.string().optional().default('Testimonials'),
+  title: z.string().min(1).default('"Absolutely wonderful dining experience"'),
+  titleHighlight: z.string().optional().default('wonderful'),
+  description: z.string().optional().default('Don\'t just take our word for it — hear from our guests.'),
+  testimonials: z.array(z.object({
+    name: z.string().default('Eleanor Pena'),
+    role: z.string().default('Verified Diner'),
+    avatar: z.string().optional().default(''),
+    rating: z.number().min(1).max(5).default(5),
+    text: z.string().default('Everything was perfect. Our server remembered our special night.'),
+  })).optional().default([
+    { name: 'Eleanor Pena', role: 'Verified Diner', rating: 5, text: 'My husband and I recently celebrated our tenth anniversary here. Everything was perfect. Our server remembered our special night.' },
+    { name: 'Darrell Steward', role: 'Regular Guest', rating: 5, text: 'I go every Sunday for brunch and am never disappointed. The eggs benedict are the best.' },
+    { name: 'Guy Hawkins', role: 'Corporate Client', rating: 5, text: 'Our company\'s quarterly celebration was flawless. The event coordinator made a customized menu.' },
+  ]),
+  socials: z.array(z.object({
+    icon: z.string().default('fab fa-instagram'),
+    url: z.string().optional().default('#'),
+  })).optional().default([
+    { icon: 'fab fa-instagram', url: '#' },
+    { icon: 'fab fa-linkedin-in', url: '#' },
+    { icon: 'fab fa-facebook-f', url: '#' },
+    { icon: 'fab fa-youtube', url: '#' },
+  ]),
+});
+
+const SpecialsSchema = z.object({
+  badgeIcon: z.string().optional().default('fas fa-tags'),
+  badgeText: z.string().optional().default('Special Offers'),
+  title: z.string().min(1).default('Exclusive Offers Just for You'),
+  titleHighlight: z.string().optional().default('Exclusive'),
+  description: z.string().optional().default('Take advantage of our limited-time promotions and special deals.'),
+  offers: z.array(z.object({
+    title: z.string().default('Early Bird Dinner'),
+    description: z.string().default('Enjoy a special discount when you dine with us before 6 PM on weekdays.'),
+    discountPercent: z.number().default(20),
+    counterTarget: z.number().default(20),
+    label: z.string().optional().default('off'),
+  })).optional().default([
+    { title: 'Early Bird Dinner', description: 'Enjoy a special discount when you dine with us before 6 PM on weekdays.', discountPercent: 20, counterTarget: 20, label: 'off' },
+    { title: 'Happy Hour Special', description: 'Half-price select appetizers and cocktails every weekday from 4 to 6 PM.', discountPercent: 50, counterTarget: 50, label: 'off' },
+    { title: 'Loyalty Members Save', description: 'Sign up for our loyalty program and receive exclusive member-only discounts.', discountPercent: 15, counterTarget: 15, label: 'save' },
+  ]),
+});
+
 export const sectionSchemas: Record<SectionCategoryType, z.ZodObject<any>> = {
   hero: HeroSchema,
   services: ServicesSchema,
@@ -298,6 +453,12 @@ export const sectionSchemas: Record<SectionCategoryType, z.ZodObject<any>> = {
   pricing: PricingSchema,
   cta: CTASchema,
   contact: ContactSchema,
+  menu: MenuSchema,
+  menuHighlights: MenuHighlightsSchema,
+  reservation: ReservationSchema,
+  gallery: GallerySchema,
+  testimonials: TestimonialsSchema,
+  specials: SpecialsSchema,
 };
 
 export const sectionRegistry: SectionRegistryEntry[] = [
@@ -390,6 +551,60 @@ export const sectionRegistry: SectionRegistryEntry[] = [
     category: 'conversion',
     schema: ContactSchema,
     defaultProps: ContactSchema.parse({}),
+  },
+  {
+    key: 'menu',
+    label: 'Menu',
+    description: 'Categorized food menu with items, prices, and dietary tags',
+    icon: 'fas fa-utensils',
+    category: 'content',
+    schema: MenuSchema,
+    defaultProps: MenuSchema.parse({}),
+  },
+  {
+    key: 'menuHighlights',
+    label: 'Menu Highlights',
+    description: 'Featured signature dishes with images and prices',
+    icon: 'fas fa-star',
+    category: 'content',
+    schema: MenuHighlightsSchema,
+    defaultProps: MenuHighlightsSchema.parse({}),
+  },
+  {
+    key: 'reservation',
+    label: 'Reservation',
+    description: 'Table booking form with date, time, guests, and seating preference',
+    icon: 'fas fa-calendar-check',
+    category: 'conversion',
+    schema: ReservationSchema,
+    defaultProps: ReservationSchema.parse({}),
+  },
+  {
+    key: 'gallery',
+    label: 'Gallery',
+    description: 'Image gallery with captions and carousel navigation',
+    icon: 'fas fa-camera',
+    category: 'layout',
+    schema: GallerySchema,
+    defaultProps: GallerySchema.parse({}),
+  },
+  {
+    key: 'testimonials',
+    label: 'Testimonials',
+    description: 'Customer reviews with avatars, ratings, and social links',
+    icon: 'fas fa-quote-left',
+    category: 'marketing',
+    schema: TestimonialsSchema,
+    defaultProps: TestimonialsSchema.parse({}),
+  },
+  {
+    key: 'specials',
+    label: 'Special Offers',
+    description: 'Limited-time offers with discount counters',
+    icon: 'fas fa-tags',
+    category: 'marketing',
+    schema: SpecialsSchema,
+    defaultProps: SpecialsSchema.parse({}),
   },
 ];
 
@@ -511,6 +726,12 @@ export type SectionPropsMap = {
   pricing: z.infer<typeof PricingSchema>;
   cta: z.infer<typeof CTASchema>;
   contact: z.infer<typeof ContactSchema>;
+  menu: z.infer<typeof MenuSchema>;
+  menuHighlights: z.infer<typeof MenuHighlightsSchema>;
+  reservation: z.infer<typeof ReservationSchema>;
+  gallery: z.infer<typeof GallerySchema>;
+  testimonials: z.infer<typeof TestimonialsSchema>;
+  specials: z.infer<typeof SpecialsSchema>;
 };
 
 export type BlockType = SectionCategoryType;

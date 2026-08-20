@@ -27,7 +27,8 @@
         "../../packages/ui/src/*"
       ]
     },
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "incremental": false
   },
   "include": [
     "next-env.d.ts",

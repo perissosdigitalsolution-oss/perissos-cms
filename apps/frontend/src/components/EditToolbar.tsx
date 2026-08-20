@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useCallback, useRef } from 'react'
+import { ThemePanel } from './ThemePanel'
 
 interface EditToolbarProps {
   pageId: string | null
@@ -10,46 +11,19 @@ interface EditToolbarProps {
   onHeightChange?: (height: number) => void
   theme?: any
   onThemeChange?: (theme: any) => void
+  onOpenContent?: () => void
+  onOpenPageBuilder?: () => void
+  templateCategory?: string
+  cssVariableMapping?: Record<string, string[]>
 }
 
-// Default theme values matching digital-agency.css CSS variables
-const DEFAULT_THEME = {
-  primary: '#FF6600',
-  primaryHover: '#E55B00',
-  dark: '#181817',
-  dark2: '#1E1E1D',
-  dark3: '#2A2A28',
-  light: '#F6F4F1',
-  white: '#FFFFFF',
-  gray: '#7A7A74',
-  border: '#3A3A38',
-  fontBody: 'DM Sans, sans-serif',
-  fontHeading: 'Plus Jakarta Sans, sans-serif',
-  borderRadius: '8px',
-  spacing: '16px',
-}
-
-export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange, theme: initialTheme, onThemeChange }: EditToolbarProps) {
+export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange, theme: initialTheme, onThemeChange, onOpenContent, onOpenPageBuilder, templateCategory, cssVariableMapping }: EditToolbarProps) {
   const [user, setUser] = useState<any>(null)
-  const [isExpanded, setIsExpanded] = useState(false)
   const [showThemePanel, setShowThemePanel] = useState(false)
   const [toolbarHeight, setToolbarHeight] = useState(50)
-  const [theme, setTheme] = useState<any>(initialTheme || DEFAULT_THEME)
   const toolbarRef = useRef<HTMLDivElement>(null)
 
   const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
-
-  // Sync theme with parent
-  useEffect(() => {
-    if (initialTheme) {
-      setTheme(initialTheme)
-    }
-  }, [initialTheme])
-
-  // Notify parent of theme changes
-  useEffect(() => {
-    onThemeChange?.(theme)
-  }, [theme, onThemeChange])
 
   useEffect(() => {
     fetch(`${cmsUrl}/api/users/me`, {
@@ -64,32 +38,13 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
       .catch(() => {})
   }, [cmsUrl])
 
-  // Measure toolbar height
   useEffect(() => {
     if (toolbarRef.current) {
       const height = toolbarRef.current.offsetHeight
       setToolbarHeight(height)
       onHeightChange?.(height)
     }
-  }, [isExpanded, user, showThemePanel, onHeightChange])
-
-  // Apply theme to document (matches digital-agency.css CSS variables)
-  useEffect(() => {
-    const root = document.documentElement
-    root.style.setProperty('--primary', theme.primary)
-    root.style.setProperty('--primary-hover', theme.primaryHover)
-    root.style.setProperty('--dark', theme.dark)
-    root.style.setProperty('--dark-2', theme.dark2)
-    root.style.setProperty('--dark-3', theme.dark3)
-    root.style.setProperty('--light', theme.light)
-    root.style.setProperty('--white', theme.white)
-    root.style.setProperty('--gray', theme.gray)
-    root.style.setProperty('--border', theme.border)
-    root.style.setProperty('--font-body', theme.fontBody)
-    root.style.setProperty('--font-heading', theme.fontHeading)
-    root.style.setProperty('--border-radius', theme.borderRadius)
-    root.style.setProperty('--spacing', theme.spacing)
-  }, [theme])
+  }, [user, onHeightChange])
 
   const handleOpenAdmin = useCallback(() => {
     if (pageId) {
@@ -107,40 +62,7 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
     } catch {}
   }, [cmsUrl])
 
-  const handleThemeChange = useCallback((key: string, value: string) => {
-    setTheme((prev: any) => ({ ...prev, [key]: value }))
-  }, [])
-
-  const handleResetTheme = useCallback(() => {
-    setTheme(DEFAULT_THEME)
-  }, [])
-
   if (!user) return null
-
-  const colorOptions = [
-    { key: 'primary', label: 'Primary (Brand)', help: 'Main brand color - buttons, links, accents' },
-    { key: 'primaryHover', label: 'Primary Hover', help: 'Darker shade for hover states' },
-    { key: 'dark', label: 'Dark Background', help: 'Main dark background color' },
-    { key: 'dark2', label: 'Dark Variant 2', help: 'Secondary dark background' },
-    { key: 'dark3', label: 'Dark Variant 3', help: 'Tertiary dark background' },
-    { key: 'light', label: 'Light Background', help: 'Light section backgrounds' },
-    { key: 'white', label: 'White', help: 'Pure white color' },
-    { key: 'gray', label: 'Gray Text', help: 'Muted text color' },
-    { key: 'border', label: 'Border', help: 'Border/divider color' },
-  ]
-
-  const fontOptions = [
-    { key: 'fontHeading', label: 'Heading Font', help: 'Used for titles, headings' },
-    { key: 'fontBody', label: 'Body Font', help: 'Used for paragraphs, UI text' },
-  ]
-
-  const fontPresets = [
-    { name: 'Default (Plus Jakarta / DM Sans)', heading: 'Plus Jakarta Sans, sans-serif', body: 'DM Sans, sans-serif' },
-    { name: 'Modern (Inter / Inter)', heading: 'Inter, sans-serif', body: 'Inter, sans-serif' },
-    { name: 'Classic (Merriweather / Source Sans)', heading: 'Merriweather, serif', body: 'Source Sans Pro, sans-serif' },
-    { name: 'Tech (JetBrains Mono / Space Grotesk)', heading: 'Space Grotesk, sans-serif', body: 'JetBrains Mono, monospace' },
-    { name: 'Elegant (Playfair Display / Lora)', heading: 'Playfair Display, serif', body: 'Lora, serif' },
-  ]
 
   return (
     <>
@@ -155,7 +77,7 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
           fontFamily: 'DM Sans, sans-serif',
         }}
       >
-        {/* Main Toolbar */}
+        {/* Main Toolbar - Compact single row */}
         <div style={{
           background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
           borderBottom: '2px solid #FF6600',
@@ -244,11 +166,49 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
             </button>
 
             <button
-              onClick={() => setShowThemePanel(!showThemePanel)}
+              onClick={onOpenPageBuilder}
               style={{
                 padding: '6px 12px',
-                background: showThemePanel ? '#FF6600' : 'transparent',
-                color: showThemePanel ? '#fff' : '#ccc',
+                background: 'transparent',
+                color: '#FF6600',
+                border: '1px solid #FF6600',
+                borderRadius: '6px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <i className="fas fa-pencil-ruler" />
+              Page Builder
+            </button>
+
+            <button
+              onClick={onOpenContent}
+              style={{
+                padding: '6px 12px',
+                background: 'transparent',
+                color: '#ccc',
+                border: '1px solid #555',
+                borderRadius: '6px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <i className="fas fa-edit" />
+              Content
+            </button>
+
+            <button
+              onClick={() => setShowThemePanel(true)}
+              style={{
+                padding: '6px 12px',
+                background: 'transparent',
+                color: '#ccc',
                 border: '1px solid #555',
                 borderRadius: '6px',
                 fontSize: '12px',
@@ -260,21 +220,6 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
             >
               <i className="fas fa-palette" />
               Theme
-            </button>
-
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              style={{
-                padding: '6px 8px',
-                background: 'transparent',
-                color: '#ccc',
-                border: '1px solid #555',
-                borderRadius: '6px',
-                fontSize: '12px',
-                cursor: 'pointer',
-              }}
-            >
-              <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'}`} />
             </button>
 
             <button
@@ -293,238 +238,18 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
             </button>
           </div>
         </div>
-
-        {/* Theme Customization Panel */}
-        {showThemePanel && (
-          <div style={{
-            background: '#1a1a1a',
-            borderBottom: '1px solid #333',
-            padding: '16px',
-            maxHeight: '50vh',
-            overflowY: 'auto',
-          }}>
-            {/* Colors */}
-            <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ color: '#fff', fontSize: '14px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <i className="fas fa-tint" style={{ color: '#FF6600' }} />
-                Colors
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                {colorOptions.map(opt => (
-                  <div key={opt.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '11px', color: '#999', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      {opt.label}
-                    </label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <input
-                        type="color"
-                        value={theme[opt.key as keyof typeof theme]}
-                        onChange={e => handleThemeChange(opt.key, e.target.value)}
-                        style={{
-                          width: '36px',
-                          height: '36px',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          background: 'none',
-                        }}
-                      />
-                      <input
-                        type="text"
-                        value={theme[opt.key as keyof typeof theme]}
-                        onChange={e => handleThemeChange(opt.key, e.target.value)}
-                        style={{
-                          flex: 1,
-                          padding: '6px 10px',
-                          background: '#2d2d2d',
-                          border: '1px solid #444',
-                          borderRadius: '4px',
-                          color: '#fff',
-                          fontSize: '12px',
-                          fontFamily: 'monospace',
-                        }}
-                      />
-                    </div>
-                    <span style={{ fontSize: '10px', color: '#666' }}>{opt.help}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Fonts */}
-            <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ color: '#fff', fontSize: '14px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <i className="fas fa-font" style={{ color: '#FF6600' }} />
-                Fonts
-              </h4>
-              
-              {/* Font Presets */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '11px', color: '#999', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'block' }}>
-                  Quick Presets
-                </label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {fontPresets.map(preset => (
-                    <button
-                      key={preset.name}
-                      type="button"
-                      onClick={() => {
-                        handleThemeChange('fontHeading', preset.heading)
-                        handleThemeChange('fontBody', preset.body)
-                      }}
-                      style={{
-                        padding: '6px 12px',
-                        background: '#2d2d2d',
-                        border: '1px solid #444',
-                        borderRadius: '4px',
-                        color: '#ccc',
-                        fontSize: '11px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = '#FF6600'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = '#444'}
-                    >
-                      {preset.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom Font Inputs */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                {fontOptions.map(opt => (
-                  <div key={opt.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '11px', color: '#999', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      {opt.label}
-                    </label>
-                    <input
-                      type="text"
-                      value={theme[opt.key as keyof typeof theme]}
-                      onChange={e => handleThemeChange(opt.key, e.target.value)}
-                      placeholder="e.g. Inter, sans-serif"
-                      style={{
-                        padding: '8px 10px',
-                        background: '#2d2d2d',
-                        border: '1px solid #444',
-                        borderRadius: '4px',
-                        color: '#fff',
-                        fontSize: '12px',
-                        fontFamily: 'monospace',
-                      }}
-                    />
-                    <span style={{ fontSize: '10px', color: '#666' }}>{opt.help}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Advanced */}
-            <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ color: '#fff', fontSize: '14px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <i className="fas fa-sliders-h" style={{ color: '#FF6600' }} />
-                Advanced
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', color: '#999', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Border Radius
-                  </label>
-                  <input
-                    type="text"
-                    value={theme.borderRadius}
-                    onChange={e => setTheme((prev: any) => ({ ...prev, borderRadius: e.target.value }))}
-                    style={{
-                      padding: '8px 10px',
-                      background: '#2d2d2d',
-                      border: '1px solid #444',
-                      borderRadius: '4px',
-                      color: '#fff',
-                      fontSize: '12px',
-                    }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', color: '#999', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Base Spacing
-                  </label>
-                  <input
-                    type="text"
-                    value={theme.spacing}
-                    onChange={e => setTheme((prev: any) => ({ ...prev, spacing: e.target.value }))}
-                    style={{
-                      padding: '8px 10px',
-                      background: '#2d2d2d',
-                      border: '1px solid #444',
-                      borderRadius: '4px',
-                      color: '#fff',
-                      fontSize: '12px',
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: '1px solid #333' }}>
-              <button
-                onClick={handleResetTheme}
-                style={{
-                  padding: '8px 16px',
-                  background: 'transparent',
-                  color: '#FF6600',
-                  border: '1px solid #FF6600',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                }}
-              >
-                <i className="fas fa-undo" style={{ marginRight: '6px' }} />
-                Reset to Default
-              </button>
-              <button
-                onClick={() => setShowThemePanel(false)}
-                style={{
-                  padding: '8px 16px',
-                  background: '#FF6600',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                }}
-              >
-                <i className="fas fa-check" style={{ marginRight: '6px' }} />
-                Done
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Expanded Tips Panel */}
-        {isExpanded && !showThemePanel && (
-          <div style={{
-            background: '#1a1a1a',
-            borderBottom: '1px solid #333',
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px',
-          }}>
-            <div style={{ color: '#7A7A74', fontSize: '12px' }}>
-              <strong style={{ color: '#fff' }}>Quick Tips:</strong>
-            </div>
-            <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#999' }}>
-              <span><i className="fas fa-mouse-pointer" style={{ color: '#FF6600', marginRight: '4px' }} /> Click any section to edit</span>
-              <span><i className="fas fa-arrows-alt" style={{ color: '#FF6600', marginRight: '4px' }} /> Drag to reorder (coming soon)</span>
-              <span><i className="fas fa-eye" style={{ color: '#FF6600', marginRight: '4px' }} /> Preview changes live</span>
-              <span><i className="fas fa-palette" style={{ color: '#FF6600', marginRight: '4px' }} /> Click Theme for colors/fonts</span>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Theme Panel - Left Sidebar */}
+<ThemePanel
+          isOpen={showThemePanel}
+          onClose={() => setShowThemePanel(false)}
+          theme={initialTheme}
+          onThemeChange={onThemeChange || (() => {})}
+          onSave={onSave}
+          cssVariableMapping={cssVariableMapping}
+        />
+
       {/* Spacer to push content below toolbar */}
       <div style={{ height: toolbarHeight }} />
     </>

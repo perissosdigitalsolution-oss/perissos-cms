@@ -12,6 +12,7 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Subscriptions } from './collections/Subscriptions'
 import { Templates } from './collections/Templates'
+import { MarketplaceTemplates } from './collections/MarketplaceTemplates'
 
 // Globals
 import { ClientSettings } from './globals/ClientSettings'
@@ -23,11 +24,14 @@ export default buildConfig({
       titleSuffix: ' — Perissos CMS',
       description: 'Perissos CMS Back Office',
     },
+    components: {
+      beforeDashboard: ['/src/admin/components/CustomDashboard#CustomDashboard'],
+    },
   },
 
   editor: lexicalEditor({}),
 
-  collections: [Pages, BlogArticles, Activities, Users, Media, Subscriptions, Templates],
+  collections: [Pages, BlogArticles, Activities, Users, Media, Subscriptions, Templates, MarketplaceTemplates],
   globals: [ClientSettings],
 
   db: postgresAdapter({

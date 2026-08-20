@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useEffect, useRef } from 'react'
+import { ImageUpload } from './ImageUpload'
 
 interface SectionEditorProps {
   section: any
@@ -8,10 +9,15 @@ interface SectionEditorProps {
   isOpen: boolean
   onClose: () => void
   onSave: (updatedSection: any) => void
+  sectionDefs?: Record<string, { label: string; icon: string; fields: Array<{ name: string; label: string; type: string; help?: string; itemFields?: Array<{ name: string; label: string; type: string; help?: string }> }> }>
 }
 
 const blockTypeLabels: Record<string, string> = {
   hero: 'Hero Banner',
+  menuHighlights: 'Menu Highlights',
+  reservation: 'Reservation',
+  gallery: 'Gallery',
+  testimonials: 'Testimonials',
   services: 'Services',
   about: 'About Us',
   whyUs: 'Why Choose Us',
@@ -21,6 +27,8 @@ const blockTypeLabels: Record<string, string> = {
   pricing: 'Pricing',
   cta: 'Call to Action',
   contact: 'Contact',
+  specials: 'Special Offers',
+  menu: 'Full Menu',
 }
 
 type FieldType = 'text' | 'textarea' | 'image' | 'array'
@@ -36,7 +44,18 @@ interface BlockField {
   accept?: string
 }
 
-function getBlockFields(blockType: string): BlockField[] {
+function getBlockFields(blockType: string, sectionDefs?: Record<string, any>): BlockField[] {
+  // First try dynamic metadata from template layoutConfig
+  if (sectionDefs?.[blockType]?.fields) {
+    return sectionDefs[blockType].fields.map((f: any) => ({
+      name: f.name,
+      label: f.label,
+      type: f.type as FieldType,
+      help: f.help,
+      itemFields: f.itemFields,
+    }))
+  }
+  // Fallback to hardcoded definitions
   switch (blockType) {
     case 'hero':
       return [
@@ -311,6 +330,43 @@ function getBlockFields(blockType: string): BlockField[] {
         { name: 'submitButtonText', label: 'Submit Button Text', type: 'text' },
         { name: 'submitButtonIcon', label: 'Submit Button Icon', type: 'text', help: 'Font Awesome class' },
       ]
+    case 'menuHighlights':
+      return [
+        { name: 'title', label: 'Title', type: 'text' },
+        { name: 'titleHighlight', label: 'Title Highlight', type: 'text' },
+        { name: 'description', label: 'Description', type: 'textarea' },
+        { name: 'badgeText', label: 'Badge Text', type: 'text' },
+        { name: 'badgeIcon', label: 'Badge Icon', type: 'text', help: 'Font Awesome class' },
+        { name: 'buttonText', label: 'Button Text', type: 'text' },
+        { name: 'buttonIcon', label: 'Button Icon', type: 'text', help: 'Font Awesome class' },
+        { name: 'buttonUrl', label: 'Button URL', type: 'text' },
+      ]
+    case 'reservation':
+      return [
+        { name: 'title', label: 'Title', type: 'text' },
+        { name: 'titleHighlight', label: 'Title Highlight', type: 'text' },
+        { name: 'description', label: 'Description', type: 'textarea' },
+        { name: 'badgeText', label: 'Badge Text', type: 'text' },
+        { name: 'badgeIcon', label: 'Badge Icon', type: 'text', help: 'Font Awesome class' },
+        { name: 'submitButtonText', label: 'Submit Button Text', type: 'text' },
+        { name: 'submitButtonIcon', label: 'Submit Button Icon', type: 'text', help: 'Font Awesome class' },
+      ]
+    case 'gallery':
+      return [
+        { name: 'title', label: 'Title', type: 'text' },
+        { name: 'titleHighlight', label: 'Title Highlight', type: 'text' },
+        { name: 'description', label: 'Description', type: 'textarea' },
+        { name: 'badgeText', label: 'Badge Text', type: 'text' },
+        { name: 'badgeIcon', label: 'Badge Icon', type: 'text', help: 'Font Awesome class' },
+      ]
+    case 'testimonials':
+      return [
+        { name: 'title', label: 'Title', type: 'text' },
+        { name: 'titleHighlight', label: 'Title Highlight', type: 'text' },
+        { name: 'description', label: 'Description', type: 'textarea' },
+        { name: 'badgeText', label: 'Badge Text', type: 'text' },
+        { name: 'badgeIcon', label: 'Badge Icon', type: 'text', help: 'Font Awesome class' },
+      ]
     default:
       return []
   }
@@ -328,7 +384,7 @@ function getDefaultArrayItem(itemFields: BlockField[]): Record<string, any> {
   return item
 }
 
-export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }: SectionEditorProps) {
+export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave, sectionDefs }: SectionEditorProps) {
   const [edits, setEdits] = useState<Record<string, any>>({})
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -361,7 +417,7 @@ export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }
       const newArray = [...currentArray]
       if (!newArray[itemIndex]) {
         newArray[itemIndex] = getDefaultArrayItem(
-          getBlockFields(section?.blockType || '').find(f => f.name === arrayName)?.itemFields || []
+          getBlockFields(section?.blockType || '', sectionDefs).find(f => f.name === arrayName)?.itemFields || []
         )
       }
       newArray[itemIndex] = { ...newArray[itemIndex], [fieldName]: value }
@@ -406,9 +462,10 @@ export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }
     const handleClickOutside = (e: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
         const target = e.target as HTMLElement
-        if (!target.closest('[data-section-editor]')) {
-          onClose()
-        }
+        // Don't close if clicking inside the ContentPanel (z-index 10000)
+        const contentPanel = document.querySelector('div[style*="z-index: 10000"]')
+        if (contentPanel && contentPanel.contains(target)) return
+        onClose()
       }
     }
     if (isOpen) {
@@ -424,7 +481,7 @@ export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }
 
   if (!isOpen || !section) return null
 
-  const fields = getBlockFields(section.blockType)
+  const fields = getBlockFields(section.blockType, sectionDefs)
 
   const renderField = (field: BlockField) => {
     const value = getValue(field.name)
@@ -540,6 +597,13 @@ export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }
                         Nested array - edit in admin
                       </span>
                     </div>
+                  ) : itemField.type === 'image' ? (
+                    <ImageUpload
+                      value={item[itemField.name] ?? ''}
+                      onChange={val => handleArrayItemChange(field.name, itemIndex, itemField.name, val)}
+                      label={itemField.label}
+                      accept={itemField.accept}
+                    />
                   ) : (
                     <input
                       type="text"
@@ -575,46 +639,12 @@ export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }
       const imageUrl = value
       return (
         <div key={field.name} style={{ marginBottom: '16px' }}>
-          <label style={{
-            display: 'block',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: '#374151',
-            marginBottom: '6px',
-          }}>
-            {field.label}
-          </label>
-          <input
-            type="text"
+          <ImageUpload
             value={imageUrl ?? ''}
-            onChange={e => handleChange(field.name, e.target.value)}
-            placeholder="Image URL"
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              border: '1px solid #e5e5e5',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontFamily: 'DM Sans, sans-serif',
-              outline: 'none',
-              color: '#1a1a1a',
-              backgroundColor: '#fff',
-            }}
+            onChange={val => handleChange(field.name, val)}
+            label={field.label}
+            accept={field.accept}
           />
-          {imageUrl && (
-            <div style={{ marginTop: '8px' }}>
-              <img 
-                src={imageUrl} 
-                alt="" 
-                style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '8px', border: '1px solid #e5e5e5' }}
-              />
-            </div>
-          )}
-          {field.help && (
-            <div style={{ fontSize: '11px', color: '#999', marginTop: '4px' }}>
-              {field.help}
-            </div>
-          )}
         </div>
       )
     }
@@ -695,7 +725,7 @@ export function SectionEditor({ section, sectionIndex, isOpen, onClose, onSave }
         height: 'calc(100vh - 60px)',
         background: '#fff',
         boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
-        zIndex: 9998,
+        zIndex: 10001,
         display: 'flex',
         flexDirection: 'column',
         fontFamily: 'DM Sans, sans-serif',

@@ -13,6 +13,7 @@
     "test:api": "node scripts/test-api.mjs",
     "test:frontend": "node scripts/test-frontend.mjs",
     "seed:pages": "node scripts/seed-pages.mjs",
+    "seed:marketplace": "tsx scripts/seed-marketplace.ts",
     "dev:backoffice": "turbo dev --filter=backoffice",
     "dev:frontend": "turbo dev --filter=frontend",
     "build:backoffice": "turbo build --filter=backoffice",

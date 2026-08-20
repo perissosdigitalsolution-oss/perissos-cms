@@ -1,12 +1,63 @@
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import { EditToolbar } from '@/components/EditToolbar'
 import { SectionEditor } from '@/components/SectionEditor'
+import { ContentPanel } from '@/components/ContentPanel'
+import { getTemplateConfig, getTemplateTheme } from '@/lib/template-registry'
+
+const GrapejsEditor = dynamic(() => import('@/components/GrapejsEditor').then(m => m.GrapejsEditor), {
+  ssr: false,
+  loading: () => (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 20000, background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center', color: '#fff' }}>
+        <i className="fas fa-spinner fa-spin" style={{ fontSize: '32px', color: '#FF6600', marginBottom: '16px', display: 'block' }} />
+        <div style={{ fontSize: '14px' }}>Loading Page Builder...</div>
+      </div>
+    </div>
+  ),
+})
 
 interface Section {
   blockType: string
   [key: string]: any
+}
+
+function extractTemplateContent(html: string): { styles: string; content: string } {
+  let styles = ''
+  let content = html
+
+  // Extract <style> tags from <head>
+  const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi
+  let match
+  while ((match = styleRegex.exec(html)) !== null) {
+    styles += match[1] + '\n'
+  }
+
+  // Extract content between <body> and </body>
+  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+  if (bodyMatch) {
+    content = bodyMatch[1]
+  }
+
+  // Remove the template's own <header> (we use React Header for edit mode)
+  // But keep <header id="masthead"> for restaurant template (has its own nav)
+  // Only strip generic headers without id="masthead"
+  content = content.replace(/<header(?!\s+id="masthead")[\s\S]*?<\/header>/gi, '')
+
+  // Clean up any nested doctype/html/head/meta/title/link/script tags
+  content = content.replace(/<!DOCTYPE[^>]*>/gi, '')
+  content = content.replace(/<html[^>]*>/gi, '')
+  content = content.replace(/<\/html>/gi, '')
+  content = content.replace(/<head[\s\S]*?<\/head>/gi, '')
+  content = content.replace(/<meta[^>]*>/gi, '')
+  content = content.replace(/<title>[^<]*<\/title>/gi, '')
+  content = content.replace(/<link[^>]*>/gi, '')
+  content = content.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+  content = content.replace(/<script[^>]*\/>/gi, '')
+
+  return { styles: styles.trim(), content: content.trim() }
 }
 
 interface Page {
@@ -16,8 +67,10 @@ interface Page {
   sections: Section[]
 }
 
-function Header({ editMode, toolbarHeight }: { editMode?: boolean; toolbarHeight?: number }) {
+function Header({ editMode, toolbarHeight, theme }: { editMode?: boolean; toolbarHeight?: number; theme?: any }) {
   const headerTop = editMode && toolbarHeight ? toolbarHeight : 0
+  const logoLight = theme?.logoLight
+  const logoDark = theme?.logoDark
   return (
     <header
       className="header"
@@ -28,7 +81,14 @@ function Header({ editMode, toolbarHeight }: { editMode?: boolean; toolbarHeight
     >
       <div className="container">
         <a href="/" className="logo">
-          <div className="logo-icon"><i className="fas fa-rocket"></i></div>
+          {(logoLight || logoDark) ? (
+            <>
+              {logoLight && <img src={logoLight} alt="Logo" className="logo-light" style={{ maxHeight: '40px' }} />}
+              {logoDark && <img src={logoDark} alt="Logo" className="logo-dark" style={{ maxHeight: '40px' }} />}
+            </>
+          ) : (
+            <div className="logo-icon"><i className="fas fa-rocket"></i></div>
+          )}
           <span>Perissos</span>
         </a>
         <nav className="nav" id="nav">
@@ -135,477 +195,20 @@ function highlightTitle(title: string, highlight: string | undefined) {
   )
 }
 
-function renderSection(section: Section, index: number) {
-  const { blockType, ...props } = section
-
-  switch (blockType) {
-    case 'hero':
-      return (
-        <section className="hero" id="hero" key={index}>
-          <div className="container">
-            <div className="hero-content">
-              {props.badgeIcon && props.badgeText && (
-                <div className="hero-badge">
-                  <i className={props.badgeIcon}></i>
-                  {props.badgeText}
-                </div>
-              )}
-              <h1 className="hero-title">
-                {highlightTitle(props.title, props.titleHighlight)}
-              </h1>
-              {props.description && <p className="hero-text">{props.description}</p>}
-              <div className="hero-buttons">
-                {props.primaryButtonText && (
-                  <a href={props.primaryButtonUrl || '#contact'} className="btn btn-primary">
-                    {props.primaryButtonText}
-                    {props.primaryButtonIcon && <i className={props.primaryButtonIcon}></i>}
-                  </a>
-                )}
-                {props.secondaryButtonText && (
-                  <a href={props.secondaryButtonUrl || '#'} className="btn btn-outline">
-                    {props.secondaryButtonIcon && <i className={props.secondaryButtonIcon}></i>}
-                    {props.secondaryButtonText}
-                  </a>
-                )}
-              </div>
-              {props.stats && props.stats.length > 0 && (
-                <div className="hero-stats">
-                  {props.stats.map((stat: any, i: number) => (
-                    <div key={i} className="stat-item">
-                      <div className="stat-number">{stat.value}</div>
-                      <div className="stat-label">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            {props.mainImage || (props.floatingCards && props.floatingCards.length > 0) && (
-              <div className="hero-image">
-                {props.mainImage ? (
-                  <div className="hero-img-main">
-                    <img src={props.mainImage} alt={props.title} />
-                  </div>
-                ) : (
-                  <div className="hero-img-main">
-                    <i className="fas fa-laptop-code hero-img-placeholder"></i>
-                  </div>
-                )}
-                {props.floatingCards && props.floatingCards.length > 0 && (
-                  <>
-                    {props.floatingCards.map((card: any, i: number) => (
-                      <div key={i} className={`floating-card floating-card-${i + 1}`}>
-                        <div className={`floating-icon`}>
-                          {card.image ? <img src={card.image} alt={card.label} /> : <i className={card.icon}></i>}
-                        </div>
-                        <div className="floating-text">
-                          <h4>{card.label}</h4>
-                          <p>{card.value}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-      )
-
-    case 'services':
-      return (
-        <section className="section" id="services" key={index}>
-          <div className="container">
-            <div className="section-header">
-              {props.badgeIcon && props.badgeText && (
-                <div className="section-badge">
-                  <i className={props.badgeIcon}></i> {props.badgeText}
-                </div>
-              )}
-              <h2 className="section-title">
-                {highlightTitle(props.title, props.titleHighlight)}
-              </h2>
-              {props.description && <p className="section-desc">{props.description}</p>}
-            </div>
-            <div className="services-grid">
-              {props.items?.map((item: any, i: number) => (
-                <div key={i} className="service-card">
-                  {item.icon && <div className="service-icon"><i className={item.icon}></i></div>}
-                  <h3 className="service-title">{item.title}</h3>
-                  {item.description && <p className="service-text">{item.description}</p>}
-                  {item.linkText && (
-                    <a href={item.linkUrl || '#'} className="service-link">
-                      {item.linkText}
-                      {item.linkIcon && <i className={item.linkIcon}></i>}
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )
-
-    case 'about':
-      return (
-        <section className="section about" id="about" key={index}>
-          <div className="container">
-            <div className="about-image">
-              {props.mainImage ? (
-                <div className="about-img-main">
-                  <img src={props.mainImage} alt={props.title} />
-                </div>
-              ) : (
-                <div className="about-img-main">
-                  <i className="fas fa-building"></i>
-                </div>
-              )}
-              {props.experienceNumber && (
-                <div className="experience-badge">
-                  <div className="number">{props.experienceNumber}</div>
-                  <div className="text">{props.experienceLabel}</div>
-                </div>
-              )}
-            </div>
-            <div className="about-content">
-              {props.badgeIcon && props.badgeText && (
-                <div className="section-badge">
-                  <i className={props.badgeIcon}></i> {props.badgeText}
-                </div>
-              )}
-              <h2 className="section-title">
-                {highlightTitle(props.title, props.titleHighlight)}
-              </h2>
-              {props.description && <p className="about-desc">{props.description}</p>}
-              {props.features && props.features.length > 0 && (
-                <div className="about-features">
-                  {props.features.map((f: any, i: number) => (
-                    <div key={i} className="about-feature">
-                      <div className={`about-feature-icon`}><i className={f.icon || 'fas fa-check'}></i></div>
-                      <div className="about-feature-text">{f.text}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {props.buttonText && (
-                <a href={props.buttonUrl || '#contact'} className="btn btn-primary">
-                  {props.buttonText}
-                  {props.buttonIcon && <i className={props.buttonIcon}></i>}
-                </a>
-              )}
-            </div>
-          </div>
-        </section>
-      )
-
-    case 'whyUs':
-      return (
-        <section className="section why-us" id="why-us" key={index}>
-          <div className="container">
-            <div className="why-us-content">
-              {props.badgeIcon && props.badgeText && (
-                <div className="section-badge">
-                  <i className={props.badgeIcon}></i> {props.badgeText}
-                </div>
-              )}
-              <h2 className="section-title">
-                {highlightTitle(props.title, props.titleHighlight)}
-              </h2>
-              {props.items && props.items.length > 0 && (
-                <div className="why-list">
-                  {props.items.map((item: any, i: number) => (
-                    <div key={i} className="why-item">
-                      {item.icon && <div className="why-icon"><i className={item.icon}></i></div>}
-                      <div className="why-text">
-                        <h4>{item.label}</h4>
-                        {item.description && <p>{item.description}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            {props.stats && props.stats.length > 0 && (
-              <div className="why-stats">
-                {props.stats.map((stat: any, i: number) => (
-                  <div key={i} className="why-stat-card">
-                    {stat.icon && <div className="why-stat-icon"><i className={stat.icon}></i></div>}
-                    <div className="why-stat-number">{stat.number}</div>
-                    <div className="why-stat-label">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      )
-
-    case 'team':
-      return (
-        <section className="section" id="team" key={index}>
-          <div className="container">
-            <div className="section-header">
-              {props.badgeIcon && props.badgeText && (
-                <div className="section-badge">
-                  <i className={props.badgeIcon}></i> {props.badgeText}
-                </div>
-              )}
-              <h2 className="section-title">
-                {highlightTitle(props.title, props.titleHighlight)}
-              </h2>
-              {props.description && <p className="section-desc">{props.description}</p>}
-            </div>
-            <div className="team-grid">
-              {props.members?.map((member: any, i: number) => (
-                <div key={i} className="team-card">
-                  <div className="team-img">
-                    {member.avatarImage ? (
-                      <img src={member.avatarImage} alt={member.name} />
-                    ) : (
-                      <i className={member.avatarIcon || 'fas fa-user'}></i>
-                    )}
-                    {member.social && member.social.length > 0 && (
-                      <div className="team-socials">
-                        {member.social.map((s: any, j: number) => (
-                          <a key={j} href={s.url || '#'} className="team-social"><i className={s.icon}></i></a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="team-info">
-                    <h3 className="team-name">{member.name}</h3>
-                    <p className="team-role">{member.role}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )
-
-    case 'portfolio':
-      return (
-        <section className="section" id="portfolio" key={index}>
-          <div className="container">
-            <div className="section-header">
-              {props.badgeIcon && props.badgeText && (
-                <div className="section-badge">
-                  <i className={props.badgeIcon}></i> {props.badgeText}
-                </div>
-              )}
-              <h2 className="section-title">
-                {highlightTitle(props.title, props.titleHighlight)}
-              </h2>
-              {props.description && <p className="section-desc">{props.description}</p>}
-            </div>
-            {props.filters && props.filters.length > 0 && (
-              <div className="portfolio-filter">
-                {props.filters.map((f: any, i: number) => (
-                  <button key={i} className={`filter-btn${i === 0 ? ' active' : ''}`}>{f.label}</button>
-                ))}
-              </div>
-            )}
-            <div className="portfolio-grid">
-              {props.projects?.map((proj: any, i: number) => (
-                <div key={i} className="portfolio-card">
-                  {proj.icon && <i className={proj.icon}></i>}
-                  <div className="portfolio-overlay">
-                    {proj.category && <span className="portfolio-category">{proj.category}</span>}
-                    <h3 className="portfolio-title">{proj.title}</h3>
-                    {proj.linkText && (
-                      <a href={proj.linkUrl || '#'} className="portfolio-link">
-                        {proj.linkText}
-                        {proj.linkIcon && <i className={proj.linkIcon}></i>}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )
-
-    case 'blog':
-      return (
-        <section className="section blog" id="blog" key={index}>
-          <div className="container">
-            <div className="section-header">
-              {props.badgeIcon && props.badgeText && (
-                <div className="section-badge">
-                  <i className={props.badgeIcon}></i> {props.badgeText}
-                </div>
-              )}
-              <h2 className="section-title">
-                {highlightTitle(props.title, props.titleHighlight)}
-              </h2>
-              {props.description && <p className="section-desc">{props.description}</p>}
-            </div>
-            <div className="blog-grid">
-              {props.posts?.map((post: any, i: number) => (
-                <div key={i} className="blog-card">
-                  <div className="blog-img">
-                    {post.icon && <i className={post.icon}></i>}
-                    {post.date && <span className="blog-date">{post.date}</span>}
-                  </div>
-                  <div className="blog-content">
-                    {post.tag && <span className="blog-tag">{post.tag}</span>}
-                    <h3 className="blog-title">{post.title}</h3>
-                    <div className="blog-meta">
-                      {post.author && <span><i className="fas fa-user"></i> {post.author}</span>}
-                      {post.readTime && <span><i className="fas fa-clock"></i> {post.readTime}</span>}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )
-
-    case 'pricing':
-      return (
-        <section className="section" id="pricing" key={index}>
-          <div className="container">
-            <div className="section-header">
-              {props.badgeIcon && props.badgeText && (
-                <div className="section-badge">
-                  <i className={props.badgeIcon}></i> {props.badgeText}
-                </div>
-              )}
-              <h2 className="section-title">
-                {highlightTitle(props.title, props.titleHighlight)}
-              </h2>
-              {props.description && <p className="section-desc">{props.description}</p>}
-            </div>
-            <div className="pricing-grid">
-              {props.plans?.map((plan: any, i: number) => (
-                <div key={i} className={`pricing-card${plan.featured ? ' featured' : ''}`}>
-                  {plan.featured && plan.featuredBadge && <span className="pricing-badge">{plan.featuredBadge}</span>}
-                  <h3 className="pricing-name">{plan.name}</h3>
-                  {plan.description && <p className="pricing-desc">{plan.description}</p>}
-                  <div className="pricing-price">
-                    <span className="pricing-amount">{plan.price}</span>
-                    {plan.period && <span className="pricing-period">{plan.period}</span>}
-                  </div>
-                  {plan.features && plan.features.length > 0 && (
-                    <div className="pricing-features">
-                      {plan.features.map((f: any, j: number) => (
-                        <div key={j} className="pricing-feature">
-                          <i className={f.icon || 'fas fa-check'}></i>
-                          <span>{f.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {plan.buttonText && (
-                    <a href={plan.buttonUrl || '#contact'} className={`btn ${plan.buttonStyle === 'primary' ? 'btn-primary' : 'btn-outline'}`}>
-                      {plan.buttonText}
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )
-
-    case 'cta':
-      return (
-        <section className="section cta" key={index}>
-          <div className="container">
-            <h2 className="cta-title">{props.title}</h2>
-            {props.description && <p className="cta-desc">{props.description}</p>}
-            {props.buttonText && (
-              <a href={props.buttonUrl || '#contact'} className="btn">
-                {props.buttonText}
-                {props.buttonIcon && <i className={props.buttonIcon}></i>}
-              </a>
-            )}
-          </div>
-        </section>
-      )
-
-    case 'contact':
-      return (
-        <section className="section contact" id="contact" key={index}>
-          <div className="container">
-              <div className="contact-info">
-                <h2 className="section-title">
-                  {highlightTitle(props.title, props.titleHighlight)}
-                </h2>
-                {props.description && <p className="section-desc" style={{ textAlign: 'left' }}>{props.description}</p>}
-                {props.contactItems && props.contactItems.length > 0 && (
-                  <div className="contact-list">
-                    {props.contactItems.map((item: any, i: number) => (
-                      <div key={i} className="contact-item">
-                        <div className="contact-icon"><i className={item.icon}></i></div>
-                        <div className="contact-text">
-                          <h4>{item.label}</h4>
-                          <p>{item.value}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {props.socials && props.socials.length > 0 && (
-                  <div className="contact-socials">
-                    {props.socials.map((s: any, i: number) => (
-                      <a key={i} href={s.url || '#'} className="contact-social"><i className={s.icon}></i></a>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {props.formFields && props.formFields.length > 0 && (
-                <div className="contact-form">
-                  <form className="contact-form-inner">
-                    {props.formFields.map((field: any, i: number) => (
-                      <div key={i} className="form-group">
-                        <label className="form-label" htmlFor={field.name}>{field.label}{field.required && <span className="required">*</span>}</label>
-                        {field.type === 'textarea' ? (
-                          <textarea
-                            className="form-textarea"
-                            id={field.name}
-                            name={field.name}
-                            placeholder={field.placeholder}
-                            required={field.required}
-                          />
-                        ) : field.type === 'select' ? (
-                          <select
-                            className="form-input"
-                            id={field.name}
-                            name={field.name}
-                            required={field.required}
-                          >
-                            {field.options?.map((opt: any, j: number) => (
-                              <option key={j} value={opt.value}>{opt.label}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            className="form-input"
-                            type={field.type}
-                            id={field.name}
-                            name={field.name}
-                            placeholder={field.placeholder}
-                            required={field.required}
-                          />
-                        )}
-                      </div>
-                    ))}
-                    <button type="submit" className="btn btn-primary">
-                      {props.submitButtonText || 'Send Message'}
-                      {props.submitButtonIcon && <i className={props.submitButtonIcon}></i>}
-                    </button>
-                  </form>
-                </div>
-              )}
-          </div>
-        </section>
-      )
-
-    default:
-      return null
+function renderSection(section: Section, index: number, templateCategory: string = 'digital-agency') {
+  const template = getTemplateConfig(templateCategory)
+  const Renderer = template.sections[section.blockType]
+  
+  if (!Renderer) {
+    console.warn(`No renderer for blockType: ${section.blockType} in template ${templateCategory}`)
+    return (
+      <div key={index} className="section-unknown" data-missing={section.blockType}>
+        <p>Unknown section type: {section.blockType}</p>
+      </div>
+    )
   }
+  
+  return <Renderer key={index} section={section} />
 }
 
 export default function LandingPage() {
@@ -618,20 +221,70 @@ export default function LandingPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [toolbarHeight, setToolbarHeight] = useState(60)
   const [theme, setTheme] = useState<any>(null)
+  const [renderedHtml, setRenderedHtml] = useState<string | null>(null)
+  const [showContentPanel, setShowContentPanel] = useState(false)
+  const [showPageBuilder, setShowPageBuilder] = useState(false)
+  const [projectData, setProjectData] = useState<any>(null)
+  const [cssVariableMapping, setCssVariableMapping] = useState<Record<string, string[]>>({})
+  const [templateSections, setTemplateSections] = useState<string[]>([])
+  const [templateSectionDefs, setTemplateSectionDefs] = useState<Record<string, any>>({})
+  const [templateCategory, setTemplateCategory] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('perissos-template-category') || 'digital-agency'
+    }
+    return 'digital-agency'
+  })
 
   const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
 
+  // Load CSS variable mapping, sections, and section definitions from template layoutConfig
+  useEffect(() => {
+    if (!templateCategory) return
+    fetch(`${cmsUrl}/api/templates?where[category][equals]=${templateCategory}&depth=1`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        const template = data.docs?.[0]
+        const layoutConfig = template?.layoutConfig
+        if (layoutConfig?.cssVariableMapping) {
+          setCssVariableMapping(layoutConfig.cssVariableMapping)
+        }
+        if (layoutConfig?.sections) {
+          setTemplateSections(layoutConfig.sections)
+        }
+        if (layoutConfig?.sectionDefinitions) {
+          setTemplateSectionDefs(layoutConfig.sectionDefinitions)
+        }
+      })
+      .catch(() => {})
+  }, [templateCategory, cmsUrl])
+
   useEffect(() => {
     const fetchCmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
-    fetch(`${fetchCmsUrl}/api/pages?where%5Bslug%5D%5Bequals%5D=home&depth=1`)
-      .then((res) => res.json())
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
+    
+    fetch(`${fetchCmsUrl}/api/pages?where%5Bslug%5D%5Bequals%5D=home&depth=1`, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return res.json()
+      })
       .then((data: any) => {
         if (data.docs?.[0]) {
-          setSections(data.docs[0].sections || [])
-          setPageId(data.docs[0].id)
-          setPageSlug(data.docs[0].slug || 'home')
-          if (data.docs[0].theme) {
-            setTheme(data.docs[0].theme)
+          const doc = data.docs[0]
+          setSections(doc.sections || [])
+          setPageId(doc.id)
+          setPageSlug(doc.slug || 'home')
+          if (doc.theme) {
+            setTheme(doc.theme)
+          }
+          if (doc.template?.category) {
+            setTemplateCategory(doc.template.category)
+          }
+          if (doc.renderedHtml) {
+            setRenderedHtml(doc.renderedHtml)
+          }
+          if (doc.projectData) {
+            setProjectData(doc.projectData)
           }
         }
         setLoading(false)
@@ -639,9 +292,17 @@ export default function LandingPage() {
       .catch(() => {
         setLoading(false)
       })
+      .finally(() => {
+        clearTimeout(timeoutId)
+      })
   }, [])
 
-  // Check auth status for edit mode
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.body.className = `${templateCategory}-template`
+      localStorage.setItem('perissos-template-category', templateCategory)
+    }
+  }, [templateCategory])
   useEffect(() => {
     fetch(`${cmsUrl}/api/users/me`, { credentials: 'include' })
       .then(res => res.json())
@@ -661,7 +322,30 @@ export default function LandingPage() {
 
   const handleThemeChange = useCallback((newTheme: any) => {
     setTheme(newTheme)
-  }, [])
+    // Inject CSS variables using template-specific mapping
+    if (typeof window !== 'undefined' && cssVariableMapping) {
+      const root = document.documentElement
+      const themeKeyToValue: Record<string, string> = {
+        primary: newTheme.primary,
+        primaryHover: newTheme.primaryHover,
+        dark: newTheme.dark,
+        light: newTheme.light || newTheme.white,
+        white: newTheme.white,
+        gray: newTheme.gray,
+        border: newTheme.border,
+        fontBody: newTheme.fontBody,
+        fontHeading: newTheme.fontHeading,
+      }
+      for (const [themeKey, cssVars] of Object.entries(cssVariableMapping)) {
+        const value = themeKeyToValue[themeKey]
+        if (value) {
+          for (const cssVar of cssVars) {
+            root.style.setProperty(cssVar, value)
+          }
+        }
+      }
+    }
+  }, [cssVariableMapping])
 
   const handleSaveAll = useCallback(async () => {
     if (!pageId) return
@@ -680,17 +364,64 @@ export default function LandingPage() {
     }
   }, [pageId, sections, theme, cmsUrl])
 
+  const handlePageBuilderSave = useCallback(async (newProjectData: any, newRenderedHtml: string) => {
+    if (!pageId) return
+    try {
+       await fetch(`${cmsUrl}/api/pages/${pageId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          projectData: newProjectData,
+          renderedHtml: newRenderedHtml,
+        }),
+      })
+      setProjectData(newProjectData)
+      setRenderedHtml(newRenderedHtml)
+
+      // Notify parent to update sections if needed
+      // The sections data from Payload's blocks field is the source of truth
+      // Any changes from GrapeJS should be reflected back in the blocks field
+    } catch (err) {
+      console.error('Page Builder save failed:', err)
+    }
+  }, [pageId, cmsUrl])
+
   // Apply theme to CSS variables for ALL users (not just logged in)
+  // Uses template-specific mapping from layoutConfig
   useEffect(() => {
     if (theme) {
       const root = document.documentElement
+      // Generic variables
       Object.entries(theme).forEach(([key, value]) => {
         if (typeof value === 'string') {
           root.style.setProperty(`--${key}`, value)
         }
       })
+      // Template-specific CSS variables from layoutConfig mapping
+      if (cssVariableMapping) {
+        const themeKeyToValue: Record<string, string> = {
+          primary: theme.primary,
+          primaryHover: theme.primaryHover,
+          dark: theme.dark,
+          light: theme.light || theme.white,
+          white: theme.white,
+          gray: theme.gray,
+          border: theme.border,
+          fontBody: theme.fontBody,
+          fontHeading: theme.fontHeading,
+        }
+        for (const [themeKey, cssVars] of Object.entries(cssVariableMapping)) {
+          const value = themeKeyToValue[themeKey]
+          if (value) {
+            for (const cssVar of cssVars) {
+              root.style.setProperty(cssVar, value)
+            }
+          }
+        }
+      }
     }
-  }, [theme])
+  }, [theme, cssVariableMapping])
 
   useEffect(() => {
     if (loading || sections.length === 0) return
@@ -750,8 +481,69 @@ export default function LandingPage() {
     )
   }
 
+  // Render the actual template HTML in both view and edit mode
+  // This ensures the Food Express design is always shown correctly
+  if (renderedHtml) {
+    const extracted = extractTemplateContent(renderedHtml)
+    return (
+      <>
+        {isEditing && (
+          <EditToolbar
+            pageId={pageId}
+            pageSlug={pageSlug}
+            onSave={handleSaveAll}
+            isSaving={isSaving}
+            onHeightChange={setToolbarHeight}
+            theme={theme}
+            onThemeChange={handleThemeChange}
+            onOpenContent={() => setShowContentPanel(true)}
+            onOpenPageBuilder={() => setShowPageBuilder(true)}
+            templateCategory={templateCategory}
+            cssVariableMapping={cssVariableMapping}
+          />
+        )}
+        {extracted.styles && (
+          <style dangerouslySetInnerHTML={{ __html: extracted.styles }} />
+        )}
+        <main>
+          <div dangerouslySetInnerHTML={{ __html: extracted.content }} />
+        </main>
+
+        {/* Content Editor Panel */}
+        <ContentPanel
+          isOpen={showContentPanel}
+          onClose={() => setShowContentPanel(false)}
+          sections={sections}
+          pageId={pageId}
+          cmsUrl={cmsUrl}
+          onSectionsChange={setSections}
+          templateCategory={templateCategory}
+        />
+
+        {/* Page Builder (GrapeJS) */}
+        {showPageBuilder && (
+          <GrapejsEditor
+            pageId={pageId}
+            cmsUrl={cmsUrl}
+            initialProjectData={projectData}
+            initialRenderedHtml={renderedHtml}
+            theme={theme}
+            templateCategory={templateCategory}
+            templateSections={templateSections}
+            templateSectionDefs={templateSectionDefs}
+            cssVariableMapping={cssVariableMapping}
+            onSave={handlePageBuilderSave}
+            onClose={() => setShowPageBuilder(false)}
+          />
+        )}
+      </>
+    )
+  }
+
+  // Fallback: React sections (when no renderedHtml exists)
   return (
-    <main className="digital-agency-template">
+    <>
+      <main className="relative">
       {/* Edit Mode Toolbar */}
       {isEditing && (
         <EditToolbar
@@ -762,10 +554,14 @@ export default function LandingPage() {
           onHeightChange={setToolbarHeight}
           theme={theme}
           onThemeChange={handleThemeChange}
+          onOpenContent={() => setShowContentPanel(true)}
+          onOpenPageBuilder={() => setShowPageBuilder(true)}
+          templateCategory={templateCategory}
+          cssVariableMapping={cssVariableMapping}
         />
       )}
 
-      <Header editMode={isEditing} toolbarHeight={toolbarHeight} />
+      <Header editMode={isEditing} toolbarHeight={toolbarHeight} theme={theme} />
       {sections.length > 0 ? (
         sections.map((section, i) => (
           <div
@@ -823,7 +619,7 @@ export default function LandingPage() {
               if (overlay) overlay.remove()
             }}
           >
-            {renderSection(section, i)}
+            {renderSection(section, i, templateCategory)}
           </div>
         ))
       ) : (
@@ -848,6 +644,24 @@ export default function LandingPage() {
           }
         }}
       />
+
+      {/* Page Builder (GrapeJS) */}
+      {showPageBuilder && (
+        <GrapejsEditor
+          pageId={pageId}
+          cmsUrl={cmsUrl}
+          initialProjectData={projectData}
+          initialRenderedHtml={renderedHtml}
+          theme={theme}
+          templateCategory={templateCategory}
+          templateSections={templateSections}
+          templateSectionDefs={templateSectionDefs}
+          cssVariableMapping={cssVariableMapping}
+          onSave={handlePageBuilderSave}
+          onClose={() => setShowPageBuilder(false)}
+        />
+      )}
     </main>
+    </>
   )
 }
