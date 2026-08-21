@@ -302,7 +302,7 @@ export function GrapejsEditor({
     setIsGenerating(true)
 
     try {
-      const res = await fetch(`${cmsUrl}/api/ai/generate`, {
+      const res = await fetch('/api/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -330,7 +330,7 @@ export function GrapejsEditor({
     } finally {
       setIsGenerating(false)
     }
-  }, [chatPrompt, isGenerating, cmsUrl])
+  }, [chatPrompt, isGenerating, templateCategory, theme])
 
   const handleClose = useCallback(() => {
     onClose?.()
@@ -387,6 +387,25 @@ export function GrapejsEditor({
           >
             <i className="fas fa-save" style={{ marginRight: '6px' }} />
             Save
+          </button>
+          <button
+            onClick={() => setShowChat(!showChat)}
+            style={{
+              padding: '6px 12px',
+              background: showChat ? '#8b5cf6' : 'transparent',
+              color: showChat ? '#fff' : '#8b5cf6',
+              border: '1px solid #8b5cf6',
+              borderRadius: '6px',
+              fontSize: '13px',
+              cursor: 'pointer',
+              fontFamily: 'DM Sans, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <i className="fas fa-wand-magic-sparkles" />
+            AI Design
           </button>
           <button
             onClick={handleClose}

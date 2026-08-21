@@ -505,6 +505,9 @@ export default function LandingPage() {
         {extracted.styles && (
           <style dangerouslySetInnerHTML={{ __html: extracted.styles }} />
         )}
+        {isEditing && (
+          <style dangerouslySetInnerHTML={{ __html: `#masthead { top: ${toolbarHeight}px !important; }` }} />
+        )}
         <main>
           <div dangerouslySetInnerHTML={{ __html: extracted.content }} />
         </main>
