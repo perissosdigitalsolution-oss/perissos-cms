@@ -14,11 +14,20 @@ function extractRenderedHtml(zip: AdmZip): string {
 
   let html = zip.readAsText(htmlEntry.entryName)
 
-  // Inline all CSS files
+  // Inline CSS files — but only if they aren't already embedded in <style> tags
+  // Many templates have CSS both inline in <head> AND as external files (stubs)
   const cssEntries = entries.filter(e => !e.isDirectory && e.entryName.toLowerCase().endsWith('.css'))
-  let inlineCSS = ''
+  let extraCSS = ''
   for (const cssEntry of cssEntries) {
-    try { inlineCSS += `\n${zip.readAsText(cssEntry.entryName)}\n` } catch {}
+    try {
+      const cssContent = zip.readAsText(cssEntry.entryName)
+      // Skip stub/empty CSS files (less than 200 chars likely just a font-family override)
+      if (cssContent.trim().length < 200) continue
+      // Skip CSS that's already present in the HTML's <style> tags
+      const firstRule = cssContent.trim().substring(0, 50)
+      if (html.includes(firstRule)) continue
+      extraCSS += `\n${cssContent}\n`
+    } catch {}
   }
 
   // Inline all JS files
@@ -28,8 +37,14 @@ function extractRenderedHtml(zip: AdmZip): string {
     try { inlineJS += `\n${zip.readAsText(jsEntry.entryName)}\n` } catch {}
   }
 
-  if (inlineCSS) {
-    html = html.replace('</head>', `<style id="template-inlined-css">${inlineCSS}</style>\n</head>`)
+  // Inject extra CSS BEFORE the first <style> tag (not after) so it doesn't override
+  if (extraCSS) {
+    const firstStyle = html.indexOf('<style')
+    if (firstStyle > -1) {
+      html = html.substring(0, firstStyle) + `<style id="template-extra-css">${extraCSS}</style>\n` + html.substring(firstStyle)
+    } else {
+      html = html.replace('</head>', `<style id="template-extra-css">${extraCSS}</style>\n</head>`)
+    }
   }
   if (inlineJS) {
     html = html.replace('</body>', `<script>${inlineJS}</script>\n</body>`)

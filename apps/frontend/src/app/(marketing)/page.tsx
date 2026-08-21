@@ -375,16 +375,23 @@ export default function LandingPage() {
       document.body.className = `${templateCategory}-template`
       localStorage.setItem('perissos-template-category', templateCategory)
 
-      // Dynamic CSS loading: only load the active template's CSS
-      let linkEl = document.getElementById('template-css') as HTMLLinkElement
-      if (!linkEl) {
-        linkEl = document.createElement('link')
-        linkEl.id = 'template-css'
-        linkEl.rel = 'stylesheet'
-        document.head.appendChild(linkEl)
+      // Dynamic CSS loading: only needed for Path B (React sections)
+      // Path A (renderedHtml) already has CSS inlined from the ZIP
+      if (!renderedHtml) {
+        let linkEl = document.getElementById('template-css') as HTMLLinkElement
+        if (!linkEl) {
+          linkEl = document.createElement('link')
+          linkEl.id = 'template-css'
+          linkEl.rel = 'stylesheet'
+          document.head.appendChild(linkEl)
+        }
+        const cssFile = templateCategory === 'restaurant' ? '/styles/restaurant.css' : '/styles/digital-agency.css'
+        linkEl.href = cssFile
+      } else {
+        // Remove dynamic CSS link when using renderedHtml (CSS is inlined)
+        const linkEl = document.getElementById('template-css')
+        if (linkEl) linkEl.remove()
       }
-      const cssFile = templateCategory === 'restaurant' ? '/styles/restaurant.css' : '/styles/digital-agency.css'
-      linkEl.href = cssFile
 
       // Clean up old template CSS variables to prevent leaks
       const root = document.documentElement

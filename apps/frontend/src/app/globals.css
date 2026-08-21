@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Base variables — templates override these via their own CSS */
 :root {
-  --primary: #2a367a;
+  --primary: #FF6600;
   --secondary: #6d28d9;
 }
 

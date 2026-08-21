@@ -8,13 +8,15 @@ const root = process.cwd()
 function generateFromDir(dirPath: string): string {
   let html = readFileSync(join(dirPath, 'index.html'), 'utf-8')
 
-  // Inline CSS files
+  // Inline CSS files — skip stubs (<200 chars)
   const cssDir = join(dirPath, 'css')
   try {
     const cssFiles = readdirSync(cssDir).filter(f => f.endsWith('.css'))
     let inlineCSS = ''
     for (const f of cssFiles) {
-      inlineCSS += `\n${readFileSync(join(cssDir, f), 'utf-8')}\n`
+      const content = readFileSync(join(cssDir, f), 'utf-8')
+      if (content.trim().length < 200) continue
+      inlineCSS += `\n${content}\n`
     }
     if (inlineCSS) {
       html = html.replace('</head>', `<style id="template-inlined-css">${inlineCSS}</style>\n</head>`)
@@ -45,10 +47,17 @@ function generateFromZip(zipPath: string): string {
 
   let html = zip.readAsText(htmlEntry.entryName)
 
+  // Inline CSS files — skip stubs (<200 chars) and files already in HTML
   const cssEntries = entries.filter(e => !e.isDirectory && e.entryName.toLowerCase().endsWith('.css'))
-  let inlineCSS = ''
+  let extraCSS = ''
   for (const cssEntry of cssEntries) {
-    try { inlineCSS += `\n${zip.readAsText(cssEntry.entryName)}\n` } catch {}
+    try {
+      const cssContent = zip.readAsText(cssEntry.entryName)
+      if (cssContent.trim().length < 200) continue
+      const firstRule = cssContent.trim().substring(0, 50)
+      if (html.includes(firstRule)) continue
+      extraCSS += `\n${cssContent}\n`
+    } catch {}
   }
 
   const jsEntries = entries.filter(e => !e.isDirectory && e.entryName.toLowerCase().endsWith('.js'))
@@ -57,8 +66,14 @@ function generateFromZip(zipPath: string): string {
     try { inlineJS += `\n${zip.readAsText(jsEntry.entryName)}\n` } catch {}
   }
 
-  if (inlineCSS) {
-    html = html.replace('</head>', `<style id="template-inlined-css">${inlineCSS}</style>\n</head>`)
+  // Inject extra CSS BEFORE first <style> so existing styles take priority
+  if (extraCSS) {
+    const firstStyle = html.indexOf('<style')
+    if (firstStyle > -1) {
+      html = html.substring(0, firstStyle) + `<style id="template-extra-css">${extraCSS}</style>\n` + html.substring(firstStyle)
+    } else {
+      html = html.replace('</head>', `<style id="template-extra-css">${extraCSS}</style>\n</head>`)
+    }
   }
   if (inlineJS) {
     html = html.replace('</body>', `<script>${inlineJS}</script>\n</body>`)
