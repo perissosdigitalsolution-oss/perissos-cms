@@ -1,74 +1,77 @@
 import type { CollectionConfig } from 'payload'
 import { getSectionDefaultProps, type SectionCategoryType } from '@perissos/shared/registry/sections'
 
+function stripIds(obj: any): any {
+  if (Array.isArray(obj)) return obj.map(stripIds)
+  if (obj && typeof obj === 'object') {
+    const clean: any = {}
+    for (const [key, val] of Object.entries(obj)) {
+      if (key === 'id' || key === '_id') continue // skip embedded IDs
+      clean[key] = stripIds(val)
+    }
+    return clean
+  }
+  return obj
+}
+
+// Flatten sectionContents {type, props} → Payload block format {blockType, ...props}
+function flattenSection(s: any, index: number): any {
+  const blockType = s.blockType || s.type
+  const props = s.props || {}
+  const result: any = { blockType, _order: index, _path: `root.${index}` }
+  for (const [key, val] of Object.entries(props)) {
+    if (key === 'id' || key === '_id') continue
+    result[key] = val
+  }
+  return result
+}
+
 async function replaceHomePageTemplate(template: any, payload: any) {
   try {
     const layoutConfig = template.layoutConfig
     if (!layoutConfig) return
 
-    const sectionContents = (layoutConfig.sectionContents || []).filter((s: any) =>
-      !['footer', 'header'].includes(s.type)
-    )
-
     const existingHome = await payload.find({
       collection: 'pages',
       where: { slug: { equals: 'home' } },
       limit: 1,
-      depth: 1,
     })
 
     const homePage = existingHome.docs[0]
+    if (!homePage) return
 
-    // Build update data — ALWAYS overwrites existing content
-    const updateData: any = {
-      title: 'Home',
-      slug: 'home',
-      template: template.id,
-      theme: layoutConfig.theme || {},
-      projectData: null,
-      renderedHtml: null,  // Clear old template's rendered HTML
+    // Delete all existing block rows from every block table
+    const blockTables = [
+      'pages_blocks_hero','pages_blocks_services','pages_blocks_about',
+      'pages_blocks_why_us','pages_blocks_team','pages_blocks_portfolio',
+      'pages_blocks_blog','pages_blocks_pricing','pages_blocks_cta',
+      'pages_blocks_contact','pages_blocks_menu','pages_blocks_menu_highlights',
+      'pages_blocks_reservation','pages_blocks_gallery','pages_blocks_testimonials',
+      'pages_blocks_specials'
+    ]
+    for (const table of blockTables) {
+      try {
+        await payload.db.execute(`DELETE FROM "${table}" WHERE _parent_id = ${homePage.id}`)
+      } catch { /* table might not exist or be empty */ }
     }
 
-    // Path B: Store structured sections from layoutConfig
-    if (sectionContents.length > 0) {
-      updateData.sections = sectionContents.map((s: any, i: number) => ({
-        ...s,
-        _order: i,
-      }))
-    } else {
-      // Generate sections with proper defaults from the shared section registry
-      updateData.sections = (layoutConfig.sections || []).map((sectionType: string, i: number) => {
-        const defaults = getSectionDefaultProps(sectionType as SectionCategoryType)
-        return {
-          _order: i,
-          _path: `root.${i}`,
-          blockType: sectionType,
-          blockName: `${sectionType}-${i + 1}`,
-          ...defaults,
-        }
-      })
-    }
+    // Update page metadata only — no sections (Payload blocks have ID conflicts)
+    // The frontend reads section data from layoutConfig.sectionContents instead
+    await payload.update({
+      collection: 'pages',
+      id: homePage.id,
+      data: {
+        title: 'Home',
+        slug: 'home',
+        template: template.id,
+        theme: layoutConfig.theme || {},
+        projectData: null,
+        renderedHtml: null,
+      },
+      bypassValidation: true,
+    })
 
-    if (homePage) {
-      // FORCE update — replace all content on the home page
-      await payload.update({
-        collection: 'pages',
-        id: homePage.id,
-        data: updateData,
-        bypassValidation: true,
-      })
-      console.log(`[replaceHomePageTemplate] Replaced home page content with template "${template.name}"`)
-    } else {
-      // Create new home page
-      await payload.create({
-        collection: 'pages',
-        data: {
-          ...updateData,
-          publishedAt: new Date().toISOString(),
-        },
-      })
-      console.log(`[replaceHomePageTemplate] Created home page with template "${template.name}"`)
-    }
+    console.log(`[replaceHomePageTemplate] Replaced home page content with template "${template.name}"`)
   } catch (error) {
     console.error('[replaceHomePageTemplate] Failed:', error)
   }
@@ -250,7 +253,10 @@ export const Templates: CollectionConfig = {
           }
 
           // Force-replace home page content with the activated template
-          await replaceHomePageTemplate(doc, payload)
+          // Run non-blocking to avoid timeout on the PATCH response
+          replaceHomePageTemplate(doc, payload).catch(err => {
+            console.error('[Templates] replaceHomePageTemplate failed:', err)
+          })
         }
         return doc
       },

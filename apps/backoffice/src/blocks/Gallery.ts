@@ -13,10 +13,10 @@ export const GalleryBlock: Block = {
       name: 'images',
       type: 'array',
       label: 'Gallery Images',
-      minRows: 1,
+      minRows: 0,
       maxRows: 20,
       fields: [
-        { name: 'url', type: 'text', required: true, admin: { description: 'Image URL' } },
+        { name: 'url', type: 'text', admin: { description: 'Image URL' } },
         { name: 'caption', type: 'text', admin: { description: 'Image caption text' } },
         { name: 'alt', type: 'text', admin: { description: 'Alt text for accessibility' } },
       ],

@@ -271,20 +271,33 @@ export default function LandingPage() {
       .then((data: any) => {
         if (data.docs?.[0]) {
           const doc = data.docs[0]
-          setSections(doc.sections || [])
           setPageId(doc.id)
           setPageSlug(doc.slug || 'home')
-          if (doc.theme) {
-            setTheme(doc.theme)
-          }
-          if (doc.template?.category) {
-            setTemplateCategory(doc.template.category)
-          }
-          if (doc.renderedHtml) {
-            setRenderedHtml(doc.renderedHtml)
-          }
-          if (doc.projectData) {
-            setProjectData(doc.projectData)
+          if (doc.theme) setTheme(doc.theme)
+          if (doc.template?.category) setTemplateCategory(doc.template.category)
+          if (doc.renderedHtml) setRenderedHtml(doc.renderedHtml)
+          if (doc.projectData) setProjectData(doc.projectData)
+
+          // Use page sections if available, otherwise fall back to template layoutConfig.sectionContents
+          if (doc.sections && doc.sections.length > 0) {
+            setSections(doc.sections)
+          } else if (doc.template?.id) {
+            fetch(`${fetchCmsUrl}/api/templates/${doc.template.id}?depth=1`, { credentials: 'include' })
+              .then(res => res.json())
+              .then(tmplData => {
+                const lc = tmplData?.layoutConfig
+                if (lc?.sectionContents) {
+                  const secs = lc.sectionContents
+                    .filter((s: any) => !['footer', 'header'].includes(s.type))
+                    .map((s: any, i: number) => {
+                      const bt = s.blockType || s.type
+                      const p = s.props || s
+                      return { ...p, blockType: bt, _order: i, _path: `root.${i}` }
+                    })
+                  setSections(secs)
+                }
+              })
+              .catch(() => {})
           }
         }
         setLoading(false)
@@ -297,6 +310,39 @@ export default function LandingPage() {
       })
   }, [])
 
+  // Shared: process page data and resolve template sectionContents if needed
+  const processPageData = (doc: any) => {
+    setPageId(doc.id)
+    setPageSlug(doc.slug || 'home')
+    if (doc.theme) setTheme(doc.theme)
+    if (doc.template?.category) setTemplateCategory(doc.template.category)
+    if (doc.renderedHtml) setRenderedHtml(doc.renderedHtml)
+    else setRenderedHtml(null)
+    if (doc.projectData) setProjectData(doc.projectData)
+
+    if (doc.sections && doc.sections.length > 0) {
+      setSections(doc.sections)
+    } else if (doc.template?.id) {
+      const fetchCmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
+      fetch(`${fetchCmsUrl}/api/templates/${doc.template.id}?depth=1`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(tmplData => {
+          const lc = tmplData?.layoutConfig
+          if (lc?.sectionContents) {
+            const secs = lc.sectionContents
+              .filter((s: any) => !['footer', 'header'].includes(s.type))
+              .map((s: any, i: number) => {
+                const bt = s.blockType || s.type
+                const p = s.props || s
+                return { ...p, blockType: bt, _order: i, _path: `root.${i}` }
+              })
+            setSections(secs)
+          }
+        })
+        .catch(() => {})
+    }
+  }
+
   // Re-fetch page data when tab becomes visible (after template switch in backoffice)
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -305,16 +351,7 @@ export default function LandingPage() {
         fetch(`${fetchCmsUrl}/api/pages?where%5Bslug%5D%5Bequals%5D=home&depth=1`)
           .then((res) => res.json())
           .then((data: any) => {
-            if (data.docs?.[0]) {
-              const doc = data.docs[0]
-              setSections(doc.sections || [])
-              setPageId(doc.id)
-              if (doc.theme) setTheme(doc.theme)
-              if (doc.template?.category) setTemplateCategory(doc.template.category)
-              if (doc.renderedHtml) setRenderedHtml(doc.renderedHtml)
-              else setRenderedHtml(null)
-              if (doc.projectData) setProjectData(doc.projectData)
-            }
+            if (data.docs?.[0]) processPageData(data.docs[0])
           })
           .catch(() => {})
       }
@@ -330,17 +367,7 @@ export default function LandingPage() {
       fetch(`${fetchCmsUrl}/api/pages?where%5Bslug%5D%5Bequals%5D=home&depth=1`)
         .then((res) => res.json())
         .then((data: any) => {
-          if (data.docs?.[0]) {
-            const doc = data.docs[0]
-            const incomingTemplateCategory = doc.template?.category || 'digital-agency'
-            setSections(doc.sections || [])
-            setPageId(doc.id)
-            if (doc.theme) setTheme(doc.theme)
-            if (doc.template?.category) setTemplateCategory(incomingTemplateCategory)
-            if (doc.renderedHtml) setRenderedHtml(doc.renderedHtml)
-            else setRenderedHtml(null)
-            if (doc.projectData) setProjectData(doc.projectData)
-          }
+          if (data.docs?.[0]) processPageData(data.docs[0])
         })
         .catch(() => {})
     }, 30000)
