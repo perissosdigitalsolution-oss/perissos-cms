@@ -5,6 +5,38 @@ import config from '@payload-config'
 import * as cheerio from 'cheerio'
 import { parseTemplate, extractSectionHtml } from '@/lib/html-parser'
 import { processAssets, extractThemeConfig } from '@/lib/asset-pipeline'
+
+// Extract self-contained HTML from ZIP — inline all CSS and JS files
+function extractRenderedHtml(zip: AdmZip): string {
+  const entries = zip.getEntries()
+  const htmlEntry = entries.find(e => !e.isDirectory && e.entryName.toLowerCase().endsWith('index.html'))
+  if (!htmlEntry) return ''
+
+  let html = zip.readAsText(htmlEntry.entryName)
+
+  // Inline all CSS files
+  const cssEntries = entries.filter(e => !e.isDirectory && e.entryName.toLowerCase().endsWith('.css'))
+  let inlineCSS = ''
+  for (const cssEntry of cssEntries) {
+    try { inlineCSS += `\n${zip.readAsText(cssEntry.entryName)}\n` } catch {}
+  }
+
+  // Inline all JS files
+  const jsEntries = entries.filter(e => !e.isDirectory && e.entryName.toLowerCase().endsWith('.js'))
+  let inlineJS = ''
+  for (const jsEntry of jsEntries) {
+    try { inlineJS += `\n${zip.readAsText(jsEntry.entryName)}\n` } catch {}
+  }
+
+  if (inlineCSS) {
+    html = html.replace('</head>', `<style id="template-inlined-css">${inlineCSS}</style>\n</head>`)
+  }
+  if (inlineJS) {
+    html = html.replace('</body>', `<script>${inlineJS}</script>\n</body>`)
+  }
+
+  return html
+}
 import { mapHeroSection } from '@/lib/section-mappers/hero'
 import { mapServicesSection } from '@/lib/section-mappers/services'
 import { mapAboutSection } from '@/lib/section-mappers/about'
@@ -225,6 +257,9 @@ export async function POST(request: Request) {
     })
 
     // Create the template document
+    // Generate self-contained HTML with inlined CSS/JS from ZIP
+    const renderedHtml = extractRenderedHtml(zip)
+
     const templateDoc = await payload.create({
       collection: 'templates',
       data: {
@@ -233,6 +268,7 @@ export async function POST(request: Request) {
         previewImage: previewImageId || undefined,
         layoutConfig,
         zipFile: zipDoc.id,
+        renderedHtml: renderedHtml || undefined,
         isActive: false,
         version: manifest.version || '1.0.0',
         category: manifest.category || 'imported',

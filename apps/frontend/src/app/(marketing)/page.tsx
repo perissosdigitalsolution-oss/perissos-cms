@@ -28,7 +28,7 @@ function extractTemplateContent(html: string): { styles: string; content: string
   let styles = ''
   let content = html
 
-  // Extract <style> tags from <head>
+  // Extract <style> tags (including inlined template CSS)
   const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi
   let match
   while ((match = styleRegex.exec(html)) !== null) {
@@ -41,12 +41,8 @@ function extractTemplateContent(html: string): { styles: string; content: string
     content = bodyMatch[1]
   }
 
-  // Remove the template's own <header> (we use React Header for edit mode)
-  // But keep <header id="masthead"> for restaurant template (has its own nav)
-  // Only strip generic headers without id="masthead"
-  content = content.replace(/<header(?!\s+id="masthead")[\s\S]*?<\/header>/gi, '')
-
-  // Clean up any nested doctype/html/head/meta/title/link/script tags
+  // Keep the template's own header and footer — they are part of the design
+  // Only strip boilerplate tags
   content = content.replace(/<!DOCTYPE[^>]*>/gi, '')
   content = content.replace(/<html[^>]*>/gi, '')
   content = content.replace(/<\/html>/gi, '')

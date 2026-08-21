@@ -29,7 +29,6 @@ function flattenSection(s: any, index: number): any {
 async function replaceHomePageTemplate(template: any, payload: any) {
   try {
     const layoutConfig = template.layoutConfig
-    if (!layoutConfig) return
 
     const existingHome = await payload.find({
       collection: 'pages',
@@ -55,8 +54,10 @@ async function replaceHomePageTemplate(template: any, payload: any) {
       } catch { /* table might not exist or be empty */ }
     }
 
-    // Update page metadata only — no sections (Payload blocks have ID conflicts)
-    // The frontend reads section data from layoutConfig.sectionContents instead
+    // Get renderedHtml from template
+    const renderedHtml = template.renderedHtml || null
+
+    // Update page with template data and renderedHtml
     await payload.update({
       collection: 'pages',
       id: homePage.id,
@@ -64,9 +65,9 @@ async function replaceHomePageTemplate(template: any, payload: any) {
         title: 'Home',
         slug: 'home',
         template: template.id,
-        theme: layoutConfig.theme || {},
+        theme: layoutConfig?.theme || {},
         projectData: null,
-        renderedHtml: null,
+        renderedHtml,
       },
       bypassValidation: true,
     })
@@ -138,6 +139,15 @@ export const Templates: CollectionConfig = {
         readOnly: true,
         description: 'Original ZIP file (for re-import)',
       },
+    },
+    {
+      name: 'renderedHtml',
+      type: 'textarea',
+      admin: {
+        readOnly: true,
+        description: 'Self-contained HTML with inlined CSS/JS from ZIP',
+      },
+      maxLength: 500000,
     },
     {
       name: 'isActive',
