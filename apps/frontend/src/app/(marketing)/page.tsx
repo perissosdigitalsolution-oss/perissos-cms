@@ -301,6 +301,28 @@ export default function LandingPage() {
     if (typeof window !== 'undefined') {
       document.body.className = `${templateCategory}-template`
       localStorage.setItem('perissos-template-category', templateCategory)
+
+      // Dynamic CSS loading: only load the active template's CSS
+      let linkEl = document.getElementById('template-css') as HTMLLinkElement
+      if (!linkEl) {
+        linkEl = document.createElement('link')
+        linkEl.id = 'template-css'
+        linkEl.rel = 'stylesheet'
+        document.head.appendChild(linkEl)
+      }
+      const cssFile = templateCategory === 'restaurant' ? '/styles/restaurant.css' : '/styles/digital-agency.css'
+      linkEl.href = cssFile
+
+      // Clean up old template CSS variables to prevent leaks
+      const root = document.documentElement
+      const oldVars = [
+        '--primary', '--primary-hover', '--dark', '--dark-2', '--dark-3',
+        '--light', '--white', '--gray', '--border', '--font-body', '--font-heading',
+        '--r-accent', '--r-accent-hover', '--r-light', '--r-dark', '--r-gray',
+        '--r-border', '--r-font-primary', '--r-font-heading', '--r-font-display',
+        '--r-container',
+      ]
+      oldVars.forEach(v => root.style.removeProperty(v))
     }
   }, [templateCategory])
   useEffect(() => {

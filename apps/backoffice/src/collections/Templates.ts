@@ -1,11 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
-async function generatePagesFromTemplate(template: any, payload: any) {
+async function replaceHomePageTemplate(template: any, payload: any) {
   try {
     const layoutConfig = template.layoutConfig
     if (!layoutConfig) return
 
-    const sectionContents = (layoutConfig.sectionContents || []).filter((s: any) => 
+    const sectionContents = (layoutConfig.sectionContents || []).filter((s: any) =>
       !['footer', 'header'].includes(s.type)
     )
 
@@ -16,79 +16,60 @@ async function generatePagesFromTemplate(template: any, payload: any) {
       depth: 1,
     })
 
-    const homeExists = existingHome.docs.length > 0
-    const existingSections = homeExists && (existingHome.docs[0].sections || []).length > 0
-    console.log('[generatePagesFromTemplate] homeExists:', homeExists, 'existingSections:', existingSections, 'sectionContents:', sectionContents.length, 'homeId:', homeExists ? existingHome.docs[0].id : null)
+    const homePage = existingHome.docs[0]
 
-    // Only generate/overwrite sections when we have full sectionContents from a ZIP import
-    if (sectionContents.length === 0 || existingSections) {
-      // No full section data OR home page already has sections -> just link the template
-      if (homeExists) {
-        const result = await payload.update({
-          collection: 'pages',
-          id: existingHome.docs[0].id,
-          data: { template: template.id },
-          bypassValidation: true,
-        })
-        console.log('[generatePagesFromTemplate] update result template:', result.template, 'id:', result.id)
-      } else {
-        // No home page exists; create one with the section names as placeholders
-        const fallbackSections = (layoutConfig.sections || []).map((sectionType: string, i: number) => ({
-          _order: i,
-          _path: `root.${i}`,
-          blockType: sectionType,
-          blockName: `${sectionType}-${i + 1}`,
-          badgeIcon: '',
-          badgeText: '',
-          title: `${sectionType} Section`,
-          titleHighlight: '',
-          description: '',
-        }))
-        await payload.create({
-          collection: 'pages',
-          data: {
-            title: 'Home',
-            slug: 'home',
-            template: template.id,
-            sections: fallbackSections,
-            publishedAt: new Date().toISOString(),
-          },
-        })
-      }
-      return
+    // Build update data — ALWAYS overwrites existing content
+    const updateData: any = {
+      title: 'Home',
+      slug: 'home',
+      template: template.id,
+      theme: layoutConfig.theme || {},
+      projectData: null,
     }
 
-    // Full sectionContents available and home page has no sections yet -> populate it
-    if (homeExists) {
+    // Path B: Store structured sections from layoutConfig
+    if (sectionContents.length > 0) {
+      updateData.sections = sectionContents.map((s: any, i: number) => ({
+        ...s,
+        _order: i,
+      }))
+    } else {
+      // Fallback: create placeholder sections from section names
+      updateData.sections = (layoutConfig.sections || []).map((sectionType: string, i: number) => ({
+        _order: i,
+        _path: `root.${i}`,
+        blockType: sectionType,
+        blockName: `${sectionType}-${i + 1}`,
+        badgeIcon: '',
+        badgeText: '',
+        title: `${sectionType} Section`,
+        titleHighlight: '',
+        description: '',
+      }))
+    }
+
+    if (homePage) {
+      // FORCE update — replace all content on the home page
       await payload.update({
         collection: 'pages',
-        id: existingHome.docs[0].id,
-        data: {
-          template: template.id,
-          sections: sectionContents.map((s: any, i: number) => ({
-            ...s,
-            _order: i,
-          })),
-        },
+        id: homePage.id,
+        data: updateData,
         bypassValidation: true,
       })
+      console.log(`[replaceHomePageTemplate] Replaced home page content with template "${template.name}"`)
     } else {
+      // Create new home page
       await payload.create({
         collection: 'pages',
         data: {
-          title: 'Home',
-          slug: 'home',
-          template: template.id,
-          sections: sectionContents.map((s: any, i: number) => ({
-            ...s,
-            _order: i,
-          })),
+          ...updateData,
           publishedAt: new Date().toISOString(),
         },
       })
+      console.log(`[replaceHomePageTemplate] Created home page with template "${template.name}"`)
     }
   } catch (error) {
-    console.error('Failed to generate pages from template:', error)
+    console.error('[replaceHomePageTemplate] Failed:', error)
   }
 }
 
@@ -267,8 +248,8 @@ export const Templates: CollectionConfig = {
             }
           }
 
-          // Generate pages from the activated template
-          await generatePagesFromTemplate(doc, payload)
+          // Force-replace home page content with the activated template
+          await replaceHomePageTemplate(doc, payload)
         }
         return doc
       },

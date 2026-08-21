@@ -146,7 +146,7 @@ export async function POST(
         previewImage: extractId(marketplaceTemplate.previewImage),
         layoutConfig: marketplaceTemplate.layoutConfig || {},
         zipFile: extractId(marketplaceTemplate.zipFile),
-        isActive: false,
+        isActive: true,
         version: marketplaceTemplate.version,
         category: marketplaceTemplate.category,
         marketplaceTemplateId: marketplaceTemplate.id,

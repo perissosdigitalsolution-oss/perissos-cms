@@ -26,8 +26,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Plus+Jakarta+Sans:wght@200..800&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-        <link rel="stylesheet" href={`/styles/digital-agency.css?v=${CSS_VERSION}`} />
-        <link rel="stylesheet" href={`/styles/restaurant.css?v=${CSS_VERSION}`} />
       </head>
       <body className="digital-agency-template">
         {children}
