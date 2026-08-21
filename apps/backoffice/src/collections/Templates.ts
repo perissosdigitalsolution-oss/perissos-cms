@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { getSectionDefaultProps, type SectionCategoryType } from '@perissos/shared/registry/sections'
 
 async function replaceHomePageTemplate(template: any, payload: any) {
   try {
@@ -25,6 +26,7 @@ async function replaceHomePageTemplate(template: any, payload: any) {
       template: template.id,
       theme: layoutConfig.theme || {},
       projectData: null,
+      renderedHtml: null,  // Clear old template's rendered HTML
     }
 
     // Path B: Store structured sections from layoutConfig
@@ -34,18 +36,17 @@ async function replaceHomePageTemplate(template: any, payload: any) {
         _order: i,
       }))
     } else {
-      // Fallback: create placeholder sections from section names
-      updateData.sections = (layoutConfig.sections || []).map((sectionType: string, i: number) => ({
-        _order: i,
-        _path: `root.${i}`,
-        blockType: sectionType,
-        blockName: `${sectionType}-${i + 1}`,
-        badgeIcon: '',
-        badgeText: '',
-        title: `${sectionType} Section`,
-        titleHighlight: '',
-        description: '',
-      }))
+      // Generate sections with proper defaults from the shared section registry
+      updateData.sections = (layoutConfig.sections || []).map((sectionType: string, i: number) => {
+        const defaults = getSectionDefaultProps(sectionType as SectionCategoryType)
+        return {
+          _order: i,
+          _path: `root.${i}`,
+          blockType: sectionType,
+          blockName: `${sectionType}-${i + 1}`,
+          ...defaults,
+        }
+      })
     }
 
     if (homePage) {

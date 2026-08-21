@@ -11,6 +11,7 @@ interface ContentPanelProps {
   cmsUrl: string
   onSectionsChange: (sections: any[]) => void
   templateCategory?: string
+  sectionDefs?: Record<string, SectionDefinition>
 }
 
 interface SectionDefinition {
@@ -25,14 +26,17 @@ interface SectionDefinition {
   }>
 }
 
-export function ContentPanel({ isOpen, onClose, sections, pageId, cmsUrl, onSectionsChange, templateCategory }: ContentPanelProps) {
+export function ContentPanel({ isOpen, onClose, sections, pageId, cmsUrl, onSectionsChange, templateCategory, sectionDefs: sectionDefsProp }: ContentPanelProps) {
   const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const [sectionDefs, setSectionDefs] = useState<Record<string, SectionDefinition>>({})
+  const [sectionDefsLocal, setSectionDefs] = useState<Record<string, SectionDefinition>>({})
 
-  // Load section definitions from template layoutConfig
+  // Use prop if provided, otherwise fetch independently
+  const sectionDefs = sectionDefsProp || sectionDefsLocal
+
+  // Fallback: load section definitions from template layoutConfig if not provided as prop
   useEffect(() => {
-    if (!templateCategory) return
+    if (sectionDefsProp || !templateCategory) return
     fetch(`${cmsUrl}/api/templates?where[category][equals]=${templateCategory}&depth=1`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {

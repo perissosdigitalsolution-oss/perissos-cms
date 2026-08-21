@@ -297,6 +297,56 @@ export default function LandingPage() {
       })
   }, [])
 
+  // Re-fetch page data when tab becomes visible (after template switch in backoffice)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const fetchCmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
+        fetch(`${fetchCmsUrl}/api/pages?where%5Bslug%5D%5Bequals%5D=home&depth=1`)
+          .then((res) => res.json())
+          .then((data: any) => {
+            if (data.docs?.[0]) {
+              const doc = data.docs[0]
+              setSections(doc.sections || [])
+              setPageId(doc.id)
+              if (doc.theme) setTheme(doc.theme)
+              if (doc.template?.category) setTemplateCategory(doc.template.category)
+              if (doc.renderedHtml) setRenderedHtml(doc.renderedHtml)
+              else setRenderedHtml(null)
+              if (doc.projectData) setProjectData(doc.projectData)
+            }
+          })
+          .catch(() => {})
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  // Lightweight poll: check template change every 30s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const fetchCmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
+      fetch(`${fetchCmsUrl}/api/pages?where%5Bslug%5D%5Bequals%5D=home&depth=1`)
+        .then((res) => res.json())
+        .then((data: any) => {
+          if (data.docs?.[0]) {
+            const doc = data.docs[0]
+            const incomingTemplateCategory = doc.template?.category || 'digital-agency'
+            setSections(doc.sections || [])
+            setPageId(doc.id)
+            if (doc.theme) setTheme(doc.theme)
+            if (doc.template?.category) setTemplateCategory(incomingTemplateCategory)
+            if (doc.renderedHtml) setRenderedHtml(doc.renderedHtml)
+            else setRenderedHtml(null)
+            if (doc.projectData) setProjectData(doc.projectData)
+          }
+        })
+        .catch(() => {})
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       document.body.className = `${templateCategory}-template`
@@ -543,6 +593,7 @@ export default function LandingPage() {
           cmsUrl={cmsUrl}
           onSectionsChange={setSections}
           templateCategory={templateCategory}
+          sectionDefs={templateSectionDefs}
         />
 
         {/* Page Builder (GrapeJS) */}
