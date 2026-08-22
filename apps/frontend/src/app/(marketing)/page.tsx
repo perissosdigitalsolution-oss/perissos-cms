@@ -375,20 +375,28 @@ export default function LandingPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    // Remove old dynamic CSS link
+    // FULL CLEANUP of previous template's injected styles
     const linkEl = document.getElementById('template-css')
     if (linkEl) linkEl.remove()
-
-    // Remove old injected style
     const oldStyle = document.getElementById('template-rendered-css')
     if (oldStyle) oldStyle.remove()
 
+    // Clear ALL old inline CSS variables on <html> from previous template
+    const root = document.documentElement
+    const propsToRemove: string[] = []
+    for (let i = 0; i < root.style.length; i++) {
+      const prop = root.style.item(i)
+      if (prop.startsWith('--')) propsToRemove.push(prop)
+    }
+    propsToRemove.forEach(prop => root.style.removeProperty(prop))
+
+    // Clear ALL body inline styles from previous template
+    document.body.style.background = ''
+    document.body.style.color = ''
+    document.body.style.fontFamily = ''
+
     if (!renderedHtml) {
       // Path B: load template-specific CSS file
-      // Clear any forced body styles from Path A
-      document.body.style.background = ''
-      document.body.style.color = ''
-      document.body.style.fontFamily = ''
       if (templateCategory) {
         let newLink = document.getElementById('template-css') as HTMLLinkElement
         if (!newLink) {
@@ -400,6 +408,16 @@ export default function LandingPage() {
         newLink.href = templateCategory === 'restaurant' ? '/styles/restaurant.css' : '/styles/digital-agency.css'
       }
       return
+    }
+
+    // Helper: resolve var() references from the root's inline properties
+    const resolveVar = (value: string): string | null => {
+      const varRef = value.match(/var\(\s*--([^)]+)\s*\)/)
+      if (varRef) {
+        const resolved = root.style.getPropertyValue(`--${varRef[1]}`).trim()
+        if (resolved) return resolved
+      }
+      return null
     }
 
     // Path A: extract all CSS from renderedHtml <style> tags and inject into <head>
@@ -418,8 +436,6 @@ export default function LandingPage() {
     }
 
     // Apply template :root CSS variables as inline styles on <html>
-    // This ensures they're available regardless of CSS cascade issues
-    const root = document.documentElement
     const rootStyleMatch = allStyles.match(/:root\s*\{([\s\S]*?)\}/)
     if (rootStyleMatch) {
       const varRegex = /--([a-zA-Z0-9_-]+)\s*:\s*([^;]+)/g
@@ -429,34 +445,25 @@ export default function LandingPage() {
       }
     }
 
-    // Force body background directly — bypasses ALL CSS cascade issues
-    // The body CSS may use var(--dark) which we already set as inline style above
-    const bodyBgMatch = allStyles.match(/body\s*\{[^}]*background\s*:\s*([^;}\n]+)/)
-    if (bodyBgMatch) {
-      const bgValue = bodyBgMatch[1].trim()
-      // If it's a var() reference, resolve it from the inline properties we just set
-      const varMatch = bgValue.match(/var\(--([^)]+)\)/)
-      if (varMatch) {
-        const resolved = root.style.getPropertyValue(`--${varMatch[1]}`)
-        if (resolved) document.body.style.background = resolved
-      } else {
-        document.body.style.background = bgValue
-      }
+    // Extract body properties and resolve var() references
+    const bodyBlock = allStyles.match(/body\s*\{([^}]*)\}/)?.[1] || ''
+
+    const bgMatch = bodyBlock.match(/background\s*:\s*([^;]+)/)
+    if (bgMatch) {
+      const raw = bgMatch[1].trim()
+      document.body.style.background = resolveVar(raw) || raw
     }
-    const bodyColorMatch = allStyles.match(/body\s*\{[^}]*color\s*:\s*([^;}\n]+)/)
-    if (bodyColorMatch) {
-      const colorValue = bodyColorMatch[1].trim()
-      const varMatch = colorValue.match(/var\(--([^)]+)\)/)
-      if (varMatch) {
-        const resolved = root.style.getPropertyValue(`--${varMatch[1]}`)
-        if (resolved) document.body.style.color = resolved
-      } else {
-        document.body.style.color = colorValue
-      }
+
+    const colorMatch = bodyBlock.match(/(?<![\w-])color\s*:\s*([^;]+)/)
+    if (colorMatch) {
+      const raw = colorMatch[1].trim()
+      document.body.style.color = resolveVar(raw) || raw
     }
-    const bodyFontMatch = allStyles.match(/body\s*\{[^}]*font-family\s*:\s*([^;}\n]+)/)
-    if (bodyFontMatch) {
-      document.body.style.fontFamily = bodyFontMatch[1].trim()
+
+    const fontMatch = bodyBlock.match(/font-family\s*:\s*([^;]+)/)
+    if (fontMatch) {
+      const raw = fontMatch[1].trim()
+      document.body.style.fontFamily = resolveVar(raw) || raw
     }
   }, [renderedHtml, templateCategory])
 
@@ -555,10 +562,11 @@ export default function LandingPage() {
   useEffect(() => {
     if (theme) {
       const root = document.documentElement
-      // Generic variables
+      // Generic variables — keys may already start with "--" from DB
       Object.entries(theme).forEach(([key, value]) => {
         if (typeof value === 'string') {
-          root.style.setProperty(`--${key}`, value)
+          const cssVar = key.startsWith('--') ? key : `--${key}`
+          root.style.setProperty(cssVar, value)
         }
       })
       // Template-specific CSS variables from layoutConfig mapping
