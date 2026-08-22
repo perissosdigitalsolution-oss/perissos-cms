@@ -370,39 +370,66 @@ export default function LandingPage() {
     return () => clearInterval(interval)
   }, [])
 
+  // Inject template CSS from renderedHtml into <head> for proper cascade
+  // This ensures template styles ALWAYS win over Tailwind preflight
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    // Remove old dynamic CSS link
+    const linkEl = document.getElementById('template-css')
+    if (linkEl) linkEl.remove()
+
+    // Remove old injected style
+    const oldStyle = document.getElementById('template-rendered-css')
+    if (oldStyle) oldStyle.remove()
+
+    if (!renderedHtml) {
+      // Path B: load template-specific CSS file
+      if (templateCategory) {
+        let newLink = document.getElementById('template-css') as HTMLLinkElement
+        if (!newLink) {
+          newLink = document.createElement('link')
+          newLink.id = 'template-css'
+          newLink.rel = 'stylesheet'
+          document.head.appendChild(newLink)
+        }
+        newLink.href = templateCategory === 'restaurant' ? '/styles/restaurant.css' : '/styles/digital-agency.css'
+      }
+      return
+    }
+
+    // Path A: extract all CSS from renderedHtml <style> tags and inject into <head>
+    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi
+    let allStyles = ''
+    let match
+    while ((match = styleRegex.exec(renderedHtml)) !== null) {
+      allStyles += match[1] + '\n'
+    }
+
+    if (allStyles) {
+      const styleEl = document.createElement('style')
+      styleEl.id = 'template-rendered-css'
+      styleEl.textContent = allStyles
+      document.head.appendChild(styleEl)
+    }
+
+    // Apply template :root CSS variables as inline styles on <html>
+    // This ensures they're available regardless of CSS cascade issues
+    const root = document.documentElement
+    const rootStyleMatch = allStyles.match(/:root\s*\{([\s\S]*?)\}/)
+    if (rootStyleMatch) {
+      const varRegex = /--([a-zA-Z0-9_-]+)\s*:\s*([^;]+)/g
+      let vMatch
+      while ((vMatch = varRegex.exec(rootStyleMatch[1])) !== null) {
+        root.style.setProperty(`--${vMatch[1]}`, vMatch[2].trim())
+      }
+    }
+  }, [renderedHtml, templateCategory])
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       document.body.className = `${templateCategory}-template`
       localStorage.setItem('perissos-template-category', templateCategory)
-
-      // Dynamic CSS loading: only needed for Path B (React sections)
-      // Path A (renderedHtml) already has CSS inlined from the ZIP
-      if (!renderedHtml) {
-        let linkEl = document.getElementById('template-css') as HTMLLinkElement
-        if (!linkEl) {
-          linkEl = document.createElement('link')
-          linkEl.id = 'template-css'
-          linkEl.rel = 'stylesheet'
-          document.head.appendChild(linkEl)
-        }
-        const cssFile = templateCategory === 'restaurant' ? '/styles/restaurant.css' : '/styles/digital-agency.css'
-        linkEl.href = cssFile
-      } else {
-        // Remove dynamic CSS link when using renderedHtml (CSS is inlined)
-        const linkEl = document.getElementById('template-css')
-        if (linkEl) linkEl.remove()
-      }
-
-      // Clean up old template CSS variables to prevent leaks
-      const root = document.documentElement
-      const oldVars = [
-        '--primary', '--primary-hover', '--dark', '--dark-2', '--dark-3',
-        '--light', '--white', '--gray', '--border', '--font-body', '--font-heading',
-        '--r-accent', '--r-accent-hover', '--r-light', '--r-dark', '--r-gray',
-        '--r-border', '--r-font-primary', '--r-font-heading', '--r-font-display',
-        '--r-container',
-      ]
-      oldVars.forEach(v => root.style.removeProperty(v))
     }
   }, [templateCategory])
   useEffect(() => {
@@ -603,9 +630,6 @@ export default function LandingPage() {
             templateCategory={templateCategory}
             cssVariableMapping={cssVariableMapping}
           />
-        )}
-        {extracted.styles && (
-          <style dangerouslySetInnerHTML={{ __html: extracted.styles }} />
         )}
         {isEditing && (
           <style dangerouslySetInnerHTML={{ __html: `#masthead { top: ${toolbarHeight}px !important; }` }} />
