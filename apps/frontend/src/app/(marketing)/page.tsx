@@ -385,6 +385,10 @@ export default function LandingPage() {
 
     if (!renderedHtml) {
       // Path B: load template-specific CSS file
+      // Clear any forced body styles from Path A
+      document.body.style.background = ''
+      document.body.style.color = ''
+      document.body.style.fontFamily = ''
       if (templateCategory) {
         let newLink = document.getElementById('template-css') as HTMLLinkElement
         if (!newLink) {
