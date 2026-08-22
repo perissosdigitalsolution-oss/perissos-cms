@@ -424,6 +424,36 @@ export default function LandingPage() {
         root.style.setProperty(`--${vMatch[1]}`, vMatch[2].trim())
       }
     }
+
+    // Force body background directly — bypasses ALL CSS cascade issues
+    // The body CSS may use var(--dark) which we already set as inline style above
+    const bodyBgMatch = allStyles.match(/body\s*\{[^}]*background\s*:\s*([^;}\n]+)/)
+    if (bodyBgMatch) {
+      const bgValue = bodyBgMatch[1].trim()
+      // If it's a var() reference, resolve it from the inline properties we just set
+      const varMatch = bgValue.match(/var\(--([^)]+)\)/)
+      if (varMatch) {
+        const resolved = root.style.getPropertyValue(`--${varMatch[1]}`)
+        if (resolved) document.body.style.background = resolved
+      } else {
+        document.body.style.background = bgValue
+      }
+    }
+    const bodyColorMatch = allStyles.match(/body\s*\{[^}]*color\s*:\s*([^;}\n]+)/)
+    if (bodyColorMatch) {
+      const colorValue = bodyColorMatch[1].trim()
+      const varMatch = colorValue.match(/var\(--([^)]+)\)/)
+      if (varMatch) {
+        const resolved = root.style.getPropertyValue(`--${varMatch[1]}`)
+        if (resolved) document.body.style.color = resolved
+      } else {
+        document.body.style.color = colorValue
+      }
+    }
+    const bodyFontMatch = allStyles.match(/body\s*\{[^}]*font-family\s*:\s*([^;}\n]+)/)
+    if (bodyFontMatch) {
+      document.body.style.fontFamily = bodyFontMatch[1].trim()
+    }
   }, [renderedHtml, templateCategory])
 
   useEffect(() => {
@@ -634,9 +664,10 @@ export default function LandingPage() {
         {isEditing && (
           <style dangerouslySetInnerHTML={{ __html: `#masthead { top: ${toolbarHeight}px !important; }` }} />
         )}
-        <main>
-          <div dangerouslySetInnerHTML={{ __html: extracted.content }} />
-        </main>
+        {extracted.styles && (
+          <style dangerouslySetInnerHTML={{ __html: extracted.styles }} />
+        )}
+        <div dangerouslySetInnerHTML={{ __html: extracted.content }} />
 
         {/* Content Editor Panel */}
         <ContentPanel
