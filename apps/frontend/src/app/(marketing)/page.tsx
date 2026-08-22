@@ -495,16 +495,18 @@ export default function LandingPage() {
     // Inject CSS variables using template-specific mapping
     if (typeof window !== 'undefined' && cssVariableMapping) {
       const root = document.documentElement
+      const tv = (camelKey: string, dbKey: string): string =>
+        newTheme[camelKey] ?? newTheme[dbKey] ?? ''
       const themeKeyToValue: Record<string, string> = {
-        primary: newTheme.primary,
-        primaryHover: newTheme.primaryHover,
-        dark: newTheme.dark,
-        light: newTheme.light || newTheme.white,
-        white: newTheme.white,
-        gray: newTheme.gray,
-        border: newTheme.border,
-        fontBody: newTheme.fontBody,
-        fontHeading: newTheme.fontHeading,
+        primary: tv('primary', '--primary'),
+        primaryHover: tv('primaryHover', '--primary-hover'),
+        dark: tv('dark', '--dark'),
+        light: tv('light', '--light') || tv('white', '--white'),
+        white: tv('white', '--white'),
+        gray: tv('gray', '--gray'),
+        border: tv('border', '--border'),
+        fontBody: tv('fontBody', '--font-body'),
+        fontHeading: tv('fontHeading', '--font-heading'),
       }
       for (const [themeKey, cssVars] of Object.entries(cssVariableMapping)) {
         const value = themeKeyToValue[themeKey]
@@ -571,16 +573,18 @@ export default function LandingPage() {
       })
       // Template-specific CSS variables from layoutConfig mapping
       if (cssVariableMapping) {
+        const tv = (camelKey: string, dbKey: string): string =>
+          (theme[camelKey] as string) ?? (theme[dbKey] as string) ?? ''
         const themeKeyToValue: Record<string, string> = {
-          primary: theme.primary,
-          primaryHover: theme.primaryHover,
-          dark: theme.dark,
-          light: theme.light || theme.white,
-          white: theme.white,
-          gray: theme.gray,
-          border: theme.border,
-          fontBody: theme.fontBody,
-          fontHeading: theme.fontHeading,
+          primary: tv('primary', '--primary'),
+          primaryHover: tv('primaryHover', '--primary-hover'),
+          dark: tv('dark', '--dark'),
+          light: tv('light', '--light') || tv('white', '--white'),
+          white: tv('white', '--white'),
+          gray: tv('gray', '--gray'),
+          border: tv('border', '--border'),
+          fontBody: tv('fontBody', '--font-body'),
+          fontHeading: tv('fontHeading', '--font-heading'),
         }
         for (const [themeKey, cssVars] of Object.entries(cssVariableMapping)) {
           const value = themeKeyToValue[themeKey]

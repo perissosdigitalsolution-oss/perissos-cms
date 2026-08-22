@@ -625,16 +625,19 @@ function injectThemeStyles(editor: any, theme: any, cssVariableMapping?: Record<
   const root = canvasDoc.documentElement
   if (!root) return
 
+  const tv = (camelKey: string, dbKey: string): string =>
+    theme[camelKey] ?? theme[dbKey] ?? ''
+
   const vars: Record<string, string> = {
-    '--primary': theme.primary || '#FF6600',
-    '--primary-hover': theme.primaryHover || '#e55a00',
-    '--dark': theme.dark || '#1a1a1a',
-    '--light': theme.light || '#ffffff',
-    '--white': theme.white || '#ffffff',
-    '--gray': theme.gray || '#666666',
-    '--border': theme.border || '#e5e5e5',
-    '--font-body': theme.fontBody || 'DM Sans, sans-serif',
-    '--font-heading': theme.fontHeading || 'Plus Jakarta Sans, sans-serif',
+    '--primary': tv('primary', '--primary') || '#FF6600',
+    '--primary-hover': tv('primaryHover', '--primary-hover') || '#e55a00',
+    '--dark': tv('dark', '--dark') || '#1a1a1a',
+    '--light': tv('light', '--light') || '#ffffff',
+    '--white': tv('white', '--white') || '#ffffff',
+    '--gray': tv('gray', '--gray') || '#666666',
+    '--border': tv('border', '--border') || '#e5e5e5',
+    '--font-body': tv('fontBody', '--font-body') || 'DM Sans, sans-serif',
+    '--font-heading': tv('fontHeading', '--font-heading') || 'Plus Jakarta Sans, sans-serif',
   }
 
   for (const [key, value] of Object.entries(vars)) {
@@ -643,15 +646,15 @@ function injectThemeStyles(editor: any, theme: any, cssVariableMapping?: Record<
 
   if (cssVariableMapping) {
     const themeKeyToValue: Record<string, string> = {
-      primary: theme.primary,
-      primaryHover: theme.primaryHover,
-      dark: theme.dark,
-      light: theme.light || theme.white,
-      white: theme.white,
-      gray: theme.gray,
-      border: theme.border,
-      fontBody: theme.fontBody,
-      fontHeading: theme.fontHeading,
+      primary: tv('primary', '--primary'),
+      primaryHover: tv('primaryHover', '--primary-hover'),
+      dark: tv('dark', '--dark'),
+      light: tv('light', '--light') || tv('white', '--white'),
+      white: tv('white', '--white'),
+      gray: tv('gray', '--gray'),
+      border: tv('border', '--border'),
+      fontBody: tv('fontBody', '--font-body'),
+      fontHeading: tv('fontHeading', '--font-heading'),
     }
     for (const [themeKey, cssVars] of Object.entries(cssVariableMapping)) {
       const value = themeKeyToValue[themeKey]

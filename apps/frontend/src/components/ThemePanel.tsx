@@ -247,32 +247,35 @@ export function ThemePanel({ isOpen, onClose, theme: initialTheme, onThemeChange
   useEffect(() => {
     onThemeChange?.(theme)
     const root = document.documentElement
+    // Helper: read value from theme, supporting both DB keys ("--primary") and camelCase ("primary")
+    const tv = (camelKey: string, dbKey: string): string | undefined =>
+      theme[camelKey] ?? theme[dbKey]
     // Generic CSS variables (for React component sections)
-    root.style.setProperty('--primary', theme.primary)
-    root.style.setProperty('--primary-hover', theme.primaryHover)
-    root.style.setProperty('--dark', theme.dark)
-    root.style.setProperty('--dark-2', theme.dark2)
-    root.style.setProperty('--dark-3', theme.dark3)
-    root.style.setProperty('--light', theme.light)
-    root.style.setProperty('--white', theme.white)
-    root.style.setProperty('--gray', theme.gray)
-    root.style.setProperty('--border', theme.border)
-    root.style.setProperty('--font-body', theme.fontBody)
-    root.style.setProperty('--font-heading', theme.fontHeading)
-    root.style.setProperty('--border-radius', theme.borderRadius)
-    root.style.setProperty('--spacing', theme.spacing)
+    root.style.setProperty('--primary', tv('primary', '--primary') || '')
+    root.style.setProperty('--primary-hover', tv('primaryHover', '--primary-hover') || '')
+    root.style.setProperty('--dark', tv('dark', '--dark') || '')
+    root.style.setProperty('--dark-2', tv('dark2', '--dark-2') || '')
+    root.style.setProperty('--dark-3', tv('dark3', '--dark-3') || '')
+    root.style.setProperty('--light', tv('light', '--light') || '')
+    root.style.setProperty('--white', tv('white', '--white') || '')
+    root.style.setProperty('--gray', tv('gray', '--gray') || '')
+    root.style.setProperty('--border', tv('border', '--border') || '')
+    root.style.setProperty('--font-body', tv('fontBody', '--font-body') || '')
+    root.style.setProperty('--font-heading', tv('fontHeading', '--font-heading') || '')
+    root.style.setProperty('--border-radius', tv('borderRadius', '--border-radius') || '')
+    root.style.setProperty('--spacing', tv('spacing', '--spacing') || '')
     // Template-specific CSS variables from layoutConfig mapping
     if (cssVariableMapping) {
       const themeKeyToValue: Record<string, string> = {
-        primary: theme.primary,
-        primaryHover: theme.primaryHover,
-        dark: theme.dark,
-        light: theme.light || theme.white,
-        white: theme.white,
-        gray: theme.gray,
-        border: theme.border,
-        fontBody: theme.fontBody,
-        fontHeading: theme.fontHeading,
+        primary: tv('primary', '--primary') || '',
+        primaryHover: tv('primaryHover', '--primary-hover') || '',
+        dark: tv('dark', '--dark') || '',
+        light: tv('light', '--light') || tv('white', '--white') || '',
+        white: tv('white', '--white') || '',
+        gray: tv('gray', '--gray') || '',
+        border: tv('border', '--border') || '',
+        fontBody: tv('fontBody', '--font-body') || '',
+        fontHeading: tv('fontHeading', '--font-heading') || '',
       }
       for (const [themeKey, cssVars] of Object.entries(cssVariableMapping)) {
         const value = themeKeyToValue[themeKey]
