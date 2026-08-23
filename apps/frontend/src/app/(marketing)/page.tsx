@@ -792,11 +792,13 @@ export default function LandingPage() {
             onThemeChange={handleThemeChange}
             onOpenContent={() => setShowContentPanel(true)}
             onOpenPageBuilder={() => setShowPageBuilder(true)}
-            onOpenOnlook={async () => {
+onOpenOnlook={async () => {
               const onlookUrl = process.env.NEXT_PUBLIC_ONLOOK_URL || 'http://localhost:3002'
+              // Use frontend's own URL for API routes (port 3001)
+              const frontendUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3001'
               try {
-                // Fetch auth token from our API
-                const res = await fetch(`${cmsUrl}/api/onlook/auth`, {
+                // Fetch auth token from frontend API
+                const res = await fetch(`${frontendUrl}/api/onlook/auth`, {
                   credentials: 'include',
                 })
                 const data = await res.json()
@@ -877,9 +879,11 @@ export default function LandingPage() {
           onOpenPageBuilder={() => setShowPageBuilder(true)}
 onOpenOnlook={async () => {
               const onlookUrl = process.env.NEXT_PUBLIC_ONLOOK_URL || 'http://localhost:3002'
+              // Use frontend's own URL for API routes (port 3001)
+              const frontendUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3001'
               try {
-                // Fetch auth token from our API
-                const res = await fetch(`${cmsUrl}/api/onlook/auth`, {
+                // Fetch auth token from frontend API
+                const res = await fetch(`${frontendUrl}/api/onlook/auth`, {
                   credentials: 'include',
                 })
                 const data = await res.json()
