@@ -18,7 +18,7 @@ interface EditToolbarProps {
   cssVariableMapping?: Record<string, string[]>
 }
 
-export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange, theme: initialTheme, onThemeChange, onOpenContent, onOpenPageBuilder, templateCategory, cssVariableMapping }: EditToolbarProps) {
+export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange, theme: initialTheme, onThemeChange, onOpenContent, onOpenPageBuilder, onOpenOnlook, templateCategory, cssVariableMapping }: EditToolbarProps) {
   const [user, setUser] = useState<any>(null)
   const [showThemePanel, setShowThemePanel] = useState(false)
   const [toolbarHeight, setToolbarHeight] = useState(50)
