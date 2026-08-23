@@ -258,12 +258,21 @@ export function ThemePanel({ isOpen, onClose, theme: initialTheme, onThemeChange
 
   useEffect(() => {
     if (initialTheme) {
-      setTheme(normalizeTheme(initialTheme))
+      const normalized = normalizeTheme(initialTheme)
+      // Only update if values actually changed (prevents infinite loop from object reference)
+      const currentKeys = Object.keys(normalized)
+      const changed = currentKeys.some(k => normalized[k] !== theme[k])
+      if (changed) setTheme(normalized)
     }
   }, [initialTheme])
 
+  // Only call onThemeChange when user edits (not on mount/init)
+  const isUserEdit = React.useRef(false)
+
   useEffect(() => {
-    onThemeChange?.(theme)
+    if (isUserEdit.current) {
+      onThemeChange?.(theme)
+    }
     const root = document.documentElement
     // Generic CSS variables — theme is always camelCase after normalization
     root.style.setProperty('--primary', theme.primary || '')
@@ -304,10 +313,12 @@ export function ThemePanel({ isOpen, onClose, theme: initialTheme, onThemeChange
   }, [theme, onThemeChange, cssVariableMapping])
 
   const handleThemeChange = useCallback((key: string, value: string) => {
+    isUserEdit.current = true
     setTheme((prev: any) => ({ ...prev, [key]: value }))
   }, [])
 
   const handleResetTheme = useCallback(() => {
+    isUserEdit.current = true
     setTheme(DEFAULT_THEME)
   }, [])
 
@@ -632,7 +643,7 @@ export function ThemePanel({ isOpen, onClose, theme: initialTheme, onThemeChange
                   <input
                     type="text"
                     value={theme.borderRadius}
-                    onChange={e => setTheme((prev: any) => ({ ...prev, borderRadius: e.target.value }))}
+                    onChange={e => handleThemeChange('borderRadius', e.target.value)}
                     style={{
                       padding: '10px 12px',
                       background: '#252525',
@@ -650,7 +661,7 @@ export function ThemePanel({ isOpen, onClose, theme: initialTheme, onThemeChange
                   <input
                     type="text"
                     value={theme.spacing}
-                    onChange={e => setTheme((prev: any) => ({ ...prev, spacing: e.target.value }))}
+                    onChange={e => handleThemeChange('spacing', e.target.value)}
                     style={{
                       padding: '10px 12px',
                       background: '#252525',
