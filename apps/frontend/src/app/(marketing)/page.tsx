@@ -540,12 +540,21 @@ export default function LandingPage() {
     if (!pageId) return
     setIsSaving(true)
     try {
-      await fetch(`${cmsUrl}/api/pages/${pageId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ sections, theme }),
-      })
+      // Save theme and sections separately so sections validation errors don't block theme save
+      await Promise.all([
+        fetch(`${cmsUrl}/api/pages/${pageId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ theme }),
+        }),
+        fetch(`${cmsUrl}/api/pages/${pageId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ sections }),
+        }),
+      ])
     } catch (err) {
       console.error('Save failed:', err)
     } finally {
@@ -696,7 +705,7 @@ export default function LandingPage() {
           />
         )}
         {isEditing && (
-          <style dangerouslySetInnerHTML={{ __html: `#masthead { top: ${toolbarHeight}px !important; }` }} />
+          <style dangerouslySetInnerHTML={{ __html: `#masthead, header.header, header#header { top: ${toolbarHeight}px !important; }` }} />
         )}
         {extracted.styles && (
           <style dangerouslySetInnerHTML={{ __html: extracted.styles }} />
