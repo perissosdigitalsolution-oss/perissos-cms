@@ -1,0 +1,3 @@
+[submodule "onlook"]
+	path = onlook
+	url = https://github.com/onlook-dev/onlook.git

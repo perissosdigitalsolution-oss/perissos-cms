@@ -171,7 +171,79 @@ services:
     depends_on:
       - backoffice
 
-  # ─── Database Admin (Optional) ───────────────────────────
+  # ─── Onlook AI Visual Editor (Evaluation) ─────────────────────
+  # Supabase (minimal - just PostgreSQL + PostgREST for evaluation)
+  supabase-db:
+    image: postgres:15-alpine
+    container_name: perissos-supabase-db
+    profiles: ["onlook"]
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - supabase_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgREST for Supabase REST API
+  supabase-rest:
+    image: postgrest/postgrest:v12.2.0
+    container_name: perissos-supabase-rest
+    profiles: ["onlook"]
+    environment:
+      PGRST_DB_URI: postgresql://postgres:postgres@supabase-db:5432/postgres
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+    depends_on:
+      - supabase-db
+    ports:
+      - "3004:3000"
+
+  # Onlook Studio - dev mode (bun dev)
+  onlook:
+    image: oven/bun:1
+    container_name: perissos-onlook
+    profiles: ["onlook"]
+    working_dir: /app/onlook
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@supabase-db:5432/postgres
+      NEXT_PUBLIC_SUPABASE_URL: http://supabase-rest:3000
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1cGFiYXNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNTY4OTYwMCwiZXhwIjoyMDUxMjY1NjAwfQ.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      CODESANDBOX_API_KEY: ${CODESANDBOX_API_KEY}
+      NEXT_PUBLIC_ONLOOK_URL: http://localhost:3002
+      ONLOOK_PROJECT_PATH: /app/projects/perissos-frontend
+      # Required env vars for Onlook
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1cGFiYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU2ODk2MDAsImV4cCI6MjA1MTI2NTYwMH0.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8
+      SUPABASE_URL: http://supabase-rest:3000
+      OPENAI_API_KEY: ${OPENROUTER_API_KEY}
+      CSB_API_KEY: ${CODESANDBOX_API_KEY:-dummy-csb-key}
+      SUPABASE_DATABASE_URL: postgresql://postgres:postgres@supabase-db:5432/postgres
+    ports:
+      - "3002:3000"
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      supabase-rest:
+        condition: service_started
+    volumes:
+      - ./onlook:/app/onlook
+      - .:/app/projects/perissos-frontend
+      - onlook_data:/app/.onlook
+    command: sh -c "cd /app/onlook && bun install --frozen-lockfile && bun run dev"
+    mem_limit: 2g
+    cpus: 1
+
+
+# ─── Database Admin (Optional) ───────────────────────────
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: perissos-pgadmin
@@ -194,6 +266,8 @@ volumes:
   backoffice_next:
   frontend_node:
   frontend_next:
+  supabase_data:
+  onlook_data:
 
 networks:
   default:
