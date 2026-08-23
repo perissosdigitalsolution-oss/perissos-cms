@@ -792,6 +792,29 @@ export default function LandingPage() {
             onThemeChange={handleThemeChange}
             onOpenContent={() => setShowContentPanel(true)}
             onOpenPageBuilder={() => setShowPageBuilder(true)}
+            onOpenOnlook={async () => {
+              const onlookUrl = process.env.NEXT_PUBLIC_ONLOOK_URL || 'http://localhost:3002'
+              try {
+                // Fetch auth token from our API
+                const res = await fetch(`${cmsUrl}/api/onlook/auth`, {
+                  credentials: 'include',
+                })
+                const data = await res.json()
+                if (data.token) {
+                  const projectPath = encodeURIComponent('perissos-frontend')
+                  // Pass token via URL fragment (more secure than query param)
+                  window.open(`${onlookUrl}/project/${projectPath}#token=${data.token}`, '_blank')
+                } else {
+                  // Fallback without token
+                  const projectPath = encodeURIComponent('perissos-frontend')
+                  window.open(`${onlookUrl}/project/${projectPath}`, '_blank')
+                }
+              } catch {
+                // Fallback without token
+                const projectPath = encodeURIComponent('perissos-frontend')
+                window.open(`${onlookUrl}/project/${projectPath}`, '_blank')
+              }
+            }}
             templateCategory={templateCategory}
             cssVariableMapping={cssVariableMapping}
           />
@@ -852,6 +875,29 @@ export default function LandingPage() {
           onThemeChange={handleThemeChange}
           onOpenContent={() => setShowContentPanel(true)}
           onOpenPageBuilder={() => setShowPageBuilder(true)}
+onOpenOnlook={async () => {
+              const onlookUrl = process.env.NEXT_PUBLIC_ONLOOK_URL || 'http://localhost:3002'
+              try {
+                // Fetch auth token from our API
+                const res = await fetch(`${cmsUrl}/api/onlook/auth`, {
+                  credentials: 'include',
+                })
+                const data = await res.json()
+                if (data.token) {
+                  const projectPath = encodeURIComponent('perissos-frontend')
+                  // Pass token via URL fragment (more secure than query param)
+                  window.open(`${onlookUrl}/project/${projectPath}#token=${data.token}`, '_blank')
+                } else {
+                  // Fallback without token
+                  const projectPath = encodeURIComponent('perissos-frontend')
+                  window.open(`${onlookUrl}/project/${projectPath}`, '_blank')
+                }
+              } catch {
+                // Fallback without token
+                const projectPath = encodeURIComponent('perissos-frontend')
+                window.open(`${onlookUrl}/project/${projectPath}`, '_blank')
+              }
+            }}
           templateCategory={templateCategory}
           cssVariableMapping={cssVariableMapping}
         />

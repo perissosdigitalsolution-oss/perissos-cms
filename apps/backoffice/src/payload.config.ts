@@ -26,6 +26,7 @@ export default buildConfig({
     },
     components: {
       beforeDashboard: ['/src/admin/components/CustomDashboard#CustomDashboard'],
+      Nav: ['/src/admin/components/OnlookNavLink#OnlookNavLink'],
     },
   },
 

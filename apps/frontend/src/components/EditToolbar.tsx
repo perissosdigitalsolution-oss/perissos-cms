@@ -13,6 +13,7 @@ interface EditToolbarProps {
   onThemeChange?: (theme: any) => void
   onOpenContent?: () => void
   onOpenPageBuilder?: () => void
+  onOpenOnlook?: () => void
   templateCategory?: string
   cssVariableMapping?: Record<string, string[]>
 }
@@ -182,6 +183,27 @@ export function EditToolbar({ pageId, pageSlug, onSave, isSaving, onHeightChange
             >
               <i className="fas fa-pencil-ruler" />
               Page Builder
+            </button>
+
+            <button
+              onClick={onOpenOnlook}
+              style={{
+                padding: '6px 12px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 8px rgba(102, 126, 234, 0.4)',
+              }}
+            >
+              <i className="fas fa-robot" />
+              Onlook AI
             </button>
 
             <button
