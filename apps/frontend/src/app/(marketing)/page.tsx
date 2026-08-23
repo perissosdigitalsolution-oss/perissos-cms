@@ -24,6 +24,25 @@ interface Section {
   [key: string]: any
 }
 
+// Normalize DB theme keys (--primary, --dark) to camelCase (primary, dark)
+function normalizeTheme(raw: any): any {
+  if (!raw || typeof raw !== 'object') return raw
+  const out: any = { ...raw }
+  const keyMap: Record<string, string> = {
+    '--primary': 'primary', '--primary-hover': 'primaryHover', '--dark': 'dark',
+    '--dark-2': 'dark2', '--dark-3': 'dark3', '--light': 'light', '--white': 'white',
+    '--gray': 'gray', '--border': 'border', '--font-body': 'fontBody',
+    '--font-heading': 'fontHeading', '--border-radius': 'borderRadius', '--spacing': 'spacing',
+  }
+  for (const [dbKey, camelKey] of Object.entries(keyMap)) {
+    if (out[dbKey] !== undefined) {
+      out[camelKey] = out[dbKey]
+      delete out[dbKey]
+    }
+  }
+  return out
+}
+
 function extractTemplateContent(html: string): { styles: string; content: string } {
   let styles = ''
   let content = html
@@ -269,7 +288,7 @@ export default function LandingPage() {
           const doc = data.docs[0]
           setPageId(doc.id)
           setPageSlug(doc.slug || 'home')
-          if (doc.theme) setTheme(doc.theme)
+    if (doc.theme) setTheme(normalizeTheme(doc.theme))
           if (doc.template?.category) setTemplateCategory(doc.template.category)
           if (doc.renderedHtml) setRenderedHtml(doc.renderedHtml)
           if (doc.projectData) setProjectData(doc.projectData)
@@ -495,18 +514,16 @@ export default function LandingPage() {
     // Inject CSS variables using template-specific mapping
     if (typeof window !== 'undefined' && cssVariableMapping) {
       const root = document.documentElement
-      const tv = (camelKey: string, dbKey: string): string =>
-        newTheme[camelKey] ?? newTheme[dbKey] ?? ''
       const themeKeyToValue: Record<string, string> = {
-        primary: tv('primary', '--primary'),
-        primaryHover: tv('primaryHover', '--primary-hover'),
-        dark: tv('dark', '--dark'),
-        light: tv('light', '--light') || tv('white', '--white'),
-        white: tv('white', '--white'),
-        gray: tv('gray', '--gray'),
-        border: tv('border', '--border'),
-        fontBody: tv('fontBody', '--font-body'),
-        fontHeading: tv('fontHeading', '--font-heading'),
+        primary: newTheme.primary || '',
+        primaryHover: newTheme.primaryHover || '',
+        dark: newTheme.dark || '',
+        light: newTheme.light || newTheme.white || '',
+        white: newTheme.white || '',
+        gray: newTheme.gray || '',
+        border: newTheme.border || '',
+        fontBody: newTheme.fontBody || '',
+        fontHeading: newTheme.fontHeading || '',
       }
       for (const [themeKey, cssVars] of Object.entries(cssVariableMapping)) {
         const value = themeKeyToValue[themeKey]
@@ -560,31 +577,32 @@ export default function LandingPage() {
   }, [pageId, cmsUrl])
 
   // Apply theme to CSS variables for ALL users (not just logged in)
-  // Uses template-specific mapping from layoutConfig
+  // Theme is always camelCase after normalization
   useEffect(() => {
     if (theme) {
       const root = document.documentElement
-      // Generic variables — keys may already start with "--" from DB
-      Object.entries(theme).forEach(([key, value]) => {
-        if (typeof value === 'string') {
-          const cssVar = key.startsWith('--') ? key : `--${key}`
-          root.style.setProperty(cssVar, value)
-        }
-      })
+      // Set all camelCase keys as --kebab CSS vars
+      const keyToVar: Record<string, string> = {
+        primary: '--primary', primaryHover: '--primary-hover', dark: '--dark',
+        dark2: '--dark-2', dark3: '--dark-3', light: '--light', white: '--white',
+        gray: '--gray', border: '--border', fontBody: '--font-body',
+        fontHeading: '--font-heading', borderRadius: '--border-radius', spacing: '--spacing',
+      }
+      for (const [camelKey, cssVar] of Object.entries(keyToVar)) {
+        if (theme[camelKey]) root.style.setProperty(cssVar, theme[camelKey])
+      }
       // Template-specific CSS variables from layoutConfig mapping
       if (cssVariableMapping) {
-        const tv = (camelKey: string, dbKey: string): string =>
-          (theme[camelKey] as string) ?? (theme[dbKey] as string) ?? ''
         const themeKeyToValue: Record<string, string> = {
-          primary: tv('primary', '--primary'),
-          primaryHover: tv('primaryHover', '--primary-hover'),
-          dark: tv('dark', '--dark'),
-          light: tv('light', '--light') || tv('white', '--white'),
-          white: tv('white', '--white'),
-          gray: tv('gray', '--gray'),
-          border: tv('border', '--border'),
-          fontBody: tv('fontBody', '--font-body'),
-          fontHeading: tv('fontHeading', '--font-heading'),
+          primary: theme.primary || '',
+          primaryHover: theme.primaryHover || '',
+          dark: theme.dark || '',
+          light: theme.light || theme.white || '',
+          white: theme.white || '',
+          gray: theme.gray || '',
+          border: theme.border || '',
+          fontBody: theme.fontBody || '',
+          fontHeading: theme.fontHeading || '',
         }
         for (const [themeKey, cssVars] of Object.entries(cssVariableMapping)) {
           const value = themeKeyToValue[themeKey]

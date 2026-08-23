@@ -138,6 +138,15 @@ export function GrapejsEditor({
           }
         }
 
+        // Add template class to canvas HTML element so CSS selectors like .digital-agency-template body match
+        // DB category "agency" maps to CSS class "digital-agency-template"
+        const cssClassMap: Record<string, string> = { agency: 'digital-agency', restaurant: 'restaurant' }
+        const cssClassName = cssClassMap[templateCategory || ''] || templateCategory || 'digital-agency'
+        const canvasHtml = canvasDoc.documentElement
+        if (canvasHtml) {
+          canvasHtml.classList.add(`${cssClassName}-template`)
+        }
+
         // 2. Inject Google Fonts
         const fontsUrl = 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Marcellus&family=Open+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Roboto+Slab:wght@400;500;600;700&display=swap'
         if (!canvasDoc.getElementById('gjs-google-fonts')) {
@@ -159,33 +168,16 @@ export function GrapejsEditor({
 
         // 4. Inject template CSS + overrides as a single <style> (LAST — overrides all)
         const overrideCss = `
-          /* DO NOT set height:100% on canvas elements — GrapeJS auto-resizes them */
-          .gjs-cv-canvas { background: #fff !important; }
-          .gjs-cv-canvas-bg { background: #fff !important; }
-          .gjs-editor-cont { background: #fff !important; }
-          /* Override GrapeJS wrapper defaults */
+          /* Structural fixes only — colors come from template CSS + theme vars */
           [data-gjs-type="wrapper"] { min-height: auto !important; padding-top: 0 !important; }
-          body { height: 100vh !important; overflow-y: auto !important; overflow-x: hidden !important; font-family: 'Open Sans', sans-serif !important; background: #fff !important; margin: 0 !important; padding: 0 !important; }
+          body { height: 100vh !important; overflow-y: auto !important; overflow-x: hidden !important; margin: 0 !important; padding: 0 !important; }
           img { max-width: 100%; height: auto; display: block; }
           a { text-decoration: none; }
-          header#masthead { position: relative !important; background-color: #000 !important; color: #fff !important; z-index: 100 !important; }
-          header, .header-inner { background-color: #000 !important; color: #fff !important; }
-          .nav-left a, .nav-right a, .header-logo, .hamburger, .center-btn, .submenu a,
-          .nav-left a.active, .nav-left a:hover, .nav-right a:hover { color: #fff !important; }
-          .nav-left a.active, .nav-left a:hover, .nav-right a:hover { color: #c8a97e !important; }
-          .hero, section.hero, .section-heading, .hero-content, .hero-title, .hero-text { color: #fff !important; }
-          .hero h1, .hero h2, .hero h3, .hero p, .section-heading h2, .section-heading p { color: #fff !important; }
-          .hero-title span, .hero-text span, .restaurant-highlight, .section-heading h2 span { color: #c8a97e !important; }
-          .about, .testimonials, .gallery, .features-grid, .offer-card, .rating-info { color: #333 !important; }
-          .reservation, .menu, .menu-highlights, .contact, .specials { background-color: #fff !important; color: #333 !important; }
-          .reservation-form-wrapper { background-color: #f5f5f5 !important; border: 1px solid #e0e0e0 !important; }
-          .footer, .footer-main { background-color: #1a1a1a !important; color: #fff !important; }
-          .footer a, .footer h4, .footer p, .footer li { color: #ccc !important; }
-          .footer h4 { color: #fff !important; }
-          .section-heading h2 { color: #1a1a1a !important; }
-          .section-heading h2 span { color: #c8a97e !important; }
           .mobile-menu { display: none !important; }
           section.hero, .hero { padding-top: 40px !important; min-height: auto !important; }
+          /* Ensure editable regions are clickable */
+          [data-gjs-selectable] { cursor: pointer; }
+          [data-gjs-selectable]:hover { outline: 2px dashed rgba(255,102,0,0.4); }
         `
         const existing = canvasDoc.getElementById('gjs-template-merged')
         if (existing) existing.remove()
