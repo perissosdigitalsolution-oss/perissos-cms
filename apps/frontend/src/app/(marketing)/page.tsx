@@ -625,6 +625,98 @@ export default function LandingPage() {
     }
   }, [theme, cssVariableMapping])
 
+  // Click-to-edit overlays on rendered HTML sections
+  useEffect(() => {
+    if (!isEditing || !renderedHtml || sections.length === 0) return
+
+    const timer = setTimeout(() => {
+      // Map HTML section IDs to sections array indices
+      const idToBlockType: Record<string, string> = {
+        hero: 'hero', services: 'services', about: 'about',
+        'why-us': 'whyUs', team: 'team', portfolio: 'portfolio',
+        blog: 'blog', pricing: 'pricing', contact: 'contact',
+        'cta': 'cta', menu: 'menu', specials: 'specials',
+        gallery: 'gallery', testimonials: 'testimonials', 'menu-highlights': 'menuHighlights',
+        reservation: 'reservation',
+      }
+
+      // Find all section elements and add overlays
+      const sectionEls = document.querySelectorAll('section[id]')
+      sectionEls.forEach((el) => {
+        const sectionId = el.id
+        const blockType = idToBlockType[sectionId] || sectionId
+        const sectionIndex = sections.findIndex(s => s.blockType === blockType)
+        if (sectionIndex === -1) return
+
+        // Don't add duplicate overlays
+        if ((el as HTMLElement).dataset.editOverlay === 'true') return
+        ;(el as HTMLElement).dataset.editOverlay = 'true'
+
+        // Make section relative for overlay positioning
+        const pos = getComputedStyle(el).position
+        if (pos === 'static') (el as HTMLElement).style.position = 'relative'
+
+        // Create overlay
+        const overlay = document.createElement('div')
+        overlay.className = 'section-edit-overlay'
+        overlay.dataset.sectionIndex = String(sectionIndex)
+        overlay.style.cssText = `
+          position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+          z-index: 50; cursor: pointer; pointer-events: none;
+          transition: all 0.2s ease;
+        `
+
+        // Label that appears on hover
+        const label = document.createElement('div')
+        label.className = 'section-edit-label'
+        label.innerHTML = `<i class="fas fa-edit" style="margin-right:6px;"></i>Edit ${blockType}`
+        label.style.cssText = `
+          position: absolute; top: 8px; right: 8px;
+          background: rgba(255,102,0,0.9); color: #fff;
+          padding: 6px 14px; border-radius: 6px;
+          font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+          opacity: 0; transition: opacity 0.2s ease;
+          pointer-events: none; display: flex; align-items: center; gap: 4px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        `
+        overlay.appendChild(label)
+
+        // Hover events
+        overlay.addEventListener('mouseenter', () => {
+          overlay.style.pointerEvents = 'auto'
+          overlay.style.background = 'rgba(255,102,0,0.06)'
+          overlay.style.outline = '2px solid rgba(255,102,0,0.5)'
+          overlay.style.outlineOffset = '-2px'
+          label.style.opacity = '1'
+        })
+        overlay.addEventListener('mouseleave', () => {
+          overlay.style.pointerEvents = 'none'
+          overlay.style.background = 'transparent'
+          overlay.style.outline = 'none'
+          label.style.opacity = '0'
+        })
+
+        // Click handler — open SectionEditor directly
+        overlay.addEventListener('click', (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setSelectedSectionIndex(sectionIndex)
+        })
+
+        el.appendChild(overlay)
+      })
+    }, 500) // Wait for HTML to render
+
+    return () => {
+      clearTimeout(timer)
+      // Clean up overlays
+      document.querySelectorAll('.section-edit-overlay').forEach(o => o.remove())
+      document.querySelectorAll('section[data-edit-overlay]').forEach(el => {
+        delete (el as HTMLElement).dataset.editOverlay
+      })
+    }
+  }, [isEditing, renderedHtml, sections])
+
   useEffect(() => {
     if (loading || sections.length === 0) return
 

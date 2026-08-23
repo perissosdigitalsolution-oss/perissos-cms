@@ -174,6 +174,8 @@ export function GrapejsEditor({
           img { max-width: 100%; height: auto; display: block; }
           a { text-decoration: none; }
           .mobile-menu { display: none !important; }
+          /* Make fixed header relative so it doesn't overlap hero in canvas */
+          header, header.header, header#header, #header, .header { position: relative !important; top: auto !important; }
           section.hero, .hero { padding-top: 40px !important; min-height: auto !important; }
           /* Ensure editable regions are clickable */
           [data-gjs-selectable] { cursor: pointer; }
