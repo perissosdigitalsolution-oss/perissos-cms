@@ -1,9 +1,9 @@
 'use client'
 
-'use client'
-
 import React from 'react'
 import Link from 'next/link'
+import { formatAdminURL } from 'payload/shared'
+import { Nav as DefaultNav } from '@payloadcms/ui'
 
 interface OnlookNavLinkProps {
   i18n: any
@@ -11,7 +11,7 @@ interface OnlookNavLinkProps {
   user: any
 }
 
-export const OnlookNavLink: React.FC<OnlookNavLinkProps> = ({ i18n, payload }) => {
+export const OnlookNavLink: React.FC<OnlookNavLinkProps> = ({ i18n, payload, user }) => {
   const t = i18n?.t || ((key: string) => key)
   const onlookUrl = process.env.NEXT_PUBLIC_ONLOOK_URL || 'http://localhost:3002'
 
@@ -43,6 +43,16 @@ export const OnlookNavLink: React.FC<OnlookNavLinkProps> = ({ i18n, payload }) =
       <i className="fas fa-robot" style={{ fontSize: '16px', width: '20px', textAlign: 'center' }} />
       <span>{t('Onlook AI') || 'Onlook AI'}</span>
     </Link>
+  )
+}
+
+// Custom Nav that extends the default Payload nav with Onlook link
+export const CustomNav: React.FC<OnlookNavLinkProps> = ({ i18n, payload, user }) => {
+  return (
+    <>
+      <DefaultNav i18n={i18n} payload={payload} user={user} />
+      <OnlookNavLink i18n={i18n} payload={payload} user={user} />
+    </>
   )
 }
 
