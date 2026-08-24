@@ -155,3 +155,130 @@ export interface GalleryImage {
   caption?: string;
   alt?: string;
 }
+
+// Accounting types (Sprint 19)
+export interface AccountingInvoice {
+  id: string;
+  invoiceNumber: string;
+  invoiceDate: string;
+  dueDate: string;
+  customerId: string;
+  customerName?: string;
+  customerEmail?: string;
+  currencyCode: string;
+  exchangeRate: number;
+  subtotal: number;
+  taxAmount: number;
+  total: number;
+  balance: number;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'void' | 'partially_paid';
+  entries: AccountingInvoiceEntry[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface AccountingInvoiceEntry {
+  id: string;
+  index: number;
+  itemId?: string;
+  itemName?: string;
+  quantity: number;
+  rate: number;
+  description?: string;
+  debit?: number;
+  credit?: number;
+  amount: number;
+  subtotalExcludingTax: number;
+  taxAmount?: number;
+  discountAmount?: number;
+  discountPercentage?: number;
+  sellAccountId?: number;
+}
+
+export interface AccountingAccount {
+  id: number;
+  name: string;
+  slug: string;
+  code: string;
+  description?: string;
+  active: number;
+  index: number;
+  predefined: number;
+  accountType: string;
+  parentAccountId?: number;
+  currencyCode: string;
+  accountTypeLabel?: string;
+  accountParentType?: string;
+  accountRootType?: string;
+  accountNormal?: 'debit' | 'credit';
+  isBalanceSheetAccount: boolean;
+  isPLSheet: boolean;
+  formattedAmount?: string;
+  flattenName?: string;
+}
+
+export interface AccountingJournalEntry {
+  id: string;
+  journalNumber: string;
+  date: string;
+  reference?: string;
+  description?: string;
+  amount: number;
+  currencyCode: string;
+  exchangeRate: number;
+  userId: number;
+  isPublished: boolean;
+  entries: AccountingJournalEntryLine[];
+  createdAt: string;
+}
+
+export interface AccountingJournalEntryLine {
+  id: string;
+  index: number;
+  accountId: number;
+  accountName?: string;
+  debit: number;
+  credit: number;
+  description?: string;
+  contactId?: number;
+}
+
+export interface AccountingBalance {
+  accountId: number;
+  accountName: string;
+  accountCode: string;
+  accountType: string;
+  debit: number;
+  credit: number;
+  balance: number;
+  formattedDebit?: string;
+  formattedCredit?: string;
+  formattedBalance?: string;
+}
+
+export interface FinancialReport {
+  type: 'profit-loss' | 'balance-sheet' | 'trial-balance' | 'cashflow';
+  fromDate: string;
+  toDate: string;
+  currencyCode: string;
+  data: unknown[];
+  meta: {
+    organizationName: string;
+    baseCurrency: string;
+    formattedFromDate: string;
+    formattedToDate: string;
+    formattedDateRange: string;
+  };
+}
+
+export interface AccountingActionResult {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+  source: string;
+}
+
+export interface AccountingMutation {
+  action: string;
+  params: Record<string, unknown>;
+}

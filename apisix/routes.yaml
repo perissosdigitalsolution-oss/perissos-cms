@@ -1,0 +1,158 @@
+# APISIX Routes Configuration
+# Sprint 16: CRM, Users, Template Import routes added
+
+routes:
+  # Test route - returns mock response
+  - uri: /api/test
+    name: "test-route"
+    desc: "Test route for APISIX PoC"
+    plugins:
+      mock-interceptor:
+        responses:
+          - code: 200
+            body: |
+              {
+                "status": "ok",
+                "message": "APISIX is working!",
+                "route": "test-route"
+              }
+            headers:
+              Content-Type: "application/json"
+
+  # Health check proxy
+  - uri: /api/health
+    name: "backoffice-health"
+    desc: "Proxy health check to backoffice"
+    upstream:
+      nodes:
+        "perissos-backoffice-dev:3000": 1
+      type: roundrobin
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/api/$1"]
+
+  # AI routes with rate limiting
+  - uri: /api/ai/*
+    name: "ai-rate-limit"
+    desc: "Rate limiting for AI endpoints"
+    upstream:
+      nodes:
+        "perissos-backoffice-dev:3000": 1
+      type: roundrobin
+    plugins:
+      limit-count:
+        count: 30
+        time_window: 60
+        key_type: var
+        key: "remote_addr"
+        rejected_code: 429
+        rejected_msg: '{"error":"Rate limit exceeded. Please try again later."}'
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/api/$1"]
+
+  # CRM routes (proxied to Perissos CRM GraphQL)
+  - uri: /api/crm/*
+    name: "crm-graphql-proxy"
+    desc: "CRM routes proxied to Perissos CRM (Twenty fork)"
+    upstream:
+      nodes:
+        "perissos-crm-server:3000": 1
+      type: roundrobin
+    plugins:
+      limit-count:
+        count: 30
+        time_window: 60
+        key_type: var
+        key: "remote_addr"
+        rejected_code: 429
+        rejected_msg: '{"error":"Rate limit exceeded. Please try again later."}'
+      proxy-rewrite:
+        regex_uri: ["^/api/crm/(.*)", "/$1"]
+
+  # Commerce routes (proxied to Perissos Commerce)
+  - uri: /api/commerce/*
+    name: "commerce-proxy"
+    desc: "Commerce routes proxied to Perissos Commerce (Medusa fork)"
+    upstream:
+      nodes:
+        "perissos-commerce-server:9000": 1
+      type: roundrobin
+    plugins:
+      limit-count:
+        count: 30
+        time_window: 60
+        key_type: var
+        key: "remote_addr"
+        rejected_code: 429
+        rejected_msg: '{"error":"Rate limit exceeded. Please try again later."}'
+      proxy-rewrite:
+        regex_uri: ["^/api/commerce/(.*)", "/$1"]
+
+  # Accounting routes (proxied to Perissos Accounting / Bigcapital)
+  - uri: /api/accounting/*
+    name: "accounting-proxy"
+    desc: "Accounting routes proxied to Perissos Accounting (Bigcapital)"
+    upstream:
+      nodes:
+        "perissos-accounting-server:3000": 1
+      type: roundrobin
+    plugins:
+      limit-count:
+        count: 30
+        time_window: 60
+        key_type: var
+        key: "remote_addr"
+        rejected_code: 429
+        rejected_msg: '{"error":"Rate limit exceeded. Please try again later."}'
+      proxy-rewrite:
+        regex_uri: ["^/api/accounting/(.*)", "/$1"]
+
+  # User routes with rate limiting
+  - uri: /api/users/*
+    name: "users-rate-limit"
+    desc: "Rate limiting for user endpoints (login, etc.)"
+    upstream:
+      nodes:
+        "perissos-backoffice-dev:3000": 1
+      type: roundrobin
+    plugins:
+      limit-count:
+        count: 30
+        time_window: 60
+        key_type: var
+        key: "remote_addr"
+        rejected_code: 429
+        rejected_msg: '{"error":"Rate limit exceeded. Please try again later."}'
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/api/$1"]
+
+  # Template import with stricter rate limiting
+  - uri: /api/templates/import*
+    name: "template-import-rate-limit"
+    desc: "Stricter rate limiting for template imports"
+    upstream:
+      nodes:
+        "perissos-backoffice-dev:3000": 1
+      type: roundrobin
+    plugins:
+      limit-count:
+        count: 10
+        time_window: 60
+        key_type: var
+        key: "remote_addr"
+        rejected_code: 429
+        rejected_msg: '{"error":"Rate limit exceeded for template imports. Please try again later."}'
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/api/$1"]
+
+  # Catch-all: proxy remaining /api/* to backoffice
+  - uri: /api/*
+    name: "api-catchall"
+    desc: "Catch-all API proxy to backoffice"
+    upstream:
+      nodes:
+        "perissos-backoffice-dev:3000": 1
+      type: roundrobin
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/api/$1"]
