@@ -1,18 +1,21 @@
-name: Deploy to Cloudflare Pages
+name: Deploy Frontend to Cloudflare
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile
+      - name: Build frontend
+        run: pnpm turbo build --filter=frontend
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          projectName: perissos-frontend
-          directory: apps/frontend/out
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: pages deploy apps/frontend/out --project-name perissos-frontend
