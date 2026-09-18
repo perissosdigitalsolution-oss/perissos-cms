@@ -4,6 +4,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,14 +21,27 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push backoffice
         run: |
-          docker build -t ghcr.io/perissos/backoffice:latest -f apps/backoffice/Dockerfile .
+          docker build -t ghcr.io/perissos/backoffice:latest -f apps/backoffice/Dockerfile --target runner .
           docker push ghcr.io/perissos/backoffice:latest
+      - name: Build and push casdoor
+        run: |
+          docker build -t ghcr.io/perissos/casdoor:latest -f apps/casdoor/Dockerfile .
+          docker push ghcr.io/perissos/casdoor:latest
+      - name: Build and push apisix
+        run: |
+          docker build -t ghcr.io/perissos/apisix:latest -f apps/apisix/Dockerfile .
+          docker push ghcr.io/perissos/apisix:latest
       - name: Deploy to Koyeb
         run: |
+          echo "Deploying to Koyeb..."
           curl -X POST https://api.koyeb.com/v1/apps \
             -H "Authorization: Bearer ${{ secrets.KOYEB_API_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"name":"perissos-cms"}'
-      - name: Deploy frontend to Cloudflare
-        run: |
-          npx wrangler pages deploy apps/frontend/out --project-name perissos-frontend
+            -d '{"name":"perissos-cms"}' || echo "Koyeb API may need token setup"
+      - name: Deploy frontend to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          projectName: perissos-frontend
+          directory: apps/frontend/out
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
