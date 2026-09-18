@@ -42,10 +42,8 @@ RUN pnpm install --frozen-lockfile --prod
 
 # Copy built app from builder
 COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
-COPY --from=builder /app/apps/backoffice/public/ ./apps/backoffice/public/
 COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-RUN mkdir -p ./apps/backoffice/public/images
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./apps/backoffice/public/images
 
 # Create non-root user and fix ownership
 RUN addgroup --system --gid 1001 nodejs && \
