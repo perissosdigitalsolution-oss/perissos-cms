@@ -3,13 +3,10 @@
 
 # ─── Base Stage ───────────────────────────────────────────
 FROM node:20-alpine AS base
-
-# Install pnpm and dependencies
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
-
 WORKDIR /app
 
 # ─── Dependencies ─────────────────────────────────────────
@@ -22,7 +19,7 @@ RUN pnpm install --frozen-lockfile
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app ./
 COPY . .
 RUN pnpm turbo build --filter=backoffice
 
@@ -32,27 +29,33 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Copy workspace structure + lockfile for pnpm workspace resolution
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/backoffice/package.json apps/backoffice/
+COPY packages/shared/package.json packages/shared/
+COPY packages/ui/package.json packages/ui/
 
-# Copy built application
-COPY --from=builder /app/apps/backoffice/.next/standalone ./
-COPY --from=builder /app/apps/backoffice/.next/static ./.next/static
-COPY --from=builder /app/apps/backoffice/public ./public
-COPY --from=builder /app/node_modules ./node_modules
+# Install production deps as root (pnpm needs write access to /app)
+RUN pnpm install --frozen-lockfile --prod
 
-# Copy entrypoint script
+# Copy built app from builder
+COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
+COPY --from=builder /app/apps/backoffice/public ./apps/backoffice/public
 COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Create non-root user and fix ownership
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app
 
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["node", "server.js"]
+CMD ["pnpm", "--filter", "backoffice", "start"]
