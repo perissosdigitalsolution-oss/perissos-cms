@@ -17,8 +17,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push backoffice
         run: |
-          docker build -t ghcr.io/perissos/backoffice:latest -f apps/backoffice/Dockerfile --target runner .
-          docker push ghcr.io/perissos/backoffice:latest
+          docker build -t ghcr.io/${{ github.repository_owner }}/backoffice:latest -f apps/backoffice/Dockerfile --target runner .
+          docker push ghcr.io/${{ github.repository_owner }}/backoffice:latest
+          docker tag ghcr.io/${{ github.repository_owner }}/backoffice:latest ghcr.io/${{ github.repository_owner }}/backoffice:stable
+          docker push ghcr.io/${{ github.repository_owner }}/backoffice:stable
       - name: Deploy to Koyeb via API
         if: env.KOYEB_API_TOKEN != ''
         env:
