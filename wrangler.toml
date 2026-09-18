@@ -1,0 +1,8 @@
+name = "perissos-frontend"
+type = "pages"
+
+account_id = "c51dde59d5bd84ed96f9ad779feb9ed6"
+
+r2_buckets = [
+  { binding = "PERISSOS_MEDIA", bucket_name = "perissos-media" }
+]

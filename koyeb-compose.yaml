@@ -1,0 +1,47 @@
+version: "1"
+
+services:
+  perissos-cms:
+    image: ghcr.io/perissos/backoffice:latest
+    ports:
+      - "3000"
+    envs:
+      - PAYLOAD_SECRET=1134bfd2ca61febeea1c5d0597c916da8ed13a3bcb434b332d0e7aee53c3ee32
+      - DATABASE_URL=postgresql://perissos:perissos_dev_password@perissos-postgres:5432/perissos_dev
+      - R2_BUCKET=perissos-media
+      - NEXT_PUBLIC_CMS_URL=https://cms.perissos.dev
+      - NEXT_PUBLIC_FRONTEND_URL=https://perissos-frontend.pages.dev
+      - NODE_ENV=production
+    http_port: 3000
+    healthcheck:
+      path: /api/health
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    domains:
+      - cms.perissos.dev
+
+  perissos-auth:
+    image: casbin/casdoor:latest
+    ports:
+      - "8000"
+    envs:
+      - RUNNING_IN_DOCKER=true
+      - driverName=postgres
+      - appname=casdoor
+      - httpport=8000
+      - runmode=prod
+      - origin=https://auth.perissos.dev
+      - originFrontend=https://cms.perissos.dev
+    http_port: 8000
+    domains:
+      - auth.perissos.dev
+
+  perissos-gateway:
+    image: apiseven/apisix:3-debian
+    ports:
+      - "9080"
+      - "9081"
+    http_port: 9080
+    domains:
+      - api.perissos.dev
