@@ -4,26 +4,27 @@
 # ─── Base Stage ───────────────────────────────────────────
 FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
-# ─── Dependencies ─────────────────────────────────────────
+# ─── Dependencies (all deps including dev) ────────────────
 FROM base AS deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
-COPY apps/frontend/package.json apps/frontend/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile --shamefully-hoist
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && pnpm install --frozen-lockfile --shamefully-hoist
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
-COPY --from=deps /app ./
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/backoffice/node_modules ./apps/backoffice/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY . .
-ENV NODE_PATH=/app/node_modules
-RUN pnpm install --frozen-lockfile --shamefully-hoist && pnpm build --filter=backoffice
+WORKDIR /app/apps/backoffice
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
@@ -33,18 +34,20 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Copy workspace structure + lockfile for pnpm workspace resolution
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+# Copy production node_modules (re-install prod only)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-
-# Install production deps as root (pnpm needs write access to /app)
-RUN pnpm install --frozen-lockfile --prod
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && pnpm install --frozen-lockfile --prod
 
 # Copy built app from builder
 COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
+COPY --from=builder /app/apps/backoffice/public ./apps/backoffice/public
 COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY --from=builder /app/apps/backoffice/package.json ./apps/backoffice/package.json
+
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./apps/backoffice/public/images
 
 # Create non-root user and fix ownership
