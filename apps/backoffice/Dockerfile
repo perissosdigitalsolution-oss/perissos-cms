@@ -14,6 +14,7 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY apps/frontend/package.json apps/frontend/
+COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 RUN pnpm install --frozen-lockfile --shamefully-hoist
@@ -23,7 +24,7 @@ FROM base AS builder
 COPY --from=deps /app ./
 COPY . .
 ENV NODE_PATH=/app/node_modules
-RUN pnpm turbo build --filter=backoffice
+RUN pnpm install --frozen-lockfile --shamefully-hoist && pnpm build --filter=backoffice
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
