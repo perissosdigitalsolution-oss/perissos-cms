@@ -21,7 +21,8 @@ RUN pnpm install --frozen-lockfile --shamefully-hoist
 FROM base AS builder
 COPY --from=deps /app ./
 COPY . .
-RUN pnpm turbo build --filter=backoffice
+ENV NODE_PATH=/app/node_modules
+RUN pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=backoffice
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
