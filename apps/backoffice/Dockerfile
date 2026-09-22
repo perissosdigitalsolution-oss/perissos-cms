@@ -4,28 +4,23 @@
 # ─── Base Stage ───────────────────────────────────────────
 FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
-# ─── Dependencies ─────────────────────────────────────────
+# ─── Dependencies: pnpm install with shamefully-hoist ───────
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile --shamefully-hoist
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && pnpm install --frozen-lockfile --shamefully-hoist
 
-# ─── Builder ──────────────────────────────────────────────
+# ─── Builder: use npm with pnpm's hoisted node_modules ─────
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/backoffice/node_modules ./apps/backoffice/node_modules
-COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
-COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY . .
 WORKDIR /app/apps/backoffice
-RUN pnpm run build
+RUN npm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
@@ -35,12 +30,12 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Copy production deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# Copy production deps (npm install --production)
+COPY package.json ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile --prod --shamefully-hoist
+RUN npm install --production
 
 # Copy built app from builder
 COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
@@ -62,4 +57,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["pnpm", "--filter", "backoffice", "start"]
+CMD ["node", "apps/backoffice/server.js"]
