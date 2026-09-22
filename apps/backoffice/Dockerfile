@@ -13,13 +13,21 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
+COPY apps/frontend/package.json apps/frontend/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 RUN pnpm install --frozen-lockfile --shamefully-hoist
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
-COPY --from=deps /app ./
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/.pnpm ./.pnpm
+COPY --from=deps /app/package.json ./
+COPY --from=deps /app/pnpm-lock.yaml ./
+COPY --from=deps /app/pnpm-workspace.yaml ./
+COPY apps/backoffice/package.json apps/backoffice/
+COPY packages/shared/package.json packages/shared/
+COPY packages/ui/package.json packages/ui/
 COPY . .
 WORKDIR /app/apps/backoffice
 RUN pnpm run build
@@ -32,7 +40,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Copy production deps (pnpm install --prod)
+# Copy production deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
