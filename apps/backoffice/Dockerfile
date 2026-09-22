@@ -19,7 +19,7 @@ RUN pnpm install --frozen-lockfile
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app ./
 COPY . .
 RUN pnpm turbo build --filter=backoffice
 
@@ -29,6 +29,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=768"
 
 # Copy workspace structure + lockfile for pnpm workspace resolution
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
@@ -41,9 +42,8 @@ RUN pnpm install --frozen-lockfile --prod
 
 # Copy built app from builder
 COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
-COPY --from=builder /app/apps/backoffice/public ./apps/backoffice/public
 COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./apps/backoffice/public/images
 
 # Create non-root user and fix ownership
 RUN addgroup --system --gid 1001 nodejs && \
