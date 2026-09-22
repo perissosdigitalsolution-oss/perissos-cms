@@ -1,51 +1,38 @@
 # apps/backoffice/Dockerfile
-# Multi-stage build for Payload CMS Backoffice
-
-# ─── Base Stage ───────────────────────────────────────────
-FROM node:20-alpine AS base
+FROM node:20-alpine
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
 WORKDIR /app
 
-# ─── Dependencies ─────────────────────────────────────────
-FROM base AS deps
+# Copy all package.json files first for better caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
-COPY apps/frontend/package.json apps/frontend/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile
 
-# ─── Builder: pnpm deploy for standalone backoffice ───────
-FROM base AS builder
-COPY --from=deps /app /app
+# Install dependencies with shamefully-hoist for flat node_modules
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && pnpm install --frozen-lockfile --shamefully-hoist
+
+# Copy source code
 COPY . .
-COPY tsconfig.json ./
-RUN pnpm deploy --filter=backoffice --prod /app/backoffice-deploy
-WORKDIR /app/backoffice-deploy
-RUN cp /app/tsconfig.json ./tsconfig.json && pnpm run build
 
-# ─── Runner (Production) ──────────────────────────────────
-FROM base AS runner
-WORKDIR /app
+# Build backoffice
+WORKDIR /app/apps/backoffice
+RUN pnpm run build
 
+# Production settings
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Copy standalone deployment from builder
-COPY --from=builder /app/backoffice-deploy ./
-
-# Copy built app from builder
-COPY --from=builder /app/backoffice-deploy/.next ./.next
-COPY --from=builder /app/backoffice-deploy/public ./public
-COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
+# Setup entrypoint
+COPY apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./public/images
 
-# Create non-root user and fix ownership
+# Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
     chown -R nextjs:nodejs /app
@@ -57,4 +44,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["node", "server.js"]
+CMD ["pnpm", "--filter", "backoffice", "start"]
