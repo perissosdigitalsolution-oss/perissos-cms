@@ -25,7 +25,7 @@ COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_module
 COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY . .
 WORKDIR /app/apps/backoffice
-RUN pnpm install --frozen-lockfile --shamefully-hoist && pnpm run build
+RUN pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
