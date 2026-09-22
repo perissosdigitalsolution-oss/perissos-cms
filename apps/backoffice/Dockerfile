@@ -20,7 +20,7 @@ RUN pnpm install --frozen-lockfile --shamefully-hoist
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app /app
 COPY . .
 WORKDIR /app/apps/backoffice
 RUN pnpm run build
