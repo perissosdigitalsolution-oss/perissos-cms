@@ -25,8 +25,7 @@ COPY . .
 COPY tsconfig.json ./
 RUN pnpm deploy --filter=backoffice --prod /app/backoffice-deploy
 WORKDIR /app/backoffice-deploy
-COPY /app/tsconfig.json ./tsconfig.json
-RUN pnpm run build
+RUN cp /app/tsconfig.json ./tsconfig.json && pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
