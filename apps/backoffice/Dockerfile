@@ -6,24 +6,24 @@ FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
 WORKDIR /app
 
-# ─── Dependencies ─────────────────────────────────────────
+# ─── Dependencies: npm install with flat node_modules ───────
 FROM base AS deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && pnpm install --frozen-lockfile
+# Use npm for flat installation (works better with Next.js webpack)
+RUN npm install --production=false
 
-# ─── Builder: deploy standalone backoffice ────────────────
+# ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
-COPY --from=deps /app /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/backoffice/node_modules ./apps/backoffice/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY . .
-COPY tsconfig.json ./
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && pnpm deploy --filter=backoffice --prod /app/backoffice-deploy
-WORKDIR /app/backoffice-deploy
-RUN cp /app/tsconfig.json ./tsconfig.json && pnpm run build
+WORKDIR /app/apps/backoffice
+RUN npm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
@@ -33,15 +33,20 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Copy standalone deployment from builder
-COPY --from=builder /app/backoffice-deploy ./
+# Copy production node_modules (npm install --production)
+COPY package.json ./
+COPY apps/backoffice/package.json apps/backoffice/
+COPY packages/shared/package.json packages/shared/
+COPY packages/ui/package.json packages/ui/
+RUN npm install --production
 
 # Copy built app from builder
-COPY --from=builder /app/backoffice-deploy/.next ./.next
-COPY --from=builder /app/backoffice-deploy/public ./public
+COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
+COPY --from=builder /app/apps/backoffice/public ./apps/backoffice/public
 COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY --from=builder /app/apps/backoffice/package.json ./apps/backoffice/package.json
 
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./public/images
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./apps/backoffice/public/images
 
 # Create non-root user and fix ownership
 RUN addgroup --system --gid 1001 nodejs && \
@@ -55,4 +60,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["node", "server.js"]
+CMD ["node", "apps/backoffice/server.js"]
