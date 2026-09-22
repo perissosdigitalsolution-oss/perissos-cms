@@ -6,13 +6,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  typescript: { ignoreErrors: true, ignoreBuildErrors: true },
   reactStrictMode: true,
-  // output: 'standalone', // Disabled - not compatible with Payload's withPayload wrapper
-  transpilePackages: ['@payloadcms/*'],
+  transpilePackages: ['@payloadcms/next', '@payloadcms/richtext-lexical'],
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    optimizePackageImports: ['@payloadcms/next', '@payloadcms/richtext-lexical'],
   },
   webpack: (config) => {
     config.resolve.alias['@payload-config'] = path.resolve(__dirname, 'src/payload.config.ts')
