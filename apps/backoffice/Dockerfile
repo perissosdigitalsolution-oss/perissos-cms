@@ -10,18 +10,15 @@ COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 
-# Install dependencies with shamefully-hoist for flat node_modules
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && pnpm install --frozen-lockfile --shamefully-hoist
+# Install dependencies with npm (workspaces now in root package.json)
+RUN npm install --production=false
 
 # Copy source code
 COPY . .
 
 # Build backoffice
 WORKDIR /app/apps/backoffice
-RUN pnpm run build
+RUN npm run build
 
 # Production settings
 ENV NODE_ENV=production
@@ -44,4 +41,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["pnpm", "--filter", "backoffice", "start"]
+CMD ["node", "apps/backoffice/server.js"]

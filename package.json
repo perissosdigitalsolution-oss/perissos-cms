@@ -2,7 +2,7 @@
   "name": "perissos-cms",
   "private": true,
   "version": "1.0.0",
-  "description": "Perissos CMS — Single-tenant-per-install SaaS platform (Payload + Next.js)",
+  "description": "Perissos CMS \u2014 Single-tenant-per-install SaaS platform (Payload + Next.js)",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -12,6 +12,7 @@
     "test:ci": "pnpm typecheck && pnpm build && pnpm test:api && pnpm test:frontend",
     "test:api": "node scripts/test-api.mjs",
     "test:frontend": "node scripts/test-frontend.mjs",
+    "test:ecosystem": "node scripts/test-ecosystem.mjs",
     "seed:pages": "node scripts/seed-pages.mjs",
     "seed:marketplace": "tsx scripts/seed-marketplace.ts",
     "dev:backoffice": "turbo dev --filter=backoffice",
@@ -32,5 +33,13 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
-  }
+  },
+  "dependencies": {
+    "@payloadcms/plugin-multi-tenant": "3.88.0",
+    "@shadowmkj/plugin-ecommerce": "3.85.6"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
