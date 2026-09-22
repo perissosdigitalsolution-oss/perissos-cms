@@ -1,5 +1,5 @@
 # apps/backoffice/Dockerfile
-FROM node:20-alpine
+FROM node:20-alpine AS runner
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
 
 WORKDIR /app
