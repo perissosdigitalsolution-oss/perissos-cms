@@ -19,10 +19,11 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
 FROM base AS builder
 COPY --from=deps /app /app
 COPY . .
+COPY tsconfig.json ./
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
     && pnpm deploy --filter=backoffice --prod /app/backoffice-deploy
 WORKDIR /app/backoffice-deploy
-RUN pnpm run build
+RUN cp /app/tsconfig.json ./tsconfig.json && pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
