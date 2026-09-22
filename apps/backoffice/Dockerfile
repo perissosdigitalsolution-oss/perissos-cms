@@ -4,23 +4,25 @@
 # ─── Base Stage ───────────────────────────────────────────
 FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
-# ─── Dependencies: pnpm install with shamefully-hoist ───────
+# ─── Dependencies ─────────────────────────────────────────
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && pnpm install --frozen-lockfile --shamefully-hoist
+RUN pnpm install --frozen-lockfile --shamefully-hoist
 
-# ─── Builder: use npm with pnpm's hoisted node_modules ─────
+# ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app ./
 COPY . .
 WORKDIR /app/apps/backoffice
-RUN npm run build
+RUN pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
@@ -30,12 +32,12 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Copy production deps (npm install --production)
-COPY package.json ./
+# Copy production deps (pnpm install --prod)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN npm install --production
+RUN pnpm install --frozen-lockfile --prod --shamefully-hoist
 
 # Copy built app from builder
 COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
@@ -57,4 +59,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["node", "apps/backoffice/server.js"]
+CMD ["pnpm", "--filter", "backoffice", "start"]
