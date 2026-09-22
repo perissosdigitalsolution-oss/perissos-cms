@@ -13,19 +13,16 @@ COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && pnpm install --frozen-lockfile --shamefully-hoist
+    && pnpm install --frozen-lockfile
 
-# ─── Builder ──────────────────────────────────────────────
+# ─── Builder: deploy standalone backoffice ────────────────
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/backoffice/node_modules ./apps/backoffice/node_modules
-COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
-COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
+COPY --from=deps /app /app
 COPY . .
-WORKDIR /app/apps/backoffice
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && pnpm install --frozen-lockfile --shamefully-hoist \
-    && pnpm run build
+    && pnpm deploy --filter=backoffice --prod /app/backoffice-deploy
+WORKDIR /app/backoffice-deploy
+RUN pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
@@ -35,21 +32,15 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Copy production node_modules (re-install prod only)
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/backoffice/package.json apps/backoffice/
-COPY packages/shared/package.json packages/shared/
-COPY packages/ui/package.json packages/ui/
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && pnpm install --frozen-lockfile --prod
+# Copy standalone deployment from builder
+COPY --from=builder /app/backoffice-deploy ./
 
 # Copy built app from builder
-COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
-COPY --from=builder /app/apps/backoffice/public ./apps/backoffice/public
+COPY --from=builder /app/backoffice-deploy/.next ./.next
+COPY --from=builder /app/backoffice-deploy/public ./public
 COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-COPY --from=builder /app/apps/backoffice/package.json ./apps/backoffice/package.json
 
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./apps/backoffice/public/images
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./public/images
 
 # Create non-root user and fix ownership
 RUN addgroup --system --gid 1001 nodejs && \
@@ -63,4 +54,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["pnpm", "--filter", "backoffice", "start"]
+CMD ["node", "server.js"]
