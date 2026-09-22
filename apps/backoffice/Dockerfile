@@ -19,8 +19,8 @@ RUN npm install --production=false
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-WORKDIR /app/apps/backoffice
-RUN npm run build
+WORKDIR /app
+RUN npm run build --workspace=backoffice
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
@@ -35,7 +35,7 @@ COPY package.json ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN npm install --production
+RUN npm install --production --workspaces=false
 
 # Copy built app from builder
 COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
