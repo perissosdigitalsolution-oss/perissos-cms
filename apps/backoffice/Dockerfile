@@ -18,9 +18,6 @@ RUN npm install --production=false
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/backoffice/node_modules ./apps/backoffice/node_modules
-COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
-COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY . .
 WORKDIR /app/apps/backoffice
 RUN npm run build
