@@ -6,7 +6,7 @@ FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
 WORKDIR /app
 
-# ─── Dependencies (all deps including dev) ────────────────
+# ─── Dependencies ─────────────────────────────────────────
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
@@ -24,6 +24,7 @@ COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY . .
 WORKDIR /app/apps/backoffice
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && pnpm install --frozen-lockfile --shamefully-hoist \
     && pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
