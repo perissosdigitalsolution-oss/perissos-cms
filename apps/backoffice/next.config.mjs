@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   reactStrictMode: true,
-  transpilePackages: ['@payloadcms/next', '@payloadcms/richtext-lexical', '@payloadcms/plugin-multi-tenant', '@shadowmkj/plugin-ecommerce', '@consilioweb/payload-support', '@karixi/payload-ai'],
+  transpilePackages: ['@payloadcms/next', '@payloadcms/richtext-lexical', '@payloadcms/plugin-multi-tenant', '@shadowmkj/plugin-ecommerce', '@shadowmkj/plugin-ecommerce/payments/stripe', '@consilioweb/payload-support', '@karixi/payload-ai'],
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
@@ -19,6 +19,11 @@ const nextConfig = {
     config.resolve.alias['@payload-config'] = path.resolve(__dirname, 'src/payload.config.ts')
     config.resolve.alias['@perissos/shared'] = path.resolve(__dirname, '../../packages/shared/src')
     config.resolve.alias['@perissos/ui'] = path.resolve(__dirname, '../../packages/ui/src')
+    config.resolve.alias['@shadowmkj/plugin-ecommerce'] = path.resolve(__dirname, '../../node_modules/@shadowmkj/plugin-ecommerce')
+    config.resolve.alias['@shadowmkj/plugin-ecommerce/payments/stripe'] = path.resolve(__dirname, '../../node_modules/@shadowmkj/plugin-ecommerce/dist/exports/payments/stripe.js')
+    config.resolve.alias['@payloadcms/plugin-multi-tenant'] = path.resolve(__dirname, '../../node_modules/@payloadcms/plugin-multi-tenant')
+    config.resolve.alias['@consilioweb/payload-support'] = path.resolve(__dirname, '../../node_modules/@consilioweb/payload-support')
+    config.resolve.alias['@karixi/payload-ai'] = path.resolve(__dirname, '../../node_modules/@karixi/payload-ai')
     return config
   },
   images: {
