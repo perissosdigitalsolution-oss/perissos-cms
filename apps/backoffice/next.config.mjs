@@ -24,6 +24,7 @@ const nextConfig = {
     config.resolve.alias['@payloadcms/plugin-multi-tenant'] = path.resolve(__dirname, '../../node_modules/@payloadcms/plugin-multi-tenant')
     config.resolve.alias['@consilioweb/payload-support'] = path.resolve(__dirname, '../../node_modules/@consilioweb/payload-support')
     config.resolve.alias['@karixi/payload-ai'] = path.resolve(__dirname, '../../node_modules/@karixi/payload-ai')
+    config.resolve.modules = [path.resolve(__dirname, '../../node_modules'), 'node_modules']
     return config
   },
   images: {
