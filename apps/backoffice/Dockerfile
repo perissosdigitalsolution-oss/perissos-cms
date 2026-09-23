@@ -29,7 +29,7 @@ RUN pnpm deploy --filter=backoffice --prod /app/backoffice-deploy
 WORKDIR /app/backoffice-deploy
 # Copy source code from the workspace (needed for build)
 RUN cp -r /app/apps/backoffice/src ./src && \
-    cp -r /app/apps/backoffice/public ./public && \
+    mkdir -p ./public && \
     cp /app/apps/backoffice/next.config.mjs ./next.config.mjs && \
     cp /app/tsconfig.json ./tsconfig.json && \
     cp -r /app/packages/shared/src ./node_modules/@perissos/shared/src && \
