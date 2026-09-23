@@ -13,7 +13,7 @@ COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 COPY . .
-RUN pnpm install --shamefully-hoist && cd apps/backoffice && pnpm run build
+RUN pnpm install --frozen-lockfile && cd apps/backoffice && pnpm run build
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
