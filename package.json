@@ -37,9 +37,5 @@
   "dependencies": {
     "@payloadcms/plugin-multi-tenant": "3.88.0",
     "@shadowmkj/plugin-ecommerce": "3.85.6"
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  }
 }

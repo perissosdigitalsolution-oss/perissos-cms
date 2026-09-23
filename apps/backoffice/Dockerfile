@@ -4,21 +4,26 @@ RUN apk add --no-cache libc6-compat openssl postgresql-client curl
 
 WORKDIR /app
 
-# Copy all package.json files first for better caching
+# Copy root workspace files and ALL workspace package.json files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
+COPY apps/frontend/package.json apps/frontend/
+COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 
-# Install dependencies with npm (workspaces now in root package.json)
-RUN npm install --legacy-peer-deps
+# Install dependencies with pnpm (shamefully-hoist for flat node_modules)
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && pnpm install --frozen-lockfile --shamefully-hoist
 
-# Copy source code
+# Copy source code (node_modules excluded by .dockerignore)
 COPY . .
 
 # Build backoffice
 WORKDIR /app/apps/backoffice
-RUN npm run build
+RUN pnpm run build
 
 # Production settings
 ENV NODE_ENV=production
@@ -41,4 +46,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["npx", "next", "start"]
+CMD ["node", "node_modules/.bin/next", "start"]
