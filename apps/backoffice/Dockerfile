@@ -13,34 +13,7 @@ COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 COPY . .
-RUN pnpm install --shamefully-hoist 2>&1 | tail -3 && node -e "
-const fs = require('fs');
-const path = require('path');
-const src = '/app/node_modules';
-const dst = '/app/apps/backoffice/node_modules';
-function copy(src, dst) {
-  fs.mkdirSync(dst, {recursive: true});
-  for (const entry of fs.readdirSync(src)) {
-    const s = path.join(src, entry);
-    const d = path.join(dst, entry);
-    const stat = fs.lstatSync(s);
-    if (stat.isSymbolicLink()) {
-      const t = fs.readlinkSync(s);
-      const r = path.resolve(path.dirname(s), t);
-      if (fs.existsSync(r)) {
-        const rs = fs.statSync(r);
-        if (rs.isDirectory()) copy(r, d);
-        else fs.copyFileSync(r, d);
-      }
-    } else if (stat.isDirectory()) {
-      copy(s, d);
-    } else {
-      fs.copyFileSync(s, d);
-    }
-  }
-}
-copy(src, dst);
-" && cd apps/backoffice && pnpm run build
+RUN pnpm install --shamefully-hoist 2>&1 | tail -3 && node scripts/fix-node-modules.mjs && cd apps/backoffice && pnpm run build
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
