@@ -33,9 +33,5 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
-  },
-  "dependencies": {
-    "@payloadcms/plugin-multi-tenant": "3.88.0",
-    "@shadowmkj/plugin-ecommerce": "3.85.6"
   }
 }
