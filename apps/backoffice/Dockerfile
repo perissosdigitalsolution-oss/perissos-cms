@@ -25,7 +25,7 @@ COPY --from=deps /app /app
 COPY . .
 WORKDIR /app/apps/backoffice
 ENV NODE_PATH=/app/node_modules
-RUN ls /app/node_modules/@payloadcms/ 2>&1 || echo "NOT FOUND @payloadcms" && ls /app/node_modules/@shadowmkj/ 2>&1 || echo "NOT FOUND @shadowmkj" && pnpm run build
+RUN ls /app/node_modules/ | head -20 && ls /app/node_modules/@payloadcms/ 2>&1 || echo "NOT FOUND @payloadcms" && pnpm install --no-frozen-lockfile --shamefully-hoist && ls /app/node_modules/@payloadcms/ 2>&1 || echo "STILL NOT FOUND" && pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
