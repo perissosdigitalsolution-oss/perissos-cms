@@ -11,7 +11,7 @@ COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 
 # Install dependencies with npm (workspaces now in root package.json)
-RUN npm install --production=false
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -41,4 +41,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["node", "apps/backoffice/server.js"]
+CMD ["npx", "next", "start"]
