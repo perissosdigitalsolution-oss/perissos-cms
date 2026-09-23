@@ -18,7 +18,7 @@ COPY apps/apisix/package.json apps/apisix/
 COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile && ls /app/node_modules/@payloadcms/ 2>&1 || echo "NOT FOUND"
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
