@@ -13,7 +13,7 @@ COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 COPY . .
-RUN pnpm install --shamefully-hoist 2>&1 | tail -3 && node -e "const fs=require("fs");const path=require("path");const pnpm="/app/node_modules/.pnpm",nm="/app/node_modules";function link(src,dst){fs.mkdirSync(dst,{recursive:true});for(const e of fs.readdirSync(src)){const s=path.join(src,e),d=path.join(dst,e);const st=fs.lstatSync(s);if(st.isSymbolicLink()){const t=fs.readlinkSync(s);const r=path.resolve(path.dirname(s),t);if(fs.existsSync(r)){const rs=fs.statSync(r);if(rs.isDirectory())link(r,d);else fs.copyFileSync(r,d);}}else if(st.isDirectory())link(s,d);else fs.copyFileSync(s,d);}}link(pnpm,nm);" && cp -rL /app/node_modules/* /app/apps/backoffice/node_modules/ 2>/dev/null; cd apps/backoffice && pnpm run build
+RUN pnpm install --shamefully-hoist 2>&1 | tail -3 && node apps/backoffice/scripts/fix-node-modules.mjs && cp -rL /app/node_modules/* /app/apps/backoffice/node_modules/ 2>/dev/null; cd apps/backoffice && pnpm run build
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
