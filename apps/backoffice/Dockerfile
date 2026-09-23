@@ -18,7 +18,7 @@ COPY apps/apisix/package.json apps/apisix/
 COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile --verbose 2>&1 | tail -5 && echo "---" && ls /app/node_modules/ | wc -l && ls /app/node_modules/ | head -20
+RUN pnpm install --verbose 2>&1 | tail -10 && echo "---" && ls /app/node_modules/ | wc -l && ls /app/node_modules/ | head -20 && echo "---" && ls /app/.pnpm 2>&1 || echo "NO .pnpm"
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
