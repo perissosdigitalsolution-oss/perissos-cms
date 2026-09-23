@@ -18,7 +18,7 @@ COPY apps/apisix/package.json apps/apisix/
 COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile --shamefully-hoist
+RUN pnpm install --frozen-lockfile
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
