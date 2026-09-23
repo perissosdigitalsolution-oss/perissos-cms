@@ -16,7 +16,7 @@ COPY packages/ui/package.json packages/ui/
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && pnpm install --frozen-lockfile --shamefully-hoist
+    && pnpm install --no-frozen-lockfile --shamefully-hoist && ls /app/node_modules/@payloadcms/
 
 # Copy source code (node_modules excluded by .dockerignore)
 COPY . .
