@@ -13,7 +13,7 @@ COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 COPY . .
-RUN pnpm install --shamefully-hoist && ls -la /app/node_modules/@payloadcms/plugin-multi-tenant 2>&1 || echo "NO @payloadcms/plugin-multi-tenant" && ls -la /app/node_modules/@shadowmkj/plugin-ecommerce 2>&1 || echo "NO @shadowmkj/plugin-ecommerce" && cd apps/backoffice && pnpm run build
+RUN pnpm install && ls -la /app/node_modules/@payloadcms/plugin-multi-tenant 2>&1 || echo "NO @payloadcms/plugin-multi-tenant" && ls -la /app/node_modules/@shadowmkj/plugin-ecommerce 2>&1 || echo "NO @shadowmkj/plugin-ecommerce" && cd apps/backoffice && pnpm run build
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
