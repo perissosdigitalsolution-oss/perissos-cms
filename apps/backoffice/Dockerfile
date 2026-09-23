@@ -13,7 +13,7 @@ COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 COPY . .
-RUN pnpm install --frozen-lockfile && ls /app/node_modules/@payloadcms/ 2>&1 || echo "NO @payloadcms" && ls /app/.pnpm 2>&1 || echo "NO .pnpm" && cd apps/backoffice && pnpm run build
+RUN pnpm install --shamefully-hoist && ls /app/node_modules/@payloadcms/ 2>&1 || echo "NO @payloadcms" && ls /app/node_modules/.pnpm 2>&1 || echo "NO .pnpm" && cd apps/backoffice && pnpm run build
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
