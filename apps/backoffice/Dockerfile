@@ -14,18 +14,18 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backoffice/package.json apps/backoffice/
 COPY apps/frontend/package.json apps/frontend/
+COPY apps/apisix/package.json apps/apisix/
 COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --shamefully-hoist
 
 # ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
 COPY --from=deps /app /app
 COPY . .
 WORKDIR /app/apps/backoffice
-ENV NODE_PATH=/app/node_modules
-RUN ls /app/node_modules/ | head -20 && ls /app/node_modules/@payloadcms/ 2>&1 || echo "NOT FOUND @payloadcms" && pnpm install --no-frozen-lockfile --shamefully-hoist && ls /app/node_modules/@payloadcms/ 2>&1 || echo "STILL NOT FOUND" && pnpm run build
+RUN pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
 FROM base AS runner
