@@ -13,7 +13,7 @@ COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 COPY . .
-RUN pnpm install && cp -rL /app/node_modules /app/apps/backoffice/node_modules 2>/dev/null; cd apps/backoffice && pnpm run build
+RUN pnpm install && ls -la /app/node_modules/@payloadcms/ 2>&1 || echo "NO /app/node_modules/@payloadcms" && ls -la /app/.pnpm 2>&1 || echo "NO /app/.pnpm" && cp -rL /app/node_modules /app/apps/backoffice/node_modules 2>/dev/null && cd apps/backoffice && pnpm run build
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
