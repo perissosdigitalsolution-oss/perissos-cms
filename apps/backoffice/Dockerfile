@@ -19,21 +19,12 @@ COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 RUN pnpm install --frozen-lockfile
 
-# ─── Builder: pnpm deploy + copy source ───────────────────
+# ─── Builder ──────────────────────────────────────────────
 FROM base AS builder
 COPY --from=deps /app /app
 COPY . .
-COPY tsconfig.json ./
-# Deploy backoffice as standalone with flat node_modules
-RUN pnpm deploy --filter=backoffice --prod /app/backoffice-deploy
-WORKDIR /app/backoffice-deploy
-# Copy source code from the workspace (needed for build)
-RUN cp -r /app/apps/backoffice/src ./src && \
-    mkdir -p ./public && \
-    cp /app/apps/backoffice/next.config.mjs ./next.config.mjs && \
-    cp /app/tsconfig.json ./tsconfig.json && \
-    cp -r /app/packages/shared/src ./node_modules/@perissos/shared/src && \
-    cp -r /app/packages/ui/src ./node_modules/@perissos/ui/src
+WORKDIR /app/apps/backoffice
+ENV NODE_PATH=/app/node_modules
 RUN pnpm run build
 
 # ─── Runner (Production) ──────────────────────────────────
@@ -44,14 +35,14 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
-# Copy standalone deployment from builder
-COPY --from=builder /app/backoffice-deploy ./
-
-# Copy built app from builder
-COPY --from=builder /app/backoffice-deploy/.next ./.next
+# Copy production deps
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
+COPY --from=builder /app/apps/backoffice/public ./apps/backoffice/public
 COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY --from=builder /app/apps/backoffice/package.json ./apps/backoffice/package.json
 
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./public/images
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p ./apps/backoffice/public/images
 
 # Create non-root user and fix ownership
 RUN addgroup --system --gid 1001 nodejs && \
