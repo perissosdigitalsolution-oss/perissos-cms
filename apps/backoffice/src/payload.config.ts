@@ -22,7 +22,7 @@ import { Media } from './collections/Media'
 import { Subscriptions } from './collections/Subscriptions'
 import { Templates } from './collections/Templates'
 import { MarketplaceTemplates } from './collections/MarketplaceTemplates'
-import { Tenant } from './collections/Tenant'
+import { Tenant } from '@/collections/Tenant'
 
 // Globals
 import { ClientSettings } from './globals/ClientSettings'
