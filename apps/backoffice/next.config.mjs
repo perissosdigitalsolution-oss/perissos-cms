@@ -15,6 +15,7 @@ const nextConfig = {
       '@perissos/shared': path.resolve(__dirname, '../../packages/shared/src'),
       '@perissos/ui': path.resolve(__dirname, '../../packages/ui/src'),
       '@/collections': path.resolve(__dirname, 'src/collections'),
+      '@/collections/Tenant': path.resolve(__dirname, 'src/collections/Tenant.ts'),
       '@/lib': path.resolve(__dirname, 'src/lib'),
       '@payloadcms/plugin-multi-tenant': path.resolve(__dirname, './node_modules/@payloadcms/plugin-multi-tenant'),
       '@shadowmkj/plugin-ecommerce': path.resolve(__dirname, './node_modules/@shadowmkj/plugin-ecommerce'),
