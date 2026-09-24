@@ -26,7 +26,15 @@ const nextConfig = {
     config.resolve.alias['@karixi/payload-ai'] = path.resolve(__dirname, './node_modules/@karixi/payload-ai')
     config.resolve.alias['entities/decode'] = path.resolve(__dirname, './node_modules/entities/lib/decode.js')
     config.resolve.alias['@/collections'] = path.resolve(__dirname, './src/collections')
+    config.resolve.alias['entities/decode'] = path.resolve(__dirname, './node_modules/entities/lib/decode.js')
+    config.resolve.alias['entities/escape'] = path.resolve(__dirname, './node_modules/entities/lib/escape.js')
     config.resolve.modules = [path.resolve(__dirname, './node_modules'), path.resolve(__dirname, './src/collections'), 'node_modules']
+    // Preserve webpack aliases through withPayload wrapper
+    const originalWebpack = nextConfig.webpack
+    nextConfig.webpack = (config, options) => {
+      const result = originalWebpack ? originalWebpack(config, options) : config
+      return result
+    }
     config.resolve.symlinks = true
     return config
   },
