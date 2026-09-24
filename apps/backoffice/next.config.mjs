@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   reactStrictMode: true,
@@ -24,17 +23,11 @@ const nextConfig = {
     config.resolve.alias['@payloadcms/plugin-multi-tenant'] = path.resolve(__dirname, './node_modules/@payloadcms/plugin-multi-tenant')
     config.resolve.alias['@consilioweb/payload-support'] = path.resolve(__dirname, './node_modules/@consilioweb/payload-support')
     config.resolve.alias['@karixi/payload-ai'] = path.resolve(__dirname, './node_modules/@karixi/payload-ai')
-    config.resolve.alias['entities/decode'] = path.resolve(__dirname, './node_modules/entities/lib/decode.js')
     config.resolve.alias['@/collections'] = path.resolve(__dirname, './src/collections')
+    config.resolve.alias['@/collections/Tenant'] = path.resolve(__dirname, './src/collections/Tenant.ts')
     config.resolve.alias['entities/decode'] = path.resolve(__dirname, './node_modules/entities/lib/decode.js')
     config.resolve.alias['entities/escape'] = path.resolve(__dirname, './node_modules/entities/lib/escape.js')
-    config.resolve.modules = [path.resolve(__dirname, './node_modules'), path.resolve(__dirname, './src/collections'), 'node_modules']
-    // Preserve webpack aliases through withPayload wrapper
-    const originalWebpack = nextConfig.webpack
-    nextConfig.webpack = (config, options) => {
-      const result = originalWebpack ? originalWebpack(config, options) : config
-      return result
-    }
+    config.resolve.modules = [path.resolve(__dirname, './node_modules'), path.resolve(__dirname, './src/collections'), path.resolve(__dirname, './src'), 'node_modules']
     config.resolve.symlinks = true
     return config
   },
