@@ -24,6 +24,8 @@ const nextConfig = {
     config.resolve.alias['@payloadcms/plugin-multi-tenant'] = path.resolve(__dirname, './node_modules/@payloadcms/plugin-multi-tenant')
     config.resolve.alias['@consilioweb/payload-support'] = path.resolve(__dirname, './node_modules/@consilioweb/payload-support')
     config.resolve.alias['@karixi/payload-ai'] = path.resolve(__dirname, './node_modules/@karixi/payload-ai')
+    config.resolve.alias['entities/decode'] = path.resolve(__dirname, './node_modules/entities/lib/decode.js')
+    config.resolve.alias['@/collections'] = path.resolve(__dirname, './src/collections')
     config.resolve.modules = [path.resolve(__dirname, './node_modules'), path.resolve(__dirname, './src/collections'), 'node_modules']
     config.resolve.symlinks = true
     return config

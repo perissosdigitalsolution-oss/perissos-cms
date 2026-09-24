@@ -11,6 +11,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@/collections/*": [
+        "./src/collections/*"
+      ],
       "@payload-config": [
         "./src/payload.config.ts"
       ],
