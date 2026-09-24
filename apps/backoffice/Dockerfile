@@ -14,8 +14,8 @@ COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 COPY . .
 RUN pnpm install --shamefully-hoist
-# Copy flat node_modules to backoffice workspace so Next.js finds all modules
-RUN mkdir -p /app/apps/backoffice/node_modules && cp -rL /app/node_modules/. /app/apps/backoffice/node_modules/
+# Ensure webpack can find hoisted packages at root node_modules
+ENV NODE_PATH="/app/node_modules"
 RUN cd apps/backoffice && pnpm run build
 
 FROM node:20-alpine AS runner

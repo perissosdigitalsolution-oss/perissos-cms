@@ -24,7 +24,12 @@ const nextConfig = {
       'entities/decode': path.resolve(__dirname, './node_modules/entities/lib/decode.js'),
       'entities/escape': path.resolve(__dirname, './node_modules/entities/lib/escape.js'),
     },
-    modules: [path.resolve(__dirname, './node_modules'), path.resolve(__dirname, './src'), 'node_modules'],
+    modules: [
+      path.resolve(__dirname, './node_modules'),
+      path.resolve(__dirname, '../../node_modules'),
+      path.resolve(__dirname, './src'),
+      'node_modules',
+    ],
     symlinks: true,
   },
   experimental: {
