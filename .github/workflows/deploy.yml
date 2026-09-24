@@ -3,9 +3,6 @@ name: Build & Push Backoffice
 on:
   push:
     branches: [main, sprint/*]
-    paths:
-      - 'apps/backoffice/**'
-      - 'packages/**'
   workflow_dispatch:
 
 permissions:
