@@ -31,9 +31,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/backoffice/.next ./apps/backoffice/.next
 COPY --from=builder /app/apps/backoffice/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY --from=builder /app/apps/backoffice/package.json ./apps/backoffice/package.json
-RUN mkdir -p /app/apps/backoffice/public && chown -R nextjs:nodejs /app/apps/backoffice/public
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
+    mkdir -p /app/apps/backoffice/public && \
     chown -R nextjs:nodejs /app
 USER nextjs
 EXPOSE 3000
