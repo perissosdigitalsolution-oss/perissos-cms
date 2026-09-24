@@ -20,10 +20,6 @@ const nextConfig = {
 
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(
-        /^@\/collections\/Tenant$/,
-        path.resolve(__dirname, 'src/collections/Tenant')
-      ),
-      new webpack.NormalModuleReplacementPlugin(
         /^entities\/decode$/,
         path.resolve(__dirname, '../../node_modules/entities/lib/decode.js')
       ),
@@ -62,6 +58,7 @@ const nextConfig = {
       ...(config.resolve.modules || []),
       path.resolve(__dirname, 'node_modules'),
       path.resolve(__dirname, '../../node_modules'),
+      path.resolve(__dirname, 'src'),
     ]
 
     config.resolve.symlinks = true
