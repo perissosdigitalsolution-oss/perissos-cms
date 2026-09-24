@@ -26,7 +26,7 @@ jobs:
           docker push ghcr.io/perissosdigitalsolution-oss/backoffice:latest
       - name: Deploy to Railway
         run: |
-          pip install railway-cli --quiet 2>/dev/null || npm install -g @railway/cli 2>/dev/null || true
-          railway up --service backoffice --environment production --yes 2>&1 || echo "Railway deploy may need manual trigger"
+          npm install -g @railway/cli@latest
+          railway up --service backoffice --environment production --yes
         env:
-          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
