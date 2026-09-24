@@ -8,38 +8,32 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   reactStrictMode: true,
   transpilePackages: ['@payloadcms/next', '@payloadcms/richtext-lexical', '@payloadcms/plugin-multi-tenant', '@shadowmkj/plugin-ecommerce', '@consilioweb/payload-support', '@karixi/payload-ai'],
-  // Top-level resolve — preserved by withPayload
-  resolve: {
-    alias: {
-      '@payload-config': path.resolve(__dirname, 'src/payload.config.ts'),
-      '@perissos/shared': path.resolve(__dirname, '../../packages/shared/src'),
-      '@perissos/ui': path.resolve(__dirname, '../../packages/ui/src'),
-      '@/collections': path.resolve(__dirname, 'src/collections'),
-      '@/collections/Tenant': path.resolve(__dirname, 'src/collections/Tenant.ts'),
-      '@/lib': path.resolve(__dirname, 'src/lib'),
-      '@payloadcms/plugin-multi-tenant': path.resolve(__dirname, './node_modules/@payloadcms/plugin-multi-tenant'),
-      '@shadowmkj/plugin-ecommerce': path.resolve(__dirname, './node_modules/@shadowmkj/plugin-ecommerce'),
-      '@shadowmkj/plugin-ecommerce/payments/stripe': path.resolve(__dirname, './node_modules/@shadowmkj/plugin-ecommerce/dist/exports/payments/stripe.js'),
-      '@consilioweb/payload-support': path.resolve(__dirname, './node_modules/@consilioweb/payload-support'),
-      '@karixi/payload-ai': path.resolve(__dirname, './node_modules/@karixi/payload-ai'),
-      'entities/decode': path.resolve(__dirname, './node_modules/entities/lib/decode.js'),
-      'entities/escape': path.resolve(__dirname, './node_modules/entities/lib/escape.js'),
-    },
-    modules: [
-      path.resolve(__dirname, './node_modules'),
-      path.resolve(__dirname, '../../node_modules'),
-      path.resolve(__dirname, './src'),
-      'node_modules',
-    ],
-    symlinks: true,
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
     },
     optimizePackageImports: ['@payloadcms/next', '@payloadcms/richtext-lexical'],
   },
-  webpack: (config) => {
+  webpack: (config, options) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@payload-config': path.resolve(__dirname, 'src/payload.config.ts'),
+      '@perissos/shared': path.resolve(__dirname, '../../packages/shared/src'),
+      '@perissos/ui': path.resolve(__dirname, '../../packages/ui/src'),
+      '@/lib': path.resolve(__dirname, 'src/lib'),
+      '@shadowmkj/plugin-ecommerce/payments/stripe': path.resolve(__dirname, './node_modules/@shadowmkj/plugin-ecommerce/dist/exports/payments/stripe.js'),
+      '@payloadcms/plugin-multi-tenant': path.resolve(__dirname, './node_modules/@payloadcms/plugin-multi-tenant'),
+      '@consilioweb/payload-support': path.resolve(__dirname, './node_modules/@consilioweb/payload-support'),
+      '@karixi/payload-ai': path.resolve(__dirname, './node_modules/@karixi/payload-ai'),
+      'entities/decode': path.resolve(__dirname, './node_modules/entities/lib/decode.js'),
+      'entities/escape': path.resolve(__dirname, './node_modules/entities/lib/escape.js'),
+    }
+    config.resolve.modules = [
+      ...(config.resolve.modules || []),
+      path.resolve(__dirname, './node_modules'),
+      path.resolve(__dirname, '../../node_modules'),
+      path.resolve(__dirname, './src'),
+    ]
     config.resolve.symlinks = true
     return config
   },
