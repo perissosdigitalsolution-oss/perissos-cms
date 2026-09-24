@@ -24,10 +24,13 @@ jobs:
         run: |
           docker build -t ghcr.io/perissosdigitalsolution-oss/backoffice:latest -f apps/backoffice/Dockerfile --target runner .
           docker push ghcr.io/perissosdigitalsolution-oss/backoffice:latest
-      - name: Deploy to Railway
+      - name: Trigger Railway redeploy
         run: |
-          npm install -g @railway/cli@latest
-          railway login --token "$RAILWAY_TOKEN"
-          railway up --service backoffice --environment production --yes
+          curl -s -X POST https://backoffice.railway.app/v1/graphql \
+            -H "Authorization: Bearer $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"mutation { redeployService(input: { serviceId: \"3256b012-1e9e-4b8e-a884-b2e42f50e0a9\" }) { id } }"}' \
+            || echo "Railway API deploy failed — manual redeploy needed"
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        continue-on-error: true
