@@ -27,7 +27,6 @@ const nextConfig = {
     config.resolve.alias['@/collections/Tenant'] = path.resolve(__dirname, './src/collections/Tenant.ts')
     config.resolve.alias['entities/decode'] = path.resolve(__dirname, './node_modules/entities/lib/decode.js')
     config.resolve.alias['entities/escape'] = path.resolve(__dirname, './node_modules/entities/lib/escape.js')
-    config.resolve.modules = [path.resolve(__dirname, './node_modules'), path.resolve(__dirname, './src/collections'), path.resolve(__dirname, './src'), 'node_modules']
     config.resolve.symlinks = true
     return config
   },

@@ -11,6 +11,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@/collections": [
+        "./src/collections"
+      ],
       "@/collections/*": [
         "./src/collections/*"
       ],
