@@ -368,6 +368,42 @@ node marketplace-test.mjs
 
 ---
 
+## MCP Servers
+
+| Server | Type | Purpose |
+|--------|------|---------|
+| `cloudflare` | Remote | Cloudflare Workers management |
+| `cloudflare-docs` | Remote | Cloudflare documentation |
+| `cloudflare-bindings` | Remote | Cloudflare bindings |
+| `cloudflare-builds` | Remote | Cloudflare builds |
+| `cloudflare-observability` | Remote | Cloudflare observability |
+| `puppeteer` | Local (npx) | Browser automation for dashboard tasks |
+
+### Puppeteer MCP Tools
+
+| Tool | Purpose |
+|------|---------|
+| `puppeteer_navigate` | Go to a URL |
+| `puppeteer_screenshot` | Capture page screenshot |
+| `puppeteer_click` | Click a CSS selector |
+| `puppeteer_fill` | Fill an input field |
+| `puppeteer_select` | Select dropdown option |
+| `puppeteer_hover` | Hover over element |
+| `puppeteer_evaluate` | Execute JavaScript in page |
+
+### Usage Example (ClawCloud Deployment)
+
+```
+1. puppeteer_navigate → https://us-east-1.run.claw.cloud/signin
+2. puppeteer_click → GitHub login button
+3. puppeteer_navigate → https://us-east-1.run.claw.cloud/app-launchpad
+4. puppeteer_click → "Create App" button
+5. puppeteer_fill → Image name field
+6. puppeteer_click → Deploy button
+```
+
+---
+
 ## Key Credentials
 
 - **Admin**: `admin@perissos.dev` / `Admin123!@#` (role: admin)
