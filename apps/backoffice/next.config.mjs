@@ -8,8 +8,15 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   reactStrictMode: true,
   transpilePackages: ['@payloadcms/next', '@payloadcms/richtext-lexical', '@payloadcms/plugin-multi-tenant', '@shadowmkj/plugin-ecommerce', '@consolioweb/payload-support', '@karixi/payload-ai'],
-  resolve: {
-    alias: {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+    optimizePackageImports: ['@payloadcms/next', '@payloadcms/richtext-lexical'],
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
       '@payload-config': path.resolve(__dirname, 'src/payload.config.ts'),
       '@perissos/shared': path.resolve(__dirname, '../../packages/shared/src'),
       '@perissos/ui': path.resolve(__dirname, '../../packages/ui/src'),
@@ -22,17 +29,14 @@ const nextConfig = {
       '@/collections/Tenant': path.resolve(__dirname, './src/collections/Tenant.ts'),
       'entities/decode': path.resolve(__dirname, './node_modules/entities/lib/decode.js'),
       'entities/escape': path.resolve(__dirname, './node_modules/entities/lib/escape.js'),
-    },
-    modules: [path.resolve(__dirname, './node_modules'), path.resolve(__dirname, './src/collections'), path.resolve(__dirname, './src'), 'node_modules'],
-    symlinks: true,
-  },
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '10mb',
-    },
-    optimizePackageImports: ['@payloadcms/next', '@payloadcms/richtext-lexical'],
-  },
-  webpack: (config) => {
+    }
+    config.resolve.modules = [
+      ...(config.resolve.modules || []),
+      path.resolve(__dirname, './node_modules'),
+      path.resolve(__dirname, './src/collections'),
+      path.resolve(__dirname, './src'),
+      'node_modules',
+    ]
     config.resolve.symlinks = true
     return config
   },
