@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   reactStrictMode: true,
-  transpilePackages: ['@payloadcms/next', '@payloadcms/richtext-lexical', '@payloadcms/plugin-multi-tenant', '@shadowmkj/plugin-ecommerce', '@shadowmkj/plugin-ecommerce/payments/stripe', '@consilioweb/payload-support', '@karixi/payload-ai'],
+  transpilePackages: ['@payloadcms/next', '@payloadcms/richtext-lexical', '@payloadcms/plugin-multi-tenant', '@shadowmkj/plugin-ecommerce', '@consilioweb/payload-support', '@karixi/payload-ai'],
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
