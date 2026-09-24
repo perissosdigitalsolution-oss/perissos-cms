@@ -56,7 +56,7 @@ export default buildConfig({
       keepAlive: true,
       ssl: { rejectUnauthorized: false },
     },
-    push: false, // Migrations done via SQL — see AGENTS.md
+    push: true, // Auto-push schema on first boot (disable after initial deploy)
   }),
 
   plugins: [
