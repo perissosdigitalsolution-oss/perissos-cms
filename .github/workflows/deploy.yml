@@ -1,8 +1,11 @@
-name: Deploy to Railway
+name: Build & Push Backoffice
 
 on:
   push:
     branches: [main, sprint/*]
+    paths:
+      - 'apps/backoffice/**'
+      - 'packages/**'
   workflow_dispatch:
 
 permissions:
@@ -14,22 +17,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Login to ghcr.io
+
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push backoffice
-        run: |
-          docker build -t ghcr.io/perissosdigitalsolution-oss/backoffice:latest -f apps/backoffice/Dockerfile --target runner .
-          docker push ghcr.io/perissosdigitalsolution-oss/backoffice:latest
-      - name: Install Railway CLI (pinned Rust binary)
-        run: |
-          curl -fsSL "https://github.com/railwayapp/cli/releases/download/v4.27.5/railway-v4.27.5-x86_64-unknown-linux-gnu.tar.gz" \
-            | tar xz -C /usr/local/bin railway
-          railway --version
-      - name: Deploy to Railway
-        run: railway up --service backoffice --detach
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/backoffice/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/perissosdigitalsolution-oss/backoffice:latest
+            ghcr.io/perissosdigitalsolution-oss/backoffice:${{ github.sha }}
