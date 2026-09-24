@@ -13,7 +13,10 @@ COPY apps/casdoor/package.json apps/casdoor/
 COPY packages/shared/package.json packages/shared/
 COPY packages/ui/package.json packages/ui/
 COPY . .
-RUN pnpm install --shamefully-hoist 2>&1 | tail -3 && node apps/backoffice/scripts/fix-node-modules.mjs && cp -rL /app/node_modules/. /app/apps/backoffice/node_modules/ 2>/dev/null; cd apps/backoffice && pnpm run build
+RUN pnpm install --shamefully-hoist
+# Copy flat node_modules to backoffice workspace so Next.js finds all modules
+RUN cp -rL /app/node_modules/. /app/apps/backoffice/node_modules/
+RUN cd apps/backoffice && pnpm run build
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl
