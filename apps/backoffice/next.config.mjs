@@ -21,31 +21,31 @@ const nextConfig = {
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(
         /^@\/collections\/Tenant$/,
-        path.resolve(__dirname, 'src/collections/Tenant.ts')
+        path.resolve(__dirname, 'src/collections/Tenant')
       ),
       new webpack.NormalModuleReplacementPlugin(
         /^entities\/decode$/,
-        path.resolve(__dirname, 'node_modules/entities/lib/decode.js')
+        path.resolve(__dirname, '../../node_modules/entities/lib/decode.js')
       ),
       new webpack.NormalModuleReplacementPlugin(
         /^entities\/escape$/,
-        path.resolve(__dirname, 'node_modules/entities/lib/escape.js')
+        path.resolve(__dirname, '../../node_modules/entities/lib/escape.js')
       ),
       new webpack.NormalModuleReplacementPlugin(
         /^@shadowmkj\/plugin-ecommerce\/payments\/stripe$/,
-        path.resolve(__dirname, 'node_modules/@shadowmkj/plugin-ecommerce/dist/exports/payments/stripe.js')
+        path.resolve(__dirname, '../../node_modules/@shadowmkj/plugin-ecommerce/dist/exports/payments/stripe.js')
       ),
       new webpack.NormalModuleReplacementPlugin(
         /^@payloadcms\/plugin-multi-tenant$/,
-        path.resolve(__dirname, 'node_modules/@payloadcms/plugin-multi-tenant')
+        path.resolve(__dirname, '../../node_modules/@payloadcms/plugin-multi-tenant')
       ),
       new webpack.NormalModuleReplacementPlugin(
         /^@consilioweb\/payload-support$/,
-        path.resolve(__dirname, 'node_modules/@consilioweb/payload-support')
+        path.resolve(__dirname, '../../node_modules/@consilioweb/payload-support')
       ),
       new webpack.NormalModuleReplacementPlugin(
         /^@karixi\/payload-ai$/,
-        path.resolve(__dirname, 'node_modules/@karixi/payload-ai')
+        path.resolve(__dirname, '../../node_modules/@karixi/payload-ai')
       ),
     )
 
