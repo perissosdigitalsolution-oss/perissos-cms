@@ -43,15 +43,26 @@ function normalizeTheme(raw: any): any {
   return out
 }
 
-function extractTemplateContent(html: string): { styles: string; content: string } {
+function extractTemplateContent(html: string): { styles: string; content: string; cssLinks: string[] } {
   let styles = ''
   let content = html
+  const cssLinks: string[] = []
 
   // Extract <style> tags (including inlined template CSS)
   const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi
   let match
   while ((match = styleRegex.exec(html)) !== null) {
     styles += match[1] + '\n'
+  }
+
+  // Extract same-origin stylesheet links (e.g. /styles/nexsas.css)
+  const linkRegex = /<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi
+  let linkMatch
+  while ((linkMatch = linkRegex.exec(html)) !== null) {
+    const href = linkMatch[1]
+    if (href.startsWith('/') && !href.startsWith('//')) {
+      cssLinks.push(href)
+    }
   }
 
   // Extract content between <body> and </body>
@@ -72,7 +83,7 @@ function extractTemplateContent(html: string): { styles: string; content: string
   content = content.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
   content = content.replace(/<script[^>]*\/>/gi, '')
 
-  return { styles: styles.trim(), content: content.trim() }
+  return { styles: styles.trim(), content: content.trim(), cssLinks }
 }
 
 interface Page {
@@ -484,6 +495,26 @@ export default function LandingPage() {
       const raw = fontMatch[1].trim()
       document.body.style.fontFamily = resolveVar(raw) || raw
     }
+
+    // Load template vendor JS (async=false => executes in insertion order: gsap before nexas.js)
+    const vendorScripts = [
+      '/vendor/gsap.min.js',
+      '/vendor/lenis.min.js',
+      '/vendor/split-text.min.js',
+      '/vendor/springer.min.js',
+      '/vendor/scroll-trigger.min.js',
+      '/vendor/number-counter.js',
+      '/vendor/vanilla-infinite-marquee.min.js',
+      '/styles/nexas.js',
+    ]
+    for (const src of vendorScripts) {
+      if (!document.querySelector(`script[src="${src}"]`)) {
+        const script = document.createElement('script')
+        script.src = src
+        script.async = false
+        document.body.appendChild(script)
+      }
+    }
   }, [renderedHtml, templateCategory])
 
   useEffect(() => {
@@ -794,11 +825,9 @@ export default function LandingPage() {
             onOpenPageBuilder={() => setShowPageBuilder(true)}
 onOpenOnlook={async () => {
               const onlookUrl = process.env.NEXT_PUBLIC_ONLOOK_URL || 'http://localhost:3002'
-              // Use frontend's own URL for API routes (port 3001)
-              const frontendUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3001'
+              const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
               try {
-                // Fetch auth token from frontend API
-                const res = await fetch(`${frontendUrl}/api/onlook/auth`, {
+                const res = await fetch(`${cmsUrl}/api/onlook/auth`, {
                   credentials: 'include',
                 })
                 const data = await res.json()
@@ -827,6 +856,9 @@ onOpenOnlook={async () => {
         {extracted.styles && (
           <style dangerouslySetInnerHTML={{ __html: extracted.styles }} />
         )}
+        {extracted.cssLinks.map((href, i) => (
+          <link key={`tpl-css-${i}`} rel="stylesheet" href={href} />
+        ))}
         <div dangerouslySetInnerHTML={{ __html: extracted.content }} />
 
         {/* Content Editor Panel */}
@@ -879,11 +911,9 @@ onOpenOnlook={async () => {
           onOpenPageBuilder={() => setShowPageBuilder(true)}
 onOpenOnlook={async () => {
               const onlookUrl = process.env.NEXT_PUBLIC_ONLOOK_URL || 'http://localhost:3002'
-              // Use frontend's own URL for API routes (port 3001)
-              const frontendUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3001'
+              const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
               try {
-                // Fetch auth token from frontend API
-                const res = await fetch(`${frontendUrl}/api/onlook/auth`, {
+                const res = await fetch(`${cmsUrl}/api/onlook/auth`, {
                   credentials: 'include',
                 })
                 const data = await res.json()

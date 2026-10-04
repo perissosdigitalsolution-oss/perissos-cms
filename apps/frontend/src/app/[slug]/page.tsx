@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { RenderedHtmlPage } from './rendered-html-page'
 
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3000'
 
@@ -14,15 +15,29 @@ interface PageData {
   slug: string
   sections: Section[]
   template?: any
+  renderedHtml?: string
+}
+
+async function cmsFetch(url: string, tries = 3): Promise<Response | null> {
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(url, { next: { revalidate: 60 } })
+      if (res.ok) return res
+      console.warn(`[cmsFetch] ${url} → HTTP ${res.status} (attempt ${i + 1}/${tries})`)
+    } catch (err) {
+      console.warn(`[cmsFetch] ${url} failed (attempt ${i + 1}/${tries})`, err)
+    }
+    await new Promise((r) => setTimeout(r, 3000 * (i + 1)))
+  }
+  return null
 }
 
 async function getPageBySlug(slug: string): Promise<PageData | null> {
   try {
-    const res = await fetch(
-      `${CMS_URL}/api/pages?where[slug][equals]=${slug}&depth=1`,
-      { next: { revalidate: 60 } }
+    const res = await cmsFetch(
+      `${CMS_URL}/api/pages?where[slug][equals]=${slug}&depth=1`
     )
-    if (!res.ok) return null
+    if (!res) return null
     const data = await res.json()
     return data.docs?.[0] || null
   } catch {
@@ -345,8 +360,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export async function generateStaticParams() {
   try {
-    const res = await fetch(`${CMS_URL}/api/pages?depth=0`, { next: { revalidate: 60 } })
-    if (!res.ok) return []
+    const res = await cmsFetch(`${CMS_URL}/api/pages?depth=0&limit=0`)
+    if (!res) return []
     const data = await res.json()
     return data.docs?.map((doc: any) => ({ slug: doc.slug })) || []
   } catch {
@@ -360,6 +375,14 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
 
   if (!page) {
     notFound()
+  }
+
+  if (page.renderedHtml) {
+    return (
+      <main>
+        <RenderedHtmlPage html={page.renderedHtml} templateName={page.template?.name} />
+      </main>
+    )
   }
 
   return (
