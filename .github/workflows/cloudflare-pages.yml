@@ -17,7 +17,7 @@ jobs:
         env:
           NEXT_PUBLIC_CMS_URL: https://cms.perissos.digital
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy apps/frontend/out --project-name perissos-frontend
+        run: npx --yes wrangler@3.90.0 pages deploy apps/frontend/out --project-name perissos-frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: c51dde59d5bd84ed96f9ad779feb9ed6
